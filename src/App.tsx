@@ -245,14 +245,6 @@ export default function App() {
     activeAlbumMeta = ALBUMS.find((a) => a.id === selectedAlbum);
   }
 
-  if (currentView === 'home') {
-    return (
-      <JustinLeHomeView
-        currentView={currentView}
-        onNavigate={handleNavigate}
-      />
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white text-[#666666] font-sans antialiased selection:bg-black selection:text-white">
@@ -290,10 +282,11 @@ export default function App() {
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="w-full"
             >
-              {/* 1. Home View: Ultra-Minimal Pure Image Showcase */}
+              {/* 1. Home View: JustinLe Card Reveal, Bio, Logos & Action Cards */}
               {currentView === 'home' && (
-                <EdzHomeView
-                  photos={photos}
+                <JustinLeHomeView
+                  currentView={currentView}
+                  onNavigate={handleNavigate}
                 />
               )}
 
