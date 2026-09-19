@@ -72,18 +72,18 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
             {/* 1. Singapore Muay Thai Association (SMTA) */}
             <div
               onClick={() => onNavigate('album', 'sports', 'muay-thai')}
-              className="group flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl transition-all cursor-pointer w-full max-w-[190px] h-[130px] hover:-translate-y-0.5"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[190px] h-[130px]"
               title="Singapore Muay Thai Association (SMTA)"
             >
               <div className="h-16 flex items-center justify-center">
                 <img
                   src="/logo-smta.webp"
                   alt="Singapore Muay Thai Association (SMTA) Logo"
-                  className="max-h-16 max-w-[85px] object-contain group-hover:scale-108 transition-transform duration-300"
+                  className="max-h-16 max-w-[85px] object-contain"
                   loading="lazy"
                 />
               </div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans group-hover:underline transition-all">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">
                 SMTA Singapore
               </span>
             </div>
@@ -91,18 +91,18 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
             {/* 2. Mercedes-AMG PETRONAS Formula One Team */}
             <div
               onClick={() => onNavigate('album', 'sports', 'formula-1')}
-              className="group flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl transition-all cursor-pointer w-full max-w-[190px] h-[130px] hover:-translate-y-0.5"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[190px] h-[130px]"
               title="Mercedes-AMG PETRONAS Formula One Team"
             >
               <div className="h-16 flex items-center justify-center">
                 <img
                   src="/logo-mercedes-f1.svg"
                   alt="Mercedes-AMG PETRONAS Formula 1 Logo"
-                  className="max-h-14 max-w-[110px] object-contain group-hover:scale-108 transition-transform duration-300"
+                  className="max-h-14 max-w-[110px] object-contain"
                   loading="lazy"
                 />
               </div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans group-hover:underline transition-all">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">
                 Mercedes-AMG F1
               </span>
             </div>
@@ -110,18 +110,18 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
             {/* 3. National Cadet Corps (NCC Sea) */}
             <div
               onClick={() => onNavigate('instagram')}
-              className="group flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl transition-all cursor-pointer w-full max-w-[190px] h-[130px] hover:-translate-y-0.5"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[190px] h-[130px]"
               title="National Cadet Corps (NCC Sea)"
             >
               <div className="h-16 flex items-center justify-center">
                 <img
                   src="/logo-ncc.png"
                   alt="National Cadet Corps (Singapore) Official Crest"
-                  className="max-h-16 max-w-[85px] object-contain group-hover:scale-108 transition-transform duration-300"
+                  className="max-h-16 max-w-[85px] object-contain"
                   loading="lazy"
                 />
               </div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans group-hover:underline transition-all">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">
                 NCC Sea
               </span>
             </div>
@@ -129,18 +129,18 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
             {/* 4. Bushido Fight Academy */}
             <div
               onClick={() => onNavigate('album', 'sports', 'muay-thai')}
-              className="group flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl transition-all cursor-pointer w-full max-w-[190px] h-[130px] hover:-translate-y-0.5"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[190px] h-[130px]"
               title="Bushido Fight Academy Singapore"
             >
               <div className="h-16 flex items-center justify-center">
                 <img
                   src="/logo-bushido.png"
                   alt="Bushido Fight Academy Singapore Logo"
-                  className="max-h-14 max-w-[105px] object-contain group-hover:scale-108 transition-transform duration-300"
+                  className="max-h-14 max-w-[105px] object-contain"
                   loading="lazy"
                 />
               </div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans group-hover:underline transition-all">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">
                 Bushido Fight Academy
               </span>
             </div>

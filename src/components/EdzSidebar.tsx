@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, ChevronDown, ChevronRight, ArrowUp, ArrowDown, ShieldCheck, HelpCircle } from 'lucide-react';
+import { Menu, X, ChevronDown, ChevronRight, ShieldCheck, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PortfolioProfile } from '../types';
 import { TermsModal } from './TermsModal';
@@ -490,29 +490,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
           </AnimatePresence>
         </div>
 
-        {/* Page navigation scroll arrows with 44px touch targets */}
-        <div id="mob-pag-bttns" className="flex items-center">
-          {onScrollPrevious && (
-            <button
-              onClick={onScrollPrevious}
-              className="w-11 h-11 flex items-center justify-center text-[#444444] hover:text-black cursor-pointer"
-              title="Previous item"
-              aria-label="Previous item"
-            >
-              <ArrowUp className="w-4 h-4" />
-            </button>
-          )}
-          {onScrollNext && (
-            <button
-              onClick={onScrollNext}
-              className="w-11 h-11 flex items-center justify-center text-[#444444] hover:text-black cursor-pointer"
-              title="Next item"
-              aria-label="Next item"
-            >
-              <ArrowDown className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+
       </div>
 
       {/* Mobile Slide-Out Drawer (#sidr-left) */}
