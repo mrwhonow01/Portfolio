@@ -16,9 +16,9 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
   photos,
 }) => {
   return (
-    <div className="w-full flex flex-col items-center select-none">
+    <div className="w-full flex flex-col items-center select-none pt-6 sm:pt-12 md:pt-16 lg:pt-20">
       {/* HERO SECTION: Scroll-Driven Two-Card Slide-Out Interaction */}
-      <section className="w-full flex flex-col items-center justify-center my-2 sm:my-6">
+      <section className="w-full flex flex-col items-center justify-center mb-6 sm:mb-8">
         <NametagHeroCard />
       </section>
 
