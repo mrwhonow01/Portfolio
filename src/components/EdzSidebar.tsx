@@ -89,43 +89,25 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
   const renderNavContent = (isMobile: boolean = false) => (
     <div className="flex flex-col h-full justify-between">
       <div>
-        {/* Site Logo - matching edz.us textlogo styling */}
-        <div id="site_logo" className={`transition-all duration-300 relative ${isPastHeroCards && currentView === 'home' ? 'mb-16' : 'mb-10'}`}>
-          <a
-            href="#home"
-            onClick={(e) => {
-              e.preventDefault();
-              if (currentView === 'home') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              } else {
-                handleLinkClick('home');
-              }
-            }}
-            className="group block"
-          >
-            <div className={`flex flex-col transition-opacity duration-300 ${isPastHeroCards && currentView === 'home' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-              <span className="text-[22px] font-extrabold tracking-tight text-black uppercase leading-none font-sans">
-                {profile.signatureText || profile.name}
-              </span>
-              <span className="text-[9px] uppercase tracking-[0.25em] text-[#888888] mt-1.5 font-medium">
-                Photography & Motion
-              </span>
-            </div>
-          </a>
-
+        {/* Site Logo - Blue Card Nametag acts as brand logo, text logo completely removed */}
+        <div id="site_logo" className="relative h-[95px] mb-6 flex items-start">
           {/* DOCKED BLUE CARD ON DESKTOP OVER LOGO */}
           <AnimatePresence>
-            {isPastHeroCards && currentView === 'home' && (
+            {(isMobile || (isPastHeroCards && currentView === 'home') || currentView !== 'home') && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.82, rotate: -5, y: -6 }}
+                initial={{ opacity: 0, scale: 0.82, rotate: -4, y: -4 }}
                 animate={{ opacity: 1, scale: 1, rotate: -1.5, y: 0 }}
-                exit={{ opacity: 0, scale: 0.82, rotate: -5, y: -6 }}
+                exit={{ opacity: 0, scale: 0.82, rotate: -4, y: -4 }}
                 transition={{ type: 'spring', stiffness: 340, damping: 24 }}
                 onClick={(e) => {
                   e.preventDefault();
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  if (currentView === 'home') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  } else {
+                    handleLinkClick('home');
+                  }
                 }}
-                className="absolute -top-3 -left-2 w-[185px] aspect-[1.6/1] z-50 cursor-pointer drop-shadow-[0_10px_22px_rgba(0,0,0,0.18)] select-none group"
+                className="w-[180px] aspect-[1.6/1] cursor-pointer drop-shadow-[0_10px_22px_rgba(0,0,0,0.18)] select-none group"
                 title="Click to scroll to top"
               >
                 <img
@@ -467,32 +449,35 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
         id="mob-bttn-row"
         className="md:hidden fixed top-0 left-0 right-0 h-[50px] bg-white/95 backdrop-blur-md border-b border-gray-200 z-40 flex items-center justify-between px-4"
       >
-        {/* Hamburger Menu Button with 44px min touch target */}
-        <button
-          id="mob-menu"
-          type="button"
-          onClick={() => setMobileMenuOpen(true)}
-          className="min-h-[44px] px-2 text-black hover:text-gray-600 focus:outline-none flex items-center gap-2 cursor-pointer relative"
-          aria-label="Open Navigation Menu"
-        >
-          <Menu className="w-5 h-5 shrink-0" />
-          <span className={`text-xs uppercase tracking-widest font-bold font-sans transition-opacity duration-300 ${isPastHeroCards && currentView === 'home' ? 'opacity-0' : 'opacity-100'}`}>
-            {profile.signatureText || profile.name}
-          </span>
+        {/* Left Side: Hamburger Menu Button & Docked Blue Card on Mobile */}
+        <div className="flex items-center gap-2">
+          <button
+            id="mob-menu"
+            type="button"
+            onClick={() => setMobileMenuOpen(true)}
+            className="w-11 h-11 flex items-center justify-center text-black hover:text-gray-600 focus:outline-none cursor-pointer"
+            aria-label="Open Navigation Menu"
+          >
+            <Menu className="w-5 h-5 shrink-0" />
+          </button>
 
           {/* DOCKED BLUE CARD ON MOBILE */}
           <AnimatePresence>
-            {isPastHeroCards && currentView === 'home' && (
+            {((isPastHeroCards && currentView === 'home') || currentView !== 'home') && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.8, x: -6 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.8, x: -6 }}
                 transition={{ duration: 0.2 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  if (currentView === 'home') {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  } else {
+                    handleLinkClick('home');
+                  }
                 }}
-                className="absolute left-8 top-1/2 -translate-y-1/2 w-[115px] aspect-[1.6/1] z-50 drop-shadow-sm cursor-pointer"
+                className="h-[36px] aspect-[1.6/1] z-50 drop-shadow-sm cursor-pointer flex items-center"
                 title="Click to scroll to top"
               >
                 <img
@@ -503,7 +488,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
               </motion.div>
             )}
           </AnimatePresence>
-        </button>
+        </div>
 
         {/* Page navigation scroll arrows with 44px touch targets */}
         <div id="mob-pag-bttns" className="flex items-center">

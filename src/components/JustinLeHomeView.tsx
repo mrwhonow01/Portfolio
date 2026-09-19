@@ -18,9 +18,11 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
 }) => {
   return (
     <div className="w-full flex flex-col items-center select-none pt-0">
-      {/* HERO SECTION: Vertically centered in initial viewport, photo hidden below fold */}
+      {/* HERO SECTION: Vertically centered in initial viewport, shifted down slightly more on mobile view */}
       <section className="w-full min-h-[calc(100vh-80px)] md:min-h-[calc(100vh-50px)] flex flex-col items-center justify-center relative">
-        <NametagHeroCard isPastHeroCards={isPastHeroCards} />
+        <div className="w-full flex justify-center translate-y-[36px] md:translate-y-0">
+          <NametagHeroCard isPastHeroCards={isPastHeroCards} />
+        </div>
       </section>
 
       {/* CLEAN MINIMAL DIVIDER LINE */}
