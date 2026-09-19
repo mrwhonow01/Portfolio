@@ -29,11 +29,11 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
   const desktopCard2YRaw = useTransform(scrollY, [0, 160], [0, 28]);
   const desktopCard2RotateRaw = useTransform(scrollY, [0, 160], [5, 2]);
 
-  // Mobile slide-out: Moves slightly down so both cards stay visible below top bar
-  const mobileCard1XRaw = useTransform(scrollY, [0, 160], [0, -15]);
-  const mobileCard1YRaw = useTransform(scrollY, [0, 160], [0, 25]);
-  const mobileCard2XRaw = useTransform(scrollY, [0, 160], [0, 15]);
-  const mobileCard2YRaw = useTransform(scrollY, [0, 160], [0, 135]);
+  // Mobile slide-out: Sufficient vertical separation so Card 2 is completely visible without overlap
+  const mobileCard1XRaw = useTransform(scrollY, [0, 160], [0, -16]);
+  const mobileCard1YRaw = useTransform(scrollY, [0, 160], [0, -10]);
+  const mobileCard2XRaw = useTransform(scrollY, [0, 160], [0, 16]);
+  const mobileCard2YRaw = useTransform(scrollY, [0, 160], [0, 180]);
   const mobileCard1RotateRaw = useTransform(scrollY, [0, 160], [-4, -1]);
   const mobileCard2RotateRaw = useTransform(scrollY, [0, 160], [4, 1.5]);
 
@@ -64,11 +64,11 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
 
   // Determine positions (scroll or click toggle)
   const card1X = isMobile
-    ? manualExpand ? -15 : mobileCard1XRaw
+    ? manualExpand ? -16 : mobileCard1XRaw
     : manualExpand ? -220 : desktopCard1XRaw;
 
   const card1Y = isMobile
-    ? manualExpand ? 25 : mobileCard1YRaw
+    ? manualExpand ? -10 : mobileCard1YRaw
     : manualExpand ? 24 : desktopCard1YRaw;
 
   const card1Rotate = isMobile
@@ -81,11 +81,11 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
   const card1Opacity = 1;
 
   const card2X = isMobile
-    ? manualExpand ? 15 : mobileCard2XRaw
+    ? manualExpand ? 16 : mobileCard2XRaw
     : manualExpand ? 220 : desktopCard2XRaw;
 
   const card2Y = isMobile
-    ? manualExpand ? 135 : mobileCard2YRaw
+    ? manualExpand ? 180 : mobileCard2YRaw
     : manualExpand ? 28 : desktopCard2YRaw;
 
   const card2Rotate = isMobile
@@ -101,7 +101,7 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       onClick={() => setManualExpand(!manualExpand)}
-      className="relative w-full max-w-[960px] min-h-[340px] sm:min-h-[400px] md:min-h-[440px] flex items-center justify-center select-none md:perspective-[1200px] cursor-pointer"
+      className="relative w-full max-w-[960px] min-h-[420px] sm:min-h-[420px] md:min-h-[440px] flex items-center justify-center select-none md:perspective-[1200px] cursor-pointer"
       title="Click or scroll down to slide out the cards!"
     >
       {/* CARD 2: Brown "i am a..." Card (Slides out to the right) */}
