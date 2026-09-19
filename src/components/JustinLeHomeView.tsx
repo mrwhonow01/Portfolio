@@ -21,7 +21,6 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
   const { scrollY } = useScroll();
   // Fades out fast on initial scroll (fully invisible by 45px)
   const arrowOpacity = useTransform(scrollY, [0, 45], [1, 0]);
-  const arrowPointerEvents = useTransform(scrollY, (v) => (v < 25 ? 'auto' : 'none'));
 
   return (
     <div className="w-full flex flex-col items-center select-none pt-0">
@@ -31,18 +30,10 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
           <NametagHeroCard isPastHeroCards={isPastHeroCards} />
         </div>
 
-        {/* SCROLL DOWN INDICATOR ARROW (Below cards, just above bottom of initial screen) */}
+        {/* SCROLL DOWN INDICATOR ARROW (Pure visual cue: non-clickable, fades out on scroll) */}
         <motion.div
-          style={{ opacity: arrowOpacity, pointerEvents: arrowPointerEvents }}
-          onClick={() => {
-            window.scrollTo({
-              top: window.innerHeight * 0.85,
-              behavior: 'smooth',
-            });
-          }}
-          className="absolute bottom-5 sm:bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer z-30 select-none group"
-          title="Scroll down"
-          aria-label="Scroll to explore"
+          style={{ opacity: arrowOpacity }}
+          className="absolute bottom-5 sm:bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-none z-30 select-none"
         >
           <motion.div
             animate={{ y: [0, 8, 0] }}
@@ -51,7 +42,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
               repeat: Infinity,
               ease: 'easeInOut',
             }}
-            className="flex items-center justify-center text-black/45 group-hover:text-black transition-colors"
+            className="flex items-center justify-center text-black/45"
           >
             <ChevronDown className="w-6 h-6 stroke-[1.75]" />
           </motion.div>
