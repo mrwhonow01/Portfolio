@@ -1,4 +1,6 @@
 import React from 'react';
+import { motion, useScroll, useTransform } from 'motion/react';
+import { ChevronDown } from 'lucide-react';
 import { NavView, AlbumCategory } from './EdzSidebar';
 import { NametagHeroCard } from './NametagHeroCard';
 import { EdzHomeView } from './EdzHomeView';
@@ -16,6 +18,11 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
   photos,
   isPastHeroCards = false,
 }) => {
+  const { scrollY } = useScroll();
+  // Fades out fast on initial scroll (fully invisible by 45px)
+  const arrowOpacity = useTransform(scrollY, [0, 45], [1, 0]);
+  const arrowPointerEvents = useTransform(scrollY, (v) => (v < 25 ? 'auto' : 'none'));
+
   return (
     <div className="w-full flex flex-col items-center select-none pt-0">
       {/* HERO SECTION: Vertically centered in initial viewport, shifted down slightly more on mobile view */}
@@ -23,6 +30,32 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
         <div className="w-full flex justify-center translate-y-[36px] md:translate-y-0">
           <NametagHeroCard isPastHeroCards={isPastHeroCards} />
         </div>
+
+        {/* SCROLL DOWN INDICATOR ARROW (Below cards, just above bottom of initial screen) */}
+        <motion.div
+          style={{ opacity: arrowOpacity, pointerEvents: arrowPointerEvents }}
+          onClick={() => {
+            window.scrollTo({
+              top: window.innerHeight * 0.85,
+              behavior: 'smooth',
+            });
+          }}
+          className="absolute bottom-5 sm:bottom-7 left-1/2 -translate-x-1/2 flex flex-col items-center cursor-pointer z-30 select-none group"
+          title="Scroll down"
+          aria-label="Scroll to explore"
+        >
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+            className="flex items-center justify-center text-black/45 group-hover:text-black transition-colors"
+          >
+            <ChevronDown className="w-6 h-6 stroke-[1.75]" />
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* CLEAN MINIMAL DIVIDER LINE */}

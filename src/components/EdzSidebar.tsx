@@ -397,8 +397,8 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
           </p>
           <p className="text-[11px] text-[#aaaaaa]">© {profile.name || 'Juztin Yuen'}</p>
 
-          {/* Terms & Copyright Button + Shortcuts Button */}
-          <div className="pt-2 flex items-center gap-1.5">
+          {/* Terms & Copyright Button */}
+          <div className="pt-2 flex items-center">
             <button
               type="button"
               id="sidebar-terms-btn"
@@ -411,20 +411,6 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
             >
               <ShieldCheck className="w-3 h-3 text-zinc-600" />
               <span>Terms & Copyright</span>
-            </button>
-
-            <button
-              type="button"
-              id="sidebar-shortcuts-btn"
-              onClick={() => {
-                setShortcutsModalOpen(true);
-                setMobileMenuOpen(false);
-              }}
-              className="inline-flex items-center justify-center w-6 h-6 text-[10px] font-mono font-bold text-[#666666] hover:text-black border border-gray-200 hover:border-black bg-white transition-colors cursor-pointer"
-              title="Keyboard Shortcuts (?)"
-              aria-label="View Keyboard Shortcuts"
-            >
-              ?
             </button>
           </div>
         </div>
