@@ -84,7 +84,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
   const isAboutActive = currentView === 'about';
   const isContactActive = currentView === 'contact';
 
-  const renderNavContent = () => (
+  const renderNavContent = (isMobile: boolean = false) => (
     <div className="flex flex-col h-full justify-between">
       <div>
         {/* Site Logo - matching edz.us textlogo styling */}
@@ -234,11 +234,15 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                             {album.label}
                           </a>
 
-                          {/* Sub-tabs for Sports & Action: only appear if hovered over SPORTS AND ACTION and if in SPORTS AND ACTION tab */}
-                          {album.id === 'sports' && isSportsActive && (
+                          {/* Sub-tabs for Sports & Action:
+                              - Mobile: stay visible so touchscreen users can browse Muay Thai & Formula 1 directly
+                              - Desktop: only appear if hovered over SPORTS AND ACTION and if in SPORTS AND ACTION tab */}
+                          {album.id === 'sports' && (isMobile || isSportsActive) && (
                             <ul
                               className={`mt-1 ml-2 pl-2 border-l border-gray-200 space-y-0.5 overflow-hidden transition-all duration-200 ease-out ${
-                                sportsHovered
+                                isMobile
+                                  ? 'opacity-100 max-h-28 pointer-events-auto block'
+                                  : sportsHovered
                                   ? 'opacity-100 max-h-28 pointer-events-auto'
                                   : 'opacity-0 max-h-0 pointer-events-none group-hover/sports:opacity-100 group-hover/sports:max-h-28 group-hover/sports:pointer-events-auto group-focus-within/sports:opacity-100 group-focus-within/sports:max-h-28 group-focus-within/sports:pointer-events-auto'
                               }`}
@@ -424,7 +428,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
         className="hidden md:block fixed top-0 bottom-0 left-0 w-[250px] bg-white z-40 border-r border-gray-100/80 overflow-y-auto"
       >
         <div className="in p-[50px_30px_30px_30px] h-full">
-          {renderNavContent()}
+          {renderNavContent(false)}
         </div>
       </aside>
 
@@ -502,7 +506,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              {renderNavContent()}
+              {renderNavContent(true)}
             </motion.div>
           </>
         )}

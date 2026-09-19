@@ -100,10 +100,49 @@ export const EdzAlbumGridView: React.FC<EdzAlbumGridViewProps> = ({
   return (
     <div className="w-full">
       {/* Editorial Header matching edz.us/albums/france-on-tri-x/ */}
-      <header className="mb-8">
+      <header className="mb-6">
         <h1 className="text-[17px] sm:text-[19px] font-bold text-black tracking-normal">
           {displayTitle}
         </h1>
+
+        {/* Mobile Sub-tabs Switcher for Sports & Action */}
+        {currentAlbum === 'sports' && (
+          <div className="md:hidden flex items-center gap-2 mt-3 overflow-x-auto pb-1 text-[10.5px] uppercase tracking-wider font-sans">
+            <button
+              type="button"
+              onClick={() => onSelectSubAlbum && onSelectSubAlbum('all')}
+              className={`px-2.5 py-1 border transition-all cursor-pointer ${
+                !selectedSubAlbum || selectedSubAlbum === 'all'
+                  ? 'bg-black text-white border-black font-semibold shadow-xs'
+                  : 'bg-white text-zinc-600 border-zinc-200 hover:border-black'
+              }`}
+            >
+              All Sports
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelectSubAlbum && onSelectSubAlbum('muay-thai')}
+              className={`px-2.5 py-1 border transition-all cursor-pointer ${
+                selectedSubAlbum === 'muay-thai'
+                  ? 'bg-black text-white border-black font-semibold shadow-xs'
+                  : 'bg-white text-zinc-600 border-zinc-200 hover:border-black'
+              }`}
+            >
+              Muay Thai
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelectSubAlbum && onSelectSubAlbum('formula-1')}
+              className={`px-2.5 py-1 border transition-all cursor-pointer ${
+                selectedSubAlbum === 'formula-1'
+                  ? 'bg-black text-white border-black font-semibold shadow-xs'
+                  : 'bg-white text-zinc-600 border-zinc-200 hover:border-black'
+              }`}
+            >
+              Formula 1
+            </button>
+          </div>
+        )}
       </header>
 
       {/* 3-Column Grid matching edz.us/albums/france-on-tri-x/ (#kpgrid) */}
