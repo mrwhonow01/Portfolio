@@ -79,7 +79,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
 
         <p className="text-[14.5px] sm:text-[15.5px] leading-relaxed text-[#555555] font-sans">
           I am currently based in Singapore. Available for commercial assignments, ringside fight night coverage,
-          motorsport events, architectural documentation, and creative storytelling productions. Learn more about my journey in{' '}
+          motorsport events, and creative storytelling photography. Learn more about my journey in{' '}
           <button
             type="button"
             onClick={() => onNavigate('about')}
