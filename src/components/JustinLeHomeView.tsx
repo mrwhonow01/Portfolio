@@ -1,29 +1,20 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { ArrowRight, Camera, Film, Mail } from 'lucide-react';
 import { NavView, AlbumCategory } from './EdzSidebar';
 import { NametagHeroCard } from './NametagHeroCard';
+import { EdzHomeView } from './EdzHomeView';
+import { PhotoItem } from '../types';
 
 interface JustinLeHomeViewProps {
   currentView: NavView;
   onNavigate: (view: NavView, album?: AlbumCategory, subAlbum?: string) => void;
+  photos: PhotoItem[];
 }
 
 export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
   onNavigate,
+  photos,
 }) => {
-  // Skills / Disciplines pill tags matching the photographer & architecture student focus
-  const skills = [
-    { label: 'Combat Sports Photography', album: 'sports', subAlbum: 'muay-thai' },
-    { label: 'Motorsport Photography', album: 'sports', subAlbum: 'formula-1' },
-    { label: 'Architecture & Spatial Storytelling', album: 'stage' },
-    { label: 'Cadet Expeditions', album: 'events' },
-    { label: 'Cinematic 4K Videography', view: 'videography' },
-    { label: 'DaVinci Color Grading', view: 'videography' },
-    { label: 'Visual Storytelling', view: 'instagram' },
-    { label: 'High-Speed Action Capture', album: 'sports' },
-  ];
-
   return (
     <div className="w-full flex flex-col items-center select-none">
       {/* HERO SECTION: Scroll-Driven Two-Card Slide-Out Interaction */}
@@ -31,59 +22,36 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
         <NametagHeroCard />
       </section>
 
-      {/* CLEAN MINIMAL DIVIDER LINE (Replacing stars per user request) */}
-      <div className="w-full max-w-[860px] h-px bg-black/[0.08] my-8 sm:my-10" />
+      {/* CLEAN MINIMAL DIVIDER LINE */}
+      <div className="w-full max-w-[960px] h-px bg-black/[0.08] my-8 sm:my-10" />
 
-      {/* "WHO I AM" & "WHAT I DO" SECTION */}
-      <section className="w-full max-w-[860px] mt-2 sm:mt-4 space-y-12 sm:space-y-16">
-        {/* Row 1: Who I Am */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-start">
-          <div className="md:col-span-3">
-            <h2 className="text-[17px] sm:text-[19px] font-bold text-black font-sans lowercase tracking-tight">
-              who i am
-            </h2>
-          </div>
-          <div className="md:col-span-9">
-            <p className="text-[15px] sm:text-[16px] leading-[1.7] text-[#333333] font-sans">
-              Hi there! I'm <span className="text-black font-bold">Juztin</span>, a photographer, architecture student, and storyteller based in Singapore capturing raw speed, spatial forms, and live human grit. Most weekends, you'll find me ringside covering championship fight nights for the Singapore Muay Thai Association, trackside at motorsport events, or documenting national cadet expeditions and architectural spaces. My work is focused on real, unfiltered energy—freezing split-second action at 1/1000s without getting in the way of it.
-            </p>
-          </div>
+      {/* PHOTO HIGHLIGHT CAROUSEL (Replaces "Who I Am" and "What I Do" per user request) */}
+      <section className="w-full max-w-[960px] my-4 sm:my-6 flex flex-col items-center">
+        <div className="w-full mb-3 flex items-center justify-between px-1">
+          <span className="text-xs uppercase tracking-widest text-[#777777] font-mono font-bold">
+            Featured Highlights
+          </span>
+          <button
+            type="button"
+            onClick={() => onNavigate('photography')}
+            className="text-xs font-mono uppercase tracking-wider text-black hover:underline flex items-center gap-1 cursor-pointer"
+          >
+            <span>View All</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
 
-        {/* Row 2: What I Do */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-8 items-start">
-          <div className="md:col-span-3">
-            <h2 className="text-[17px] sm:text-[19px] font-bold text-black font-sans lowercase tracking-tight">
-              what i do
-            </h2>
-          </div>
-          <div className="md:col-span-9">
-            <div className="flex flex-wrap gap-2.5 sm:gap-3">
-              {skills.map((skill, idx) => (
-                <motion.button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    if (skill.view) {
-                      onNavigate(skill.view as NavView);
-                    } else if (skill.album) {
-                      onNavigate('album', skill.album as AlbumCategory, skill.subAlbum);
-                    }
-                  }}
-                  whileHover={{ scale: 1.03, y: -1 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center px-4 py-1.5 rounded-full border border-black/15 bg-white text-[#222222] hover:text-black hover:border-black hover:bg-black/5 text-[13px] sm:text-[14px] font-medium transition-all shadow-2xs cursor-pointer font-sans"
-                >
-                  <span>{skill.label}</span>
-                </motion.button>
-              ))}
-            </div>
-          </div>
+        <div className="w-full rounded-2xl overflow-hidden border border-black/[0.08] bg-[#fafafa] shadow-xs">
+          <EdzHomeView
+            photos={photos}
+            className="w-full flex items-center justify-center relative select-none"
+            style={{ height: 'min(72vh, 600px)', minHeight: '360px' }}
+          />
         </div>
       </section>
 
       {/* LOCATION & BIO SUMMARY */}
-      <section className="w-full max-w-[860px] text-center mt-16 sm:mt-20">
+      <section className="w-full max-w-[860px] text-center mt-14 sm:mt-18">
         <p className="text-[14.5px] sm:text-[15.5px] leading-relaxed text-[#555555] font-sans">
           Currently based in Singapore. Available for commercial assignments, ringside fight night coverage,
           motorsport events, architectural documentation, and creative storytelling productions. Learn more about my journey in{' '}

@@ -282,11 +282,12 @@ export default function App() {
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="w-full"
             >
-              {/* 1. Home View: JustinLe Card Reveal, Bio, Logos & Action Cards */}
+              {/* 1. Home View: JustinLe Card Reveal, Highlight Carousel, Logos & Action Cards */}
               {currentView === 'home' && (
                 <JustinLeHomeView
                   currentView={currentView}
                   onNavigate={handleNavigate}
+                  photos={photos}
                 />
               )}
 

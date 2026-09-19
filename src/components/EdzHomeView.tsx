@@ -5,9 +5,11 @@ import { PhotoItem } from '../types';
 
 interface EdzHomeViewProps {
   photos: PhotoItem[];
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-export const EdzHomeView: React.FC<EdzHomeViewProps> = ({ photos }) => {
+export const EdzHomeView: React.FC<EdzHomeViewProps> = ({ photos, className, style }) => {
   // Use curated featured highlights spanning Muay Thai, F1, Wushu stage, and Temple events
   const featuredPhotos = photos.filter((p) => p.featured);
   const displayPhotos = featuredPhotos.length > 0 ? featuredPhotos : photos.slice(0, 6);
@@ -87,8 +89,8 @@ export const EdzHomeView: React.FC<EdzHomeViewProps> = ({ photos }) => {
 
   return (
     <div
-      className="w-full flex items-center justify-center relative select-none"
-      style={{ height: 'calc(100vh - 100px)' }}
+      className={className || "w-full flex items-center justify-center relative select-none"}
+      style={style !== undefined ? style : { height: 'calc(100vh - 100px)' }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={handleTouchStart}
