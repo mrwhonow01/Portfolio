@@ -61,7 +61,17 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
       </section>
 
       {/* LOCATION & BIO SUMMARY */}
-      <section className="w-full max-w-[860px] text-center mt-14 sm:mt-18">
+      <section className="w-full max-w-[860px] text-center mt-12 sm:mt-16 flex flex-col items-center">
+        {/* BLUE NAMETAG CARD (Above the text that is below the images) */}
+        <div className="w-[180px] xs:w-[210px] sm:w-[240px] aspect-[1.6/1] mb-7 select-none rotate-[-1.5deg]">
+          <img
+            src="/card-nametag-blue.png?v=4"
+            alt="hello my name is JUZTIN!"
+            className="w-full h-full object-contain pointer-events-none"
+            loading="lazy"
+          />
+        </div>
+
         <p className="text-[14.5px] sm:text-[15.5px] leading-relaxed text-[#555555] font-sans">
           Currently based in Singapore. Available for commercial assignments, ringside fight night coverage,
           motorsport events, architectural documentation, and creative storytelling productions. Learn more about my journey in{' '}

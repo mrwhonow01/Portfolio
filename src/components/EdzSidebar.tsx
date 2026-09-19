@@ -498,18 +498,245 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="md:hidden fixed top-0 bottom-0 left-0 w-[270px] bg-white z-50 shadow-2xl p-6 overflow-y-auto"
+              className="md:hidden fixed top-0 bottom-0 left-0 w-[275px] max-w-[85vw] h-[100dvh] max-h-[100dvh] bg-white z-50 shadow-2xl px-5 pt-3 pb-[max(1.75rem,env(safe-area-inset-bottom,20px))] overflow-hidden flex flex-col select-none touch-none overscroll-none"
             >
-              <div className="flex justify-end mb-4">
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-11 h-11 flex items-center justify-center text-gray-500 hover:text-black cursor-pointer rounded-full"
-                  aria-label="Close menu"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+              <div className="flex flex-col h-full justify-between overflow-hidden">
+                {/* Top Section: Header with Blue Card & Close Button, and Navigation */}
+                <div className="flex flex-col">
+                  {/* Top Header Row with Blue Card & Close 'X' */}
+                  <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+                    <div
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        if (currentView === 'home') {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        } else {
+                          handleLinkClick('home');
+                        }
+                      }}
+                      className="w-[105px] aspect-[1.6/1] cursor-pointer"
+                      title="Juztin Yuen — Home"
+                    >
+                      <img
+                        src="/card-nametag-blue.png?v=4"
+                        alt="hello my name is JUZTIN!"
+                        className="w-full h-full object-contain pointer-events-none"
+                      />
+                    </div>
+                    <button
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-black cursor-pointer rounded-full"
+                      aria-label="Close menu"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Navigation list */}
+                  <nav className="edz-nav select-none pt-3">
+                    <ul className="space-y-1">
+                      {/* Home */}
+                      <li>
+                        <a
+                          href="#home"
+                          aria-current={isHomeActive ? 'page' : undefined}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleLinkClick('home');
+                          }}
+                          className={`block py-0.5 transition-colors cursor-pointer ${
+                            isHomeActive
+                              ? 'font-bold text-black'
+                              : 'font-normal text-[#444444] hover:text-black'
+                          }`}
+                        >
+                          Home
+                        </a>
+                      </li>
+
+                      {/* Photography Set & Nested Albums */}
+                      <li className="pt-0.5">
+                        <div className="flex items-center justify-between">
+                          <a
+                            href="#photography"
+                            aria-current={isPhotoSetActive ? 'page' : undefined}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              handleLinkClick('photography');
+                            }}
+                            className={`block py-0.5 transition-colors cursor-pointer ${
+                              isPhotoSetActive || currentView === 'album'
+                                ? 'font-bold text-black'
+                                : 'font-normal text-[#444444] hover:text-black'
+                            }`}
+                          >
+                            Photography
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => setPhotoSubmenuOpen(!photoSubmenuOpen)}
+                            className="p-1 text-[#888888] hover:text-black focus:outline-none"
+                            aria-label="Toggle photography albums"
+                          >
+                            {photoSubmenuOpen ? (
+                              <ChevronDown className="w-3 h-3" />
+                            ) : (
+                              <ChevronRight className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
+
+                        {/* Nested albums */}
+                        <AnimatePresence>
+                          {photoSubmenuOpen && (
+                            <motion.ul
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              exit={{ opacity: 0, height: 0 }}
+                              transition={{ duration: 0.15 }}
+                              className="mt-1 ml-2 pl-2 border-l border-gray-200 space-y-0.5 overflow-hidden"
+                            >
+                              {ALBUMS.map((album) => {
+                                const isAlbumActive =
+                                  currentView === 'album' && selectedAlbum === album.id;
+
+                                return (
+                                  <li key={album.id}>
+                                    <a
+                                      href={`#album/${album.id}`}
+                                      aria-current={isAlbumActive ? 'page' : undefined}
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        handleLinkClick('album', album.id);
+                                      }}
+                                      className={`block py-0.5 text-[10px] transition-colors cursor-pointer ${
+                                        isAlbumActive
+                                          ? 'font-bold text-black'
+                                          : 'font-normal text-[#666666] hover:text-black'
+                                      }`}
+                                    >
+                                      {album.label}
+                                    </a>
+                                  </li>
+                                );
+                              })}
+                            </motion.ul>
+                          )}
+                        </AnimatePresence>
+                      </li>
+
+                      {/* Videography */}
+                      <li>
+                        <a
+                          href="#videography"
+                          aria-current={isVideoActive ? 'page' : undefined}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleLinkClick('videography');
+                          }}
+                          className={`block py-0.5 transition-colors cursor-pointer ${
+                            isVideoActive
+                              ? 'font-bold text-black'
+                              : 'font-normal text-[#444444] hover:text-black'
+                          }`}
+                        >
+                          Videography
+                        </a>
+                      </li>
+
+                      {/* Instagram Posts */}
+                      <li>
+                        <a
+                          href="#instagram"
+                          aria-current={isInstagramActive ? 'page' : undefined}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleLinkClick('instagram');
+                          }}
+                          className={`block py-0.5 transition-colors cursor-pointer ${
+                            isInstagramActive
+                              ? 'font-bold text-black'
+                              : 'font-normal text-[#444444] hover:text-black'
+                          }`}
+                        >
+                          Instagram Posts
+                        </a>
+                      </li>
+
+                      {/* About */}
+                      <li>
+                        <a
+                          href="#about"
+                          aria-current={isAboutActive ? 'page' : undefined}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleLinkClick('about');
+                          }}
+                          className={`block py-0.5 transition-colors cursor-pointer ${
+                            isAboutActive
+                              ? 'font-bold text-black'
+                              : 'font-normal text-[#444444] hover:text-black'
+                          }`}
+                        >
+                          About
+                        </a>
+                      </li>
+
+                      {/* Contact */}
+                      <li>
+                        <a
+                          href="#contact"
+                          aria-current={isContactActive ? 'page' : undefined}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleLinkClick('contact');
+                          }}
+                          className={`block py-0.5 transition-colors cursor-pointer ${
+                            isContactActive
+                              ? 'font-bold text-black'
+                              : 'font-normal text-[#444444] hover:text-black'
+                          }`}
+                        >
+                          Contact
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+
+                {/* Mobile Drawer Footer (Compact, fully visible, safe above phone bottom bar) */}
+                <div className="pt-2.5 border-t border-gray-100 text-[11px] text-[#aaaaaa] font-sans space-y-1">
+                  <p className="text-[11px] text-[#888888]">{profile.location || 'Singapore'}</p>
+                  <p>
+                    <a
+                      href="https://www.instagram.com/quietframes.sg/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-[#666666] hover:text-black transition-colors underline"
+                    >
+                      @quietframes.sg
+                    </a>
+                  </p>
+                  <p className="text-[11px] text-[#aaaaaa]">© {profile.name || 'Juztin Yuen'}</p>
+
+                  {/* Terms & Copyright Button */}
+                  <div className="pt-1.5 flex items-center">
+                    <button
+                      type="button"
+                      id="mobile-sidebar-terms-btn"
+                      onClick={() => {
+                        setTermsModalOpen(true);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-mono text-[#555555] hover:text-black transition-colors border border-gray-200 hover:border-black px-2.5 py-1 bg-white cursor-pointer"
+                      title="Terms of Service, Usage & Copyright"
+                    >
+                      <ShieldCheck className="w-3 h-3 text-zinc-600" />
+                      <span>Terms & Copyright</span>
+                    </button>
+                  </div>
+                </div>
               </div>
-              {renderNavContent(true)}
             </motion.div>
           </>
         )}
