@@ -1,5 +1,4 @@
 import React from 'react';
-import { ArrowRight, Camera, Film, Mail } from 'lucide-react';
 import { NavView, AlbumCategory } from './EdzSidebar';
 import { NametagHeroCard } from './NametagHeroCard';
 import { EdzHomeView } from './EdzHomeView';
@@ -144,61 +143,6 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
           </div>
         </div>
       </section>
-
-      {/* QUICK EXPLORE ACTION CARDS */}
-      <section className="w-full max-w-[860px] grid grid-cols-1 sm:grid-cols-3 gap-4 mt-16 pt-8 border-t border-black/[0.08]">
-        <button
-          type="button"
-          onClick={() => onNavigate('photography')}
-          className="p-5 rounded-xl bg-[#fafafa] hover:bg-white border border-black/[0.07] hover:border-black/20 hover:shadow-sm transition-all text-left group cursor-pointer"
-        >
-          <div className="flex items-center justify-between text-zinc-400 group-hover:text-black mb-2">
-            <Camera className="w-5 h-5" />
-            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-          </div>
-          <h3 className="text-sm font-bold text-black uppercase tracking-wider font-mono">
-            Photography
-          </h3>
-          <p className="text-xs text-zinc-500 mt-1 font-sans">
-            Explore combat sports, F1 trackside, and event coverage galleries.
-          </p>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onNavigate('videography')}
-          className="p-5 rounded-xl bg-[#fafafa] hover:bg-white border border-black/[0.07] hover:border-black/20 hover:shadow-sm transition-all text-left group cursor-pointer"
-        >
-          <div className="flex items-center justify-between text-zinc-400 group-hover:text-black mb-2">
-            <Film className="w-5 h-5" />
-            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-          </div>
-          <h3 className="text-sm font-bold text-black uppercase tracking-wider font-mono">
-            Videography
-          </h3>
-          <p className="text-xs text-zinc-500 mt-1 font-sans">
-            Watch 4K cinematic edits, color grading, and video showcases.
-          </p>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onNavigate('contact')}
-          className="p-5 rounded-xl bg-[#fafafa] hover:bg-white border border-black/[0.07] hover:border-black/20 hover:shadow-sm transition-all text-left group cursor-pointer"
-        >
-          <div className="flex items-center justify-between text-zinc-400 group-hover:text-black mb-2">
-            <Mail className="w-5 h-5" />
-            <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
-          </div>
-          <h3 className="text-sm font-bold text-black uppercase tracking-wider font-mono">
-            Get in Touch
-          </h3>
-          <p className="text-xs text-zinc-500 mt-1 font-sans">
-            Available for commercial shoots, fight coverage, and bookings.
-          </p>
-        </button>
-      </section>
-
       {/* MINIMAL STATIC FOOTER */}
       <footer className="w-full max-w-[860px] border-t border-black/[0.08] mt-16 pt-8 pb-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500 font-sans">
