@@ -98,7 +98,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
         </p>
 
         {/* ORGANIZATIONS & CLIENTS SHOWCASE WITH ACTUAL OFFICIAL LOGOS */}
-        <div className="mt-14 pt-10 border-t border-black/[0.08]">
+        <div className="mt-24 sm:mt-32 md:mt-36 pt-10 border-t border-black/[0.08]">
           <p className="text-xs uppercase tracking-widest text-[#777777] font-mono font-bold mb-8">
             Organizations & Events I Have Documented:
           </p>
