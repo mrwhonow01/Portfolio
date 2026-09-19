@@ -1,6 +1,7 @@
 import React from 'react';
 import { PhotoItem } from '../types';
 import { ALBUMS, AlbumCategory } from './EdzSidebar';
+import { ProgressiveImage } from './ProgressiveImage';
 
 interface EdzAlbumsViewProps {
   photos: PhotoItem[];
@@ -38,10 +39,14 @@ export const EdzAlbumsView: React.FC<EdzAlbumsViewProps> = ({
               {/* Cover thumbnail frame */}
               <div className="bg-[#f4f4f4] aspect-[4/3] overflow-hidden relative">
                 {coverPhoto && (
-                  <img
+                  <ProgressiveImage
                     src={coverPhoto.thumbnailSrc || coverPhoto.src}
+                    thumbnailSrc={coverPhoto.thumbnailSrc}
                     alt={album.label}
+                    loading="eager"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500 ease-out"
+                    containerClassName="w-full h-full"
                   />
                 )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />

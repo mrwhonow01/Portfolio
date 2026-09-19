@@ -34,18 +34,25 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
         <div className="absolute inset-0 bg-gradient-to-r from-zinc-100 via-zinc-200/60 to-zinc-100 animate-pulse" />
       )}
 
-      {/* Optional low-res blurred thumbnail */}
-      {thumbnailSrc && !isLoaded && !hasError && (
+      {/* Optional low-res blurred thumbnail (only if distinct from src) */}
+      {thumbnailSrc && thumbnailSrc !== src && !isLoaded && !hasError && (
         <img
           src={thumbnailSrc}
           alt={alt}
           aria-hidden="true"
+          loading="eager"
+          decoding="async"
           className={`absolute inset-0 w-full h-full object-contain filter blur-md scale-105 opacity-60 transition-opacity duration-300 ${className}`}
         />
       )}
 
       {/* High-res final image */}
       <img
+        ref={(el) => {
+          if (el && el.complete && el.naturalWidth > 0 && !isLoaded) {
+            setIsLoaded(true);
+          }
+        }}
         src={src}
         alt={alt}
         loading={loading}

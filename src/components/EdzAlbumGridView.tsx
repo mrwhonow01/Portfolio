@@ -121,10 +121,11 @@ export const EdzAlbumGridView: React.FC<EdzAlbumGridViewProps> = ({
               {/* Image Frame with natural aspect ratio & #f4f4f4 frame */}
               <div className="bg-[#f4f4f4] overflow-hidden relative">
                 <ProgressiveImage
-                  src={photo.src}
+                  src={photo.thumbnailSrc || photo.src}
                   thumbnailSrc={photo.thumbnailSrc}
                   alt={photo.title}
-                  loading="lazy"
+                  loading={index < 6 ? 'eager' : 'lazy'}
+                  decoding="async"
                   className="w-full h-auto block object-cover group-hover:opacity-90 transition-opacity duration-300"
                 />
 
