@@ -56,7 +56,23 @@
   }
 }
 
-/* Clean mobile tap highlight */
+/* Mobile touch responsiveness and image rendering optimization */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+button, a, .kpgriditem, figure, [role="button"] {
+  touch-action: manipulation;
+}
+
+/* Off-screen rendering efficiency for mobile phone battery & buttery 60fps scrolling */
+.list_item {
+  content-visibility: auto;
+  contain-intrinsic-size: 700px;
+}
+
+/* Prevent accidental image drag on mobile touch devices */
+img {
+  -webkit-user-drag: none;
+  user-select: none;
 }
