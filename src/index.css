@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: #ffffff;
+    color: #666666;
+  }
+  body {
+    font-family: 'Source Sans 3', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    background-color: #ffffff;
+    color: #666666;
+    letter-spacing: 0px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    color: #000000;
+    font-weight: 700;
+  }
+}
+
+/* Koken / Madison style uppercase navigation */
+.edz-nav {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* Light minimal scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f4f4f4;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4d4d8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1aa;
+}
+
+/* Mobile device safe area support */
+@supports (padding-top: env(safe-area-inset-top)) {
+  #mob-bttn-row {
+    padding-top: env(safe-area-inset-top);
+    height: calc(50px + env(safe-area-inset-top));
+  }
+  #main {
+    padding-bottom: max(5rem, calc(2.5rem + env(safe-area-inset-bottom)));
+  }
+}
+
+/* Clean mobile tap highlight */
+* {
+  -webkit-tap-highlight-color: transparent;
+}

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <style>
+    :root {
+      --icon-color: #111111;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --icon-color: #ffffff;
+      }
+    }
+  </style>
+  <!-- Camera Body Outline -->
+  <rect x="8" y="18" width="48" height="34" rx="6" stroke="var(--icon-color)" stroke-width="4.5" fill="none" />
+  <!-- Top Viewfinder / Shutter -->
+  <path d="M22 18V13C22 11.8954 22.8954 11 24 11H40C41.1046 11 42 11.8954 42 13V18" stroke="var(--icon-color)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Center Lens -->
+  <circle cx="32" cy="35" r="10" stroke="var(--icon-color)" stroke-width="4.5" fill="none" />
+  <circle cx="32" cy="35" r="4.5" fill="var(--icon-color)" />
+  <!-- Small Flash Indicator Dot -->
+  <circle cx="47" cy="25" r="2" fill="var(--icon-color)" />
+</svg>
