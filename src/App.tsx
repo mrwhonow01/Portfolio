@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowUp } from 'lucide-react';
 import { EdzSidebar, NavView, AlbumCategory, ALBUMS } from './components/EdzSidebar';
 import { EdzHomeView } from './components/EdzHomeView';
+import { JustinLeHomeView } from './components/JustinLeHomeView';
 import { EdzPhotoStream } from './components/EdzPhotoStream';
 import { EdzAlbumsView } from './components/EdzAlbumsView';
 import { EdzAlbumGridView, SportsSubCategory } from './components/EdzAlbumGridView';
@@ -244,8 +245,17 @@ export default function App() {
     activeAlbumMeta = ALBUMS.find((a) => a.id === selectedAlbum);
   }
 
+  if (currentView === 'home') {
+    return (
+      <JustinLeHomeView
+        currentView={currentView}
+        onNavigate={handleNavigate}
+      />
+    );
+  }
+
   return (
-    <div className={`min-h-screen bg-white text-[#666666] font-sans antialiased selection:bg-black selection:text-white${currentView === 'home' ? ' h-screen overflow-hidden' : ''}`}>
+    <div className="min-h-screen bg-white text-[#666666] font-sans antialiased selection:bg-black selection:text-white">
       {/* Accessible Skip to Content Link */}
       <a
         href="#main"
