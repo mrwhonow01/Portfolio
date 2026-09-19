@@ -124,6 +124,27 @@ export default function App() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
+  // Track whether the user has scrolled past the hero cards on the home page
+  const [isPastHeroCards, setIsPastHeroCards] = useState(false);
+
+  useEffect(() => {
+    if (currentView !== 'home') {
+      setIsPastHeroCards(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      // Threshold when the user has scrolled past the cards
+      const threshold = Math.max(280, window.innerHeight * 0.35);
+      setIsPastHeroCards(window.scrollY > threshold);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [currentView]);
+
   // Hydrate encrypted client inquiries on mount
   useEffect(() => {
     hydrateEncryptedInquiries();
@@ -262,6 +283,7 @@ export default function App() {
         currentView={currentView}
         selectedAlbum={selectedAlbum}
         selectedSubAlbum={selectedSubAlbum}
+        isPastHeroCards={isPastHeroCards}
         onNavigate={handleNavigate}
         onScrollPrevious={() => handleScrollArtwork('up')}
         onScrollNext={() => handleScrollArtwork('down')}
@@ -288,6 +310,7 @@ export default function App() {
                   currentView={currentView}
                   onNavigate={handleNavigate}
                   photos={photos}
+                  isPastHeroCards={isPastHeroCards}
                 />
               )}
 

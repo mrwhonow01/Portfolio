@@ -13,6 +13,7 @@ interface EdzSidebarProps {
   currentView: NavView;
   selectedAlbum: AlbumCategory | null;
   selectedSubAlbum?: string | null;
+  isPastHeroCards?: boolean;
   onNavigate: (view: NavView, album?: AlbumCategory, subAlbum?: string) => void;
   onScrollPrevious?: () => void;
   onScrollNext?: () => void;
@@ -29,6 +30,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
   currentView,
   selectedAlbum,
   selectedSubAlbum,
+  isPastHeroCards = false,
   onNavigate,
   onScrollPrevious,
   onScrollNext,
@@ -88,16 +90,20 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
     <div className="flex flex-col h-full justify-between">
       <div>
         {/* Site Logo - matching edz.us textlogo styling */}
-        <div id="site_logo" className="mb-10">
+        <div id="site_logo" className={`transition-all duration-300 relative ${isPastHeroCards && currentView === 'home' ? 'mb-16' : 'mb-10'}`}>
           <a
             href="#home"
             onClick={(e) => {
               e.preventDefault();
-              handleLinkClick('home');
+              if (currentView === 'home') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              } else {
+                handleLinkClick('home');
+              }
             }}
             className="group block"
           >
-            <div className="flex flex-col">
+            <div className={`flex flex-col transition-opacity duration-300 ${isPastHeroCards && currentView === 'home' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
               <span className="text-[22px] font-extrabold tracking-tight text-black uppercase leading-none font-sans">
                 {profile.signatureText || profile.name}
               </span>
@@ -106,6 +112,30 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
               </span>
             </div>
           </a>
+
+          {/* DOCKED BLUE CARD ON DESKTOP OVER LOGO */}
+          <AnimatePresence>
+            {isPastHeroCards && currentView === 'home' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.82, rotate: -5, y: -6 }}
+                animate={{ opacity: 1, scale: 1, rotate: -1.5, y: 0 }}
+                exit={{ opacity: 0, scale: 0.82, rotate: -5, y: -6 }}
+                transition={{ type: 'spring', stiffness: 340, damping: 24 }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="absolute -top-3 -left-2 w-[185px] aspect-[1.6/1] z-50 cursor-pointer drop-shadow-[0_10px_22px_rgba(0,0,0,0.18)] select-none group"
+                title="Click to scroll to top"
+              >
+                <img
+                  src="/card-nametag-blue.png?v=3"
+                  alt="hello my name is JUZTIN!"
+                  className="w-full h-full object-contain pointer-events-none group-hover:scale-104 transition-transform duration-200"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Navigation list matching edz.us */}
@@ -442,13 +472,37 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
           id="mob-menu"
           type="button"
           onClick={() => setMobileMenuOpen(true)}
-          className="min-h-[44px] px-2 text-black hover:text-gray-600 focus:outline-none flex items-center gap-2 cursor-pointer"
+          className="min-h-[44px] px-2 text-black hover:text-gray-600 focus:outline-none flex items-center gap-2 cursor-pointer relative"
           aria-label="Open Navigation Menu"
         >
-          <Menu className="w-5 h-5" />
-          <span className="text-xs uppercase tracking-widest font-bold font-sans">
+          <Menu className="w-5 h-5 shrink-0" />
+          <span className={`text-xs uppercase tracking-widest font-bold font-sans transition-opacity duration-300 ${isPastHeroCards && currentView === 'home' ? 'opacity-0' : 'opacity-100'}`}>
             {profile.signatureText || profile.name}
           </span>
+
+          {/* DOCKED BLUE CARD ON MOBILE */}
+          <AnimatePresence>
+            {isPastHeroCards && currentView === 'home' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="absolute left-8 top-1/2 -translate-y-1/2 w-[115px] aspect-[1.6/1] z-50 drop-shadow-sm cursor-pointer"
+                title="Click to scroll to top"
+              >
+                <img
+                  src="/card-nametag-blue.png?v=3"
+                  alt="hello my name is JUZTIN!"
+                  className="w-full h-full object-contain pointer-events-none"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </button>
 
         {/* Page navigation scroll arrows with 44px touch targets */}

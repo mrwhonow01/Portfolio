@@ -8,17 +8,19 @@ interface JustinLeHomeViewProps {
   currentView: NavView;
   onNavigate: (view: NavView, album?: AlbumCategory, subAlbum?: string) => void;
   photos: PhotoItem[];
+  isPastHeroCards?: boolean;
 }
 
 export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
   onNavigate,
   photos,
+  isPastHeroCards = false,
 }) => {
   return (
-    <div className="w-full flex flex-col items-center select-none pt-6 sm:pt-12 md:pt-16 lg:pt-20">
-      {/* HERO SECTION: Scroll-Driven Two-Card Slide-Out Interaction */}
-      <section className="w-full flex flex-col items-center justify-center mb-6 sm:mb-8">
-        <NametagHeroCard />
+    <div className="w-full flex flex-col items-center select-none pt-0">
+      {/* HERO SECTION: Vertically centered in initial viewport, photo hidden below fold */}
+      <section className="w-full min-h-[calc(100vh-80px)] md:min-h-[calc(100vh-50px)] flex flex-col items-center justify-center relative">
+        <NametagHeroCard isPastHeroCards={isPastHeroCards} />
       </section>
 
       {/* CLEAN MINIMAL DIVIDER LINE */}
