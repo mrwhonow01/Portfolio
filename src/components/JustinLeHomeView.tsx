@@ -58,9 +58,6 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
         </motion.div>
       </section>
 
-      {/* CLEAN MINIMAL DIVIDER LINE */}
-      <div className="w-full max-w-[960px] h-px bg-black/[0.08] my-8 sm:my-10" />
-
       {/* PHOTO HIGHLIGHT CAROUSEL */}
       <section className="w-full max-w-[960px] my-4 sm:my-6 flex flex-col items-center">
         <div className="w-full flex items-center justify-center">
