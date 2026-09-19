@@ -25,7 +25,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
   return (
     <div className="w-full flex flex-col items-center select-none pt-0">
       {/* HERO SECTION: Vertically centered in initial viewport, shifted down slightly more on mobile view */}
-      <section className="w-full min-h-[calc(100vh-80px)] md:min-h-[calc(100vh-50px)] flex flex-col items-center justify-center relative">
+      <section className="w-full min-h-[calc(100vh-40px)] md:min-h-screen flex flex-col items-center justify-center relative">
         <div className="w-full flex justify-center translate-y-[36px] md:translate-y-0">
           <NametagHeroCard isPastHeroCards={isPastHeroCards} />
         </div>
@@ -50,7 +50,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
       </section>
 
       {/* PHOTO HIGHLIGHT CAROUSEL */}
-      <section className="w-full max-w-[960px] my-3 sm:my-5 flex flex-col items-center relative px-2 sm:px-4">
+      <section className="w-full max-w-[960px] mt-14 sm:mt-20 md:mt-28 mb-8 sm:mb-12 flex flex-col items-center relative px-2 sm:px-4">
         {/* SECTION TITLE: Handwritten in same Schoolbell font as cards */}
         <h2 className="font-schoolbell text-[22px] sm:text-[28px] md:text-[32px] text-[#1a1a1a] tracking-normal mb-1.5 sm:mb-2 select-none text-center">
           My photography highlights!!!

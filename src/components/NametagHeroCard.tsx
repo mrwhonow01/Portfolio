@@ -20,23 +20,18 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
   // Global window scroll tracking
   const { scrollY } = useScroll();
 
-  // Desktop slide-out: Left card moves left, right card moves right
-  // As user scrolls past the cards (260px -> 460px), blue card glides toward top-left logo
-  const desktopCard1XRaw = useTransform(scrollY, [0, 160, 260, 460], [0, -220, -220, -480]);
-  const desktopCard1YRaw = useTransform(scrollY, [0, 160, 260, 460], [0, 24, 24, -200]);
-  const desktopCard1ScaleRaw = useTransform(scrollY, [0, 160, 260, 460], [1, 1, 1, 0.45]);
-  const desktopCard1OpacityRaw = useTransform(scrollY, [0, 260, 420], [1, 1, 0]);
-  const desktopCard1RotateRaw = useTransform(scrollY, [0, 160, 260, 460], [-5, -1.5, -1.5, -2]);
+  // Desktop slide-out: Left card moves left, right card moves right on scroll
+  const desktopCard1XRaw = useTransform(scrollY, [0, 160], [0, -220]);
+  const desktopCard1YRaw = useTransform(scrollY, [0, 160], [0, 24]);
+  const desktopCard1RotateRaw = useTransform(scrollY, [0, 160], [-5, -1.5]);
 
   const desktopCard2XRaw = useTransform(scrollY, [0, 160], [0, 220]);
   const desktopCard2YRaw = useTransform(scrollY, [0, 160], [0, 28]);
-  const desktopCard2OpacityRaw = useTransform(scrollY, [280, 480], [1, 0]);
   const desktopCard2RotateRaw = useTransform(scrollY, [0, 160], [5, 2]);
 
   // Mobile slide-out: Cascades vertically without clipping
   const mobileCard1XRaw = useTransform(scrollY, [0, 160], [0, -20]);
   const mobileCard1YRaw = useTransform(scrollY, [0, 160], [0, -45]);
-  const mobileCard1OpacityRaw = useTransform(scrollY, [0, 220, 360], [1, 1, 0]);
   const mobileCard2XRaw = useTransform(scrollY, [0, 160], [0, 20]);
   const mobileCard2YRaw = useTransform(scrollY, [0, 160], [0, 85]);
   const mobileCard1RotateRaw = useTransform(scrollY, [0, 160], [-4, -1]);
@@ -80,13 +75,10 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
     ? manualExpand ? -1 : mobileCard1RotateRaw
     : manualExpand ? -1.5 : desktopCard1RotateRaw;
 
-  const card1Scale = isMobile
-    ? 1
-    : manualExpand ? 1 : desktopCard1ScaleRaw;
+  const card1Scale = 1;
 
-  const card1Opacity = isMobile
-    ? mobileCard1OpacityRaw
-    : manualExpand ? 1 : desktopCard1OpacityRaw;
+  // Cards stay solid and do NOT fade away when scrolling past
+  const card1Opacity = 1;
 
   const card2X = isMobile
     ? manualExpand ? 20 : mobileCard2XRaw
@@ -100,9 +92,7 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
     ? manualExpand ? 1.5 : mobileCard2RotateRaw
     : manualExpand ? 2 : desktopCard2RotateRaw;
 
-  const card2Opacity = isMobile
-    ? 1
-    : manualExpand ? 1 : desktopCard2OpacityRaw;
+  const card2Opacity = 1;
 
   return (
     <div
