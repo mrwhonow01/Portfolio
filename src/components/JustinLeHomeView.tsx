@@ -50,7 +50,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
       </section>
 
       {/* PHOTO HIGHLIGHT CAROUSEL */}
-      <section className="w-full max-w-[960px] mt-14 sm:mt-20 md:mt-28 mb-8 sm:mb-12 flex flex-col items-center relative px-2 sm:px-4">
+      <section className="w-full max-w-[960px] mt-14 sm:mt-20 md:mt-28 mb-4 sm:mb-8 md:mb-12 flex flex-col items-center relative px-2 sm:px-4">
         {/* SECTION TITLE: Handwritten in same Schoolbell font as cards */}
         <h2 className="font-schoolbell text-[22px] sm:text-[28px] md:text-[32px] text-[#1a1a1a] tracking-normal mb-1.5 sm:mb-2 select-none text-center">
           My photography highlights!!!
@@ -59,16 +59,15 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
         <div className="w-full flex items-start justify-center relative">
           <EdzHomeView
             photos={photos}
-            className="w-full flex items-start justify-center relative select-none"
-            style={{ height: 'min(68vh, 580px)', minHeight: '280px' }}
+            className="w-full flex items-start justify-center relative select-none h-[250px] xs:h-[310px] sm:h-[420px] md:h-[580px]"
           />
         </div>
       </section>
 
       {/* LOCATION & BIO SUMMARY */}
-      <section className="w-full max-w-[860px] text-center mt-12 sm:mt-16 flex flex-col items-center">
+      <section className="w-full max-w-[860px] text-center mt-5 sm:mt-8 md:mt-16 flex flex-col items-center">
         {/* BLUE NAMETAG CARD (Above the text that is below the images) */}
-        <div className="w-[180px] xs:w-[210px] sm:w-[240px] aspect-[1.6/1] mb-7 select-none rotate-[-1.5deg]">
+        <div className="w-[170px] xs:w-[195px] sm:w-[240px] aspect-[1.6/1] mb-5 sm:mb-7 select-none rotate-[-1.5deg]">
           <img
             src="/card-nametag-blue.png?v=4"
             alt="hello my name is JUZTIN!"

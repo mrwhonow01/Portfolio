@@ -41,7 +41,7 @@ export const EdzHomeView: React.FC<EdzHomeViewProps> = ({ photos, className, sty
   return (
     <div
       className={className || "w-full flex items-start justify-center relative select-none pointer-events-none"}
-      style={style !== undefined ? style : { height: 'calc(100vh - 100px)' }}
+      style={style}
     >
       {/* Pure, Minimalist Photo Frame (Non-clickable, no chrome, no controls) */}
       {currentPhoto && (

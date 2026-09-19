@@ -433,7 +433,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
       {/* Mobile Top Row Bar (#mob-bttn-row) */}
       <div
         id="mob-bttn-row"
-        className="md:hidden fixed top-0 left-0 right-0 h-[50px] bg-white/95 backdrop-blur-md border-b border-gray-200 z-40 flex items-center justify-between px-4"
+        className="md:hidden fixed top-0 left-0 right-0 h-[50px] bg-white border-b border-gray-200 z-40 flex items-center justify-between px-4"
       >
         {/* Left Side: Hamburger Menu Button & Docked Blue Card on Mobile */}
         <div className="flex items-center gap-2">
