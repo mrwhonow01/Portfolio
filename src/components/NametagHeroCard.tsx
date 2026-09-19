@@ -29,11 +29,11 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
   const desktopCard2YRaw = useTransform(scrollY, [0, 160], [0, 28]);
   const desktopCard2RotateRaw = useTransform(scrollY, [0, 160], [5, 2]);
 
-  // Mobile slide-out: Cascades vertically without clipping
-  const mobileCard1XRaw = useTransform(scrollY, [0, 160], [0, -20]);
-  const mobileCard1YRaw = useTransform(scrollY, [0, 160], [0, -45]);
-  const mobileCard2XRaw = useTransform(scrollY, [0, 160], [0, 20]);
-  const mobileCard2YRaw = useTransform(scrollY, [0, 160], [0, 85]);
+  // Mobile slide-out: Moves slightly down so both cards stay visible below top bar
+  const mobileCard1XRaw = useTransform(scrollY, [0, 160], [0, -15]);
+  const mobileCard1YRaw = useTransform(scrollY, [0, 160], [0, 25]);
+  const mobileCard2XRaw = useTransform(scrollY, [0, 160], [0, 15]);
+  const mobileCard2YRaw = useTransform(scrollY, [0, 160], [0, 135]);
   const mobileCard1RotateRaw = useTransform(scrollY, [0, 160], [-4, -1]);
   const mobileCard2RotateRaw = useTransform(scrollY, [0, 160], [4, 1.5]);
 
@@ -64,11 +64,11 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
 
   // Determine positions (scroll or click toggle)
   const card1X = isMobile
-    ? manualExpand ? -20 : mobileCard1XRaw
+    ? manualExpand ? -15 : mobileCard1XRaw
     : manualExpand ? -220 : desktopCard1XRaw;
 
   const card1Y = isMobile
-    ? manualExpand ? -45 : mobileCard1YRaw
+    ? manualExpand ? 25 : mobileCard1YRaw
     : manualExpand ? 24 : desktopCard1YRaw;
 
   const card1Rotate = isMobile
@@ -81,11 +81,11 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
   const card1Opacity = 1;
 
   const card2X = isMobile
-    ? manualExpand ? 20 : mobileCard2XRaw
+    ? manualExpand ? 15 : mobileCard2XRaw
     : manualExpand ? 220 : desktopCard2XRaw;
 
   const card2Y = isMobile
-    ? manualExpand ? 85 : mobileCard2YRaw
+    ? manualExpand ? 135 : mobileCard2YRaw
     : manualExpand ? 28 : desktopCard2YRaw;
 
   const card2Rotate = isMobile

@@ -24,9 +24,9 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
 
   return (
     <div className="w-full flex flex-col items-center select-none pt-0">
-      {/* HERO SECTION: Vertically centered in initial viewport, shifted down slightly more on mobile view */}
+      {/* HERO SECTION: Vertically centered in initial viewport on both mobile and desktop */}
       <section className="w-full min-h-[calc(100vh-40px)] md:min-h-screen flex flex-col items-center justify-center relative">
-        <div className="w-full flex justify-center translate-y-[36px] md:translate-y-0">
+        <div className="w-full flex justify-center translate-y-0">
           <NametagHeroCard isPastHeroCards={isPastHeroCards} />
         </div>
 
