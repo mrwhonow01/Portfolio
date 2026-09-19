@@ -50,8 +50,13 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
       </section>
 
       {/* PHOTO HIGHLIGHT CAROUSEL */}
-      <section className="w-full max-w-[960px] my-4 sm:my-6 flex flex-col items-center">
-        <div className="w-full flex items-center justify-center">
+      <section className="w-full max-w-[960px] my-4 sm:my-6 flex flex-col items-center relative px-2 sm:px-4">
+        {/* SECTION TITLE: Handwritten in same Schoolbell font as cards */}
+        <h2 className="font-schoolbell text-[22px] sm:text-[28px] md:text-[32px] text-[#1a1a1a] tracking-normal mb-3 sm:mb-4 select-none text-center">
+          My photography highlights!!!
+        </h2>
+
+        <div className="w-full flex items-center justify-center relative">
           <EdzHomeView
             photos={photos}
             className="w-full flex items-center justify-center relative select-none"
