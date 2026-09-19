@@ -121,7 +121,7 @@ export const NametagHeroCard: React.FC = () => {
         className="absolute w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-10 filter drop-shadow-[0_18px_36px_rgba(74,36,8,0.22)]"
       >
         <img
-          src="/card-nametag-brown.png"
+          src="/card-nametag-brown.png?v=3"
           alt="i am a... Photographer, Architecture Student, Storyteller"
           loading="eager"
           decoding="async"
@@ -143,7 +143,7 @@ export const NametagHeroCard: React.FC = () => {
         className="relative w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-20 filter drop-shadow-[0_20px_42px_rgba(0,0,0,0.22)]"
       >
         <img
-          src="/card-nametag-blue.png"
+          src="/card-nametag-blue.png?v=3"
           alt="hello my name is JUZTIN!"
           loading="eager"
           decoding="async"
