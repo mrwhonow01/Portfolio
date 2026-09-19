@@ -95,18 +95,6 @@ export const NametagHeroCard: React.FC = () => {
       className="relative w-full max-w-[960px] min-h-[340px] sm:min-h-[400px] md:min-h-[440px] flex items-center justify-center select-none perspective-[1200px] cursor-pointer"
       title="Click or scroll down to slide out the cards!"
     >
-      {/* Scroll indicator hint */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: isHovered ? 1 : 0.55, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="absolute -bottom-2 sm:-bottom-3 left-1/2 -translate-x-1/2 z-0 pointer-events-none text-center"
-      >
-        <span className="text-[11px] sm:text-xs tracking-wider uppercase font-semibold text-zinc-400 font-sans">
-          scroll or click to slide out card ↓
-        </span>
-      </motion.div>
-
       {/* CARD 2: Brown "i am a..." Card (Slides out to the right) */}
       <motion.div
         style={{
