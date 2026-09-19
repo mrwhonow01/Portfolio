@@ -21,17 +21,19 @@ export const NametagHeroCard: React.FC = () => {
   const { scrollY } = useScroll();
 
   // Desktop slide-out: Left card moves left, right card moves right
-  // Settles smoothly between 0px and 160px of scroll
+  // When scrolling down, the cards smoothly slide apart and move slightly down
   const desktopCard1XRaw = useTransform(scrollY, [0, 160], [0, -220]);
   const desktopCard2XRaw = useTransform(scrollY, [0, 160], [0, 220]);
+  const desktopCard1YRaw = useTransform(scrollY, [0, 160], [0, 24]);
+  const desktopCard2YRaw = useTransform(scrollY, [0, 160], [0, 28]);
   const desktopCard1RotateRaw = useTransform(scrollY, [0, 160], [-5, -1.5]);
   const desktopCard2RotateRaw = useTransform(scrollY, [0, 160], [5, 2]);
 
   // Mobile slide-out: Cascades vertically without clipping
   const mobileCard1XRaw = useTransform(scrollY, [0, 160], [0, -20]);
-  const mobileCard1YRaw = useTransform(scrollY, [0, 160], [0, -70]);
+  const mobileCard1YRaw = useTransform(scrollY, [0, 160], [0, -45]);
   const mobileCard2XRaw = useTransform(scrollY, [0, 160], [0, 20]);
-  const mobileCard2YRaw = useTransform(scrollY, [0, 160], [0, 70]);
+  const mobileCard2YRaw = useTransform(scrollY, [0, 160], [0, 85]);
   const mobileCard1RotateRaw = useTransform(scrollY, [0, 160], [-4, -1]);
   const mobileCard2RotateRaw = useTransform(scrollY, [0, 160], [4, 1.5]);
 
@@ -66,8 +68,8 @@ export const NametagHeroCard: React.FC = () => {
     : manualExpand ? -220 : desktopCard1XRaw;
 
   const card1Y = isMobile
-    ? manualExpand ? -70 : mobileCard1YRaw
-    : 0;
+    ? manualExpand ? -45 : mobileCard1YRaw
+    : manualExpand ? 24 : desktopCard1YRaw;
 
   const card1Rotate = isMobile
     ? manualExpand ? -1 : mobileCard1RotateRaw
@@ -78,8 +80,8 @@ export const NametagHeroCard: React.FC = () => {
     : manualExpand ? 220 : desktopCard2XRaw;
 
   const card2Y = isMobile
-    ? manualExpand ? 70 : mobileCard2YRaw
-    : 0;
+    ? manualExpand ? 85 : mobileCard2YRaw
+    : manualExpand ? 28 : desktopCard2YRaw;
 
   const card2Rotate = isMobile
     ? manualExpand ? 1.5 : mobileCard2RotateRaw
