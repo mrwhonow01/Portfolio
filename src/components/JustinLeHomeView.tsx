@@ -25,23 +25,9 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
       {/* CLEAN MINIMAL DIVIDER LINE */}
       <div className="w-full max-w-[960px] h-px bg-black/[0.08] my-8 sm:my-10" />
 
-      {/* PHOTO HIGHLIGHT CAROUSEL (Replaces "Who I Am" and "What I Do" per user request) */}
+      {/* PHOTO HIGHLIGHT CAROUSEL */}
       <section className="w-full max-w-[960px] my-4 sm:my-6 flex flex-col items-center">
-        <div className="w-full mb-3 flex items-center justify-between px-1">
-          <span className="text-xs uppercase tracking-widest text-[#777777] font-mono font-bold">
-            Featured Highlights
-          </span>
-          <button
-            type="button"
-            onClick={() => onNavigate('photography')}
-            className="text-xs font-mono uppercase tracking-wider text-black hover:underline flex items-center gap-1 cursor-pointer"
-          >
-            <span>View All</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="w-full rounded-2xl overflow-hidden border border-black/[0.08] bg-[#fafafa] shadow-xs">
+        <div className="w-full flex items-center justify-center">
           <EdzHomeView
             photos={photos}
             className="w-full flex items-center justify-center relative select-none"
