@@ -40,12 +40,12 @@ export const EdzHomeView: React.FC<EdzHomeViewProps> = ({ photos, className, sty
 
   return (
     <div
-      className={className || "w-full flex items-center justify-center relative select-none pointer-events-none"}
+      className={className || "w-full flex items-start justify-center relative select-none pointer-events-none"}
       style={style !== undefined ? style : { height: 'calc(100vh - 100px)' }}
     >
       {/* Pure, Minimalist Photo Frame (Non-clickable, no chrome, no controls) */}
       {currentPhoto && (
-        <div className="relative w-full h-full flex items-center justify-center select-none pointer-events-none">
+        <div className="relative w-full h-full flex items-start justify-center select-none pointer-events-none">
           <AnimatePresence mode="wait">
             <motion.img
               key={currentPhoto.id}
