@@ -111,7 +111,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                 title="Click to scroll to top"
               >
                 <img
-                  src="/card-nametag-blue.png?v=3"
+                  src="/card-nametag-blue.png?v=4"
                   alt="hello my name is JUZTIN!"
                   className="w-full h-full object-contain pointer-events-none group-hover:scale-104 transition-transform duration-200"
                 />
@@ -467,7 +467,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                 title="Click to scroll to top"
               >
                 <img
-                  src="/card-nametag-blue.png?v=3"
+                  src="/card-nametag-blue.png?v=4"
                   alt="hello my name is JUZTIN!"
                   className="w-full h-full object-contain pointer-events-none"
                 />

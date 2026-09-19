@@ -111,7 +111,7 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       onClick={() => setManualExpand(!manualExpand)}
-      className="relative w-full max-w-[960px] min-h-[340px] sm:min-h-[400px] md:min-h-[440px] flex items-center justify-center select-none perspective-[1200px] cursor-pointer"
+      className="relative w-full max-w-[960px] min-h-[340px] sm:min-h-[400px] md:min-h-[440px] flex items-center justify-center select-none md:perspective-[1200px] cursor-pointer"
       title="Click or scroll down to slide out the cards!"
     >
       {/* CARD 2: Brown "i am a..." Card (Slides out to the right) */}
@@ -126,10 +126,10 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
         }}
         whileHover={{ scale: 1.02 }}
         transition={{ type: 'spring', stiffness: 260, damping: 25 }}
-        className="absolute w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-10 filter drop-shadow-[0_18px_36px_rgba(74,36,8,0.22)]"
+        className="absolute w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-10 md:filter md:drop-shadow-[0_12px_24px_rgba(74,36,8,0.12)]"
       >
         <img
-          src="/card-nametag-brown.png?v=3"
+          src="/card-nametag-brown.png?v=4"
           alt="i am a... Photographer, Architecture Student, Storyteller"
           loading="eager"
           decoding="async"
@@ -150,10 +150,10 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
         }}
         whileHover={{ scale: 1.02 }}
         transition={{ type: 'spring', stiffness: 260, damping: 25 }}
-        className="relative w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-20 filter drop-shadow-[0_20px_42px_rgba(0,0,0,0.22)]"
+        className="relative w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-20 md:filter md:drop-shadow-[0_14px_28px_rgba(0,0,0,0.12)]"
       >
         <img
-          src="/card-nametag-blue.png?v=3"
+          src="/card-nametag-blue.png?v=4"
           alt="hello my name is JUZTIN!"
           loading="eager"
           decoding="async"
