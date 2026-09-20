@@ -92,18 +92,23 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
         </section>
 
         {/* Milestones / Leadership Trajectory */}
-        <section className="space-y-6 pt-8 border-t border-gray-300">
-          <h2 className="text-[14px] font-bold text-black uppercase tracking-wider">
+        <section className="pt-8 border-t border-gray-200">
+          <h2 className="text-[14px] font-bold text-black uppercase tracking-wider mb-6">
             Experience & Appointments
           </h2>
 
-          <div className="space-y-6 divide-y divide-gray-100">
+          <div className="divide-y divide-gray-200/80">
             {timeline.map((item) => (
-              <div key={item.id} className="pt-6 first:pt-0">
+              <div key={item.id} className="py-7 first:pt-0 last:pb-0">
                 <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-2">
                   <h3 className="text-[15px] font-bold text-black">
                     {item.role} <span className="font-normal text-[#888888]">· {item.organization}</span>
                   </h3>
+                  {item.year && (
+                    <span className="text-[11.5px] font-mono text-[#888888] shrink-0">
+                      {item.year}
+                    </span>
+                  )}
                 </div>
                 <p className="text-[13px] text-[#666666] mb-3 leading-relaxed">
                   {item.description}
@@ -118,7 +123,7 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
                 )}
 
                 {item.skills && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
+                  <div className="flex flex-wrap gap-1.5 mt-3">
                     {item.skills.map((skill, i) => (
                       <span
                         key={i}
@@ -135,7 +140,7 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
         </section>
 
         {/* Gear & Technical Setup */}
-        <section className="pt-8 border-t border-gray-300 space-y-3">
+        <section className="pt-8 border-t border-gray-200 space-y-3">
           <h2 className="text-[14px] font-bold text-black uppercase tracking-wider">
             Equipment
           </h2>
@@ -147,7 +152,7 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
         </section>
 
         {/* Contact CTA */}
-        <section className="pt-8 border-t border-gray-100">
+        <section className="pt-8 border-t border-gray-200">
           <p className="text-[13px]">
             Have an upcoming event, fight night, or project? You can reach out through the{' '}
             <button
