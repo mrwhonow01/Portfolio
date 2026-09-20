@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, Variants } from 'motion/react';
 import { ArrowUp } from 'lucide-react';
 import { EdzSidebar, NavView, AlbumCategory, ALBUMS } from './components/EdzSidebar';
 import { EdzHomeView } from './components/EdzHomeView';
@@ -13,6 +13,7 @@ import { EdzInstagramView } from './components/EdzInstagramView';
 import { EdzContactView } from './components/EdzContactView';
 import { ContentScroll } from './components/ContentScroll';
 import { Lightbox } from './components/Lightbox';
+import { MobileNextPageCue } from './components/MobileNextPageCue';
 import {
   loadPhotos,
   loadProfile,
@@ -104,6 +105,83 @@ function updateDocumentTitle(view: NavView, album?: AlbumCategory | null, subAlb
   }
 }
 
+interface MobileRouteInfo {
+  view: NavView;
+  album?: AlbumCategory;
+  subAlbum?: string;
+  title: string;
+  subtitle: string;
+  pageNumber: number;
+}
+
+// Sequential mobile page chain: Home (1) -> Photography (2) -> Videography (3) -> Instagram (4) -> About (5) -> Contact (6)
+function getNextMobileRoute(currentView: NavView): MobileRouteInfo | null {
+  if (currentView === 'home') {
+    return {
+      view: 'photography',
+      title: 'Photography',
+      subtitle: 'Explore photo collections & ringside sports',
+      pageNumber: 2,
+    };
+  }
+  if (currentView === 'photography' || currentView === 'album') {
+    return {
+      view: 'videography',
+      title: 'Videography',
+      subtitle: 'Watch documentary films & event reels',
+      pageNumber: 3,
+    };
+  }
+  if (currentView === 'videography') {
+    return {
+      view: 'instagram',
+      title: 'Instagram Posts',
+      subtitle: 'View social highlights & featured stories',
+      pageNumber: 4,
+    };
+  }
+  if (currentView === 'instagram') {
+    return {
+      view: 'about',
+      title: 'About Juztin',
+      subtitle: 'Read biography, credentials & equipment',
+      pageNumber: 5,
+    };
+  }
+  if (currentView === 'about') {
+    return {
+      view: 'contact',
+      title: 'Contact',
+      subtitle: 'Get in touch for inquiries & bookings',
+      pageNumber: 6,
+    };
+  }
+  return null; // contact is the final page
+}
+
+const pageVariants: Variants = {
+  initial: (direction: 'next' | 'standard') => ({
+    opacity: 0,
+    y: direction === 'next' ? 44 : 8,
+  }),
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.38,
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+    },
+  },
+  exit: (direction: 'next' | 'standard') => ({
+    opacity: 0,
+    y: direction === 'next' ? -32 : -8,
+    transition: {
+      duration: 0.26,
+      ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
+    },
+  }),
+};
+
 export default function App() {
   // State from persistence
   const [photos] = useState<PhotoItem[]>(loadPhotos);
@@ -119,6 +197,26 @@ export default function App() {
   const [selectedAlbum, setSelectedAlbum] = useState<AlbumCategory | null>(initialRoute.album);
   const [selectedSubAlbum, setSelectedSubAlbum] = useState<string | null>(initialRoute.subAlbum);
   const [showBackToTop, setShowBackToTop] = useState(false);
+
+  // Mobile detection for mobile-only sequential scroll progression
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+  const [transitionDirection, setTransitionDirection] = useState<'next' | 'standard'>('standard');
+  const isTransitioningRef = useRef(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    window.addEventListener('orientationchange', checkMobile);
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      window.removeEventListener('orientationchange', checkMobile);
+    };
+  }, []);
 
   // Modal states
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -186,7 +284,7 @@ export default function App() {
   };
 
   // Navigation handler with browser history & URL hash synchronization
-  const handleNavigate = (view: NavView, album?: AlbumCategory, subAlbum?: string) => {
+  const handleNavigate = (view: NavView, album?: AlbumCategory, subAlbum?: string, isNextAdvance = false) => {
     setCurrentView(view);
     if (view === 'album' && album) {
       setSelectedAlbum(album);
@@ -204,8 +302,101 @@ export default function App() {
     }
 
     updateDocumentTitle(view, album, subAlbum);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (!isNextAdvance) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
+
+  const nextMobileRoute = isMobile ? getNextMobileRoute(currentView) : null;
+
+  const triggerMobileAdvance = () => {
+    if (isTransitioningRef.current) return;
+    const next = getNextMobileRoute(currentView);
+    if (!next) return;
+
+    isTransitioningRef.current = true;
+    setTransitionDirection('next');
+    handleNavigate(next.view, next.album, next.subAlbum, true);
+
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+      setTransitionDirection('standard');
+    }, 900);
+  };
+
+  // Mobile-only: Detect scrolling to the end and scrolling further down to move to the next page
+  useEffect(() => {
+    if (!isMobile) return;
+    const next = getNextMobileRoute(currentView);
+    if (!next) return;
+
+    let touchStartY = 0;
+    let isAtBottom = false;
+
+    const checkIsAtBottom = () => {
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      const windowHeight = window.innerHeight;
+      const docHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight,
+        document.body.offsetHeight,
+        document.documentElement.offsetHeight,
+        document.body.clientHeight,
+        document.documentElement.clientHeight
+      );
+      // Within 30px of the very bottom
+      return scrollY + windowHeight >= docHeight - 30;
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      touchStartY = e.touches[0].clientY;
+      isAtBottom = checkIsAtBottom();
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length !== 1 || isTransitioningRef.current) return;
+      const currentY = e.touches[0].clientY;
+      const deltaY = touchStartY - currentY; // positive when swiping up / scrolling down
+
+      if (isAtBottom && deltaY > 48) {
+        triggerMobileAdvance();
+      } else if (!isAtBottom && checkIsAtBottom()) {
+        isAtBottom = true;
+        touchStartY = currentY;
+      }
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (isTransitioningRef.current) return;
+      if (isAtBottom && e.changedTouches.length === 1) {
+        const endY = e.changedTouches[0].clientY;
+        if (touchStartY - endY > 40) {
+          triggerMobileAdvance();
+        }
+      }
+    };
+
+    const onWheel = (e: WheelEvent) => {
+      if (isTransitioningRef.current) return;
+      if (checkIsAtBottom() && e.deltaY > 25) {
+        triggerMobileAdvance();
+      }
+    };
+
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('wheel', onWheel, { passive: true });
+
+    return () => {
+      window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+      window.removeEventListener('wheel', onWheel);
+    };
+  }, [isMobile, currentView, selectedAlbum]);
 
   // Select photo to open Lightbox
   const handleSelectPhoto = (index: number) => {
@@ -295,13 +486,19 @@ export default function App() {
         className="md:ml-[250px] min-h-screen pt-20 md:pt-[50px] px-6 md:px-10 lg:px-12 pb-20 max-w-[1600px]"
       >
         <div id="main_wrap" className="w-full">
-          <AnimatePresence mode="wait">
+          <AnimatePresence
+            mode="wait"
+            onExitComplete={() => {
+              window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+            }}
+          >
             <motion.div
               key={`${currentView}-${selectedAlbum || 'all'}-${selectedSubAlbum || 'none'}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              custom={transitionDirection}
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
               className="w-full"
             >
               {/* 1. Home View: JustinLe Card Reveal, Highlight Carousel, Logos & Action Cards */}
@@ -420,6 +617,17 @@ export default function App() {
                 <EdzContactView
                   profile={profile}
                   onSubmitInquiry={handleNewInquiry}
+                />
+              )}
+
+              {/* Mobile-Only Sequential Next Page Cue */}
+              {isMobile && nextMobileRoute && (
+                <MobileNextPageCue
+                  nextTitle={nextMobileRoute.title}
+                  nextSubtitle={nextMobileRoute.subtitle}
+                  pageNumber={nextMobileRoute.pageNumber}
+                  totalNumberedPages={6}
+                  onAdvance={triggerMobileAdvance}
                 />
               )}
             </motion.div>
