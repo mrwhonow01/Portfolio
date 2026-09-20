@@ -112,9 +112,9 @@ export const EdzInstagramView: React.FC = () => {
   return (
     <div className="w-full max-w-[1200px] mx-auto text-[#666666] space-y-12">
       {/* Header with Instagram Profile Link */}
-      <header className="pb-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
+      <header className="pb-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-black uppercase tracking-tight">
+          <h1 className="font-schoolbell text-[30px] sm:text-[36px] md:text-[40px] text-[#1a1a1a] tracking-normal select-none -mb-1">
             Instagram Posts
           </h1>
           <p className="text-xs text-[#888888] uppercase tracking-wider mt-1">

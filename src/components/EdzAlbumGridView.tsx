@@ -101,7 +101,7 @@ export const EdzAlbumGridView: React.FC<EdzAlbumGridViewProps> = ({
     <div className="w-full">
       {/* Editorial Header matching edz.us/albums/france-on-tri-x/ */}
       <header className="mb-6">
-        <h1 className="text-[17px] sm:text-[19px] font-bold text-black tracking-normal">
+        <h1 className="font-schoolbell text-[28px] sm:text-[34px] md:text-[38px] text-[#1a1a1a] tracking-normal select-none -mb-1">
           {displayTitle}
         </h1>
 

@@ -605,6 +605,8 @@ export default function App() {
                 <EdzPhotoStream
                   photos={photos}
                   onSelectPhoto={handleSelectPhoto}
+                  title="Photography"
+                  subtitle={`${photos.length} Selected Photographs · Sports, Stage & Events`}
                 />
               )}
 
