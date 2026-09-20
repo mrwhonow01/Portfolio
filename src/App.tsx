@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Variants } from 'motion/react';
-import { ArrowUp } from 'lucide-react';
 import { EdzSidebar, NavView, AlbumCategory, ALBUMS } from './components/EdzSidebar';
 import { EdzHomeView } from './components/EdzHomeView';
 import { JustinLeHomeView } from './components/JustinLeHomeView';
@@ -241,7 +240,6 @@ export default function App() {
   const [currentView, setCurrentView] = useState<NavView>(initialRoute.view);
   const [selectedAlbum, setSelectedAlbum] = useState<AlbumCategory | null>(initialRoute.album);
   const [selectedSubAlbum, setSelectedSubAlbum] = useState<string | null>(initialRoute.subAlbum);
-  const [showBackToTop, setShowBackToTop] = useState(false);
 
   // Mobile detection for mobile-only sequential scroll progression
   const [isMobile, setIsMobile] = useState(() =>
@@ -315,14 +313,6 @@ export default function App() {
     };
   }, []);
 
-  // Show "Back to Top" floating pill on long scrolls
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 450);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   const handleNewInquiry = (inquiry: ContactInquiry) => {
     saveInquiry(inquiry);
@@ -723,24 +713,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* Floating Back to Top Pill */}
-      <AnimatePresence>
-        {showBackToTop && currentView !== 'home' && (
-          <motion.button
-            type="button"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 12 }}
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-6 right-6 z-40 px-3.5 py-2 bg-white/95 hover:bg-black text-zinc-700 hover:text-white border border-zinc-200/90 shadow-md backdrop-blur-md rounded-full text-[10.5px] font-mono uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer select-none"
-            title="Scroll to Top"
-            aria-label="Scroll to Top"
-          >
-            <ArrowUp className="w-3.5 h-3.5" />
-            <span>Top</span>
-          </motion.button>
-        )}
-      </AnimatePresence>
 
       {/* High-Resolution Lightbox */}
       <Lightbox
