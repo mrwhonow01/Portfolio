@@ -116,8 +116,9 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                 title="Click to scroll to top"
               >
                 <img
-                  src="/card-nametag-blue.png?v=4"
+                  src="/card-nametag-blue.webp?v=4"
                   alt="hello my name is JUZTIN!"
+                  decoding="async"
                   className="w-full h-full object-contain pointer-events-none group-hover:scale-104 transition-transform duration-200"
                 />
               </motion.div>
@@ -462,8 +463,9 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                 title="Click to scroll to top"
               >
                 <img
-                  src="/card-nametag-blue.png?v=4"
+                  src="/card-nametag-blue.webp?v=4"
                   alt="hello my name is JUZTIN!"
+                  decoding="async"
                   className="w-full h-full object-contain pointer-events-none"
                 />
               </motion.div>
@@ -513,8 +515,9 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                       title="Juztin Yuen — Home"
                     >
                       <img
-                        src="/card-nametag-blue.png?v=4"
+                        src="/card-nametag-blue.webp?v=4"
                         alt="hello my name is JUZTIN!"
+                        decoding="async"
                         className="w-full h-full object-contain pointer-events-none"
                       />
                     </div>

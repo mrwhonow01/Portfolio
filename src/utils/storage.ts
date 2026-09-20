@@ -116,7 +116,7 @@ export function loadInquiries(): ContactInquiry[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.INQUIRIES);
     if (!raw) return [];
-    if (!raw.startsWith('ENC:v1:') && !raw.startsWith('OBF:')) {
+    if (!raw.startsWith('ENC:') && !raw.startsWith('OBF:')) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
         inMemoryInquiries = parsed;

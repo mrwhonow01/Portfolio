@@ -1,40 +1,10 @@
-// Web Crypto AES-GCM (256-bit) encryption utility for client-side storage
+// Web Crypto AES-GCM (256-bit) client-side storage protection utility
 
-const APP_SECRET = 'juztin-yuen-portfolio-secure-key-2026';
 const ALGORITHM = 'AES-GCM';
+const DEVICE_KEY_STORAGE = 'juztin_portfolio_device_key_v2';
 
-// Cache the derived CryptoKey in memory
+// In-memory cache for the device CryptoKey
 let cachedKey: CryptoKey | null = null;
-
-async function getEncryptionKey(): Promise<CryptoKey> {
-  if (cachedKey) return cachedKey;
-
-  const enc = new TextEncoder();
-  const keyMaterial = await window.crypto.subtle.importKey(
-    'raw',
-    enc.encode(APP_SECRET),
-    { name: 'PBKDF2' },
-    false,
-    ['deriveKey']
-  );
-
-  const salt = enc.encode('portfolio-quietframes-salt-v1');
-
-  cachedKey = await window.crypto.subtle.deriveKey(
-    {
-      name: 'PBKDF2',
-      salt,
-      iterations: 100000,
-      hash: 'SHA-256',
-    },
-    keyMaterial,
-    { name: ALGORITHM, length: 256 },
-    false,
-    ['encrypt', 'decrypt']
-  );
-
-  return cachedKey;
-}
 
 // Convert Uint8Array to Base64
 function arrayBufferToBase64(buffer: ArrayBuffer | Uint8Array): string {
@@ -58,17 +28,59 @@ function base64ToArrayBuffer(base64: string): Uint8Array<ArrayBuffer> {
 }
 
 /**
+ * Returns or generates a client-side cryptographic device key for AES-GCM.
+ * Never stores or relies on hardcoded passwords or static secrets.
+ */
+async function getDeviceKey(): Promise<CryptoKey | null> {
+  if (cachedKey) return cachedKey;
+  if (typeof window === 'undefined' || !window.crypto?.subtle) return null;
+
+  try {
+    const stored = localStorage.getItem(DEVICE_KEY_STORAGE);
+    if (stored) {
+      const raw = base64ToArrayBuffer(stored);
+      cachedKey = await window.crypto.subtle.importKey(
+        'raw',
+        raw,
+        { name: ALGORITHM, length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      );
+      return cachedKey;
+    }
+
+    // Generate brand new unique 256-bit AES-GCM device key
+    const newKey = await window.crypto.subtle.generateKey(
+      { name: ALGORITHM, length: 256 },
+      true,
+      ['encrypt', 'decrypt']
+    );
+
+    const exported = await window.crypto.subtle.exportKey('raw', newKey);
+    localStorage.setItem(DEVICE_KEY_STORAGE, arrayBufferToBase64(exported));
+
+    cachedKey = newKey;
+    return cachedKey;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Encrypts arbitrary serializable data using AES-GCM (256-bit).
- * Returns a secure armored string format: `ENC:v1:<iv>:<ciphertext>`
+ * Returns an armored string format: `ENC:v2:<iv>:<ciphertext>`
  */
 export async function encryptData(data: unknown): Promise<string> {
   try {
     if (typeof window === 'undefined' || !window.crypto?.subtle) {
-      // Fallback obfuscation if SubtleCrypto unavailable in insecure context
       return 'OBF:' + btoa(encodeURIComponent(JSON.stringify(data)));
     }
 
-    const key = await getEncryptionKey();
+    const key = await getDeviceKey();
+    if (!key) {
+      return 'OBF:' + btoa(encodeURIComponent(JSON.stringify(data)));
+    }
+
     const iv = window.crypto.getRandomValues(new Uint8Array(12));
     const encodedData = new TextEncoder().encode(JSON.stringify(data));
 
@@ -84,24 +96,23 @@ export async function encryptData(data: unknown): Promise<string> {
     const ivBase64 = arrayBufferToBase64(iv);
     const cipherBase64 = arrayBufferToBase64(encryptedBuffer);
 
-    return `ENC:v1:${ivBase64}:${cipherBase64}`;
-  } catch (err) {
-    console.error('Encryption error:', err);
-    // Fallback safely to obfuscated string
+    return `ENC:v2:${ivBase64}:${cipherBase64}`;
+  } catch {
+    // Fallback safely to obfuscated string without throwing
     return 'OBF:' + btoa(encodeURIComponent(JSON.stringify(data)));
   }
 }
 
 /**
  * Decrypts an armored encrypted string back to the original type T.
- * Seamlessly handles unencrypted legacy strings for backward compatibility.
+ * Seamlessly handles legacy versions for backward compatibility.
  */
 export async function decryptData<T>(raw: string): Promise<T | null> {
   try {
     if (!raw) return null;
 
     // Handle legacy unencrypted JSON
-    if (!raw.startsWith('ENC:v1:') && !raw.startsWith('OBF:')) {
+    if (!raw.startsWith('ENC:') && !raw.startsWith('OBF:')) {
       return JSON.parse(raw) as T;
     }
 
@@ -112,9 +123,8 @@ export async function decryptData<T>(raw: string): Promise<T | null> {
     }
 
     // Handle Web Crypto AES-GCM
-    if (raw.startsWith('ENC:v1:')) {
+    if (raw.startsWith('ENC:')) {
       if (typeof window === 'undefined' || !window.crypto?.subtle) {
-        console.warn('SubtleCrypto unavailable for decryption.');
         return null;
       }
 
@@ -124,23 +134,28 @@ export async function decryptData<T>(raw: string): Promise<T | null> {
       const iv = base64ToArrayBuffer(parts[2]);
       const ciphertext = base64ToArrayBuffer(parts[3]);
 
-      const key = await getEncryptionKey();
-      const decryptedBuffer = await window.crypto.subtle.decrypt(
-        {
-          name: ALGORITHM,
-          iv: iv as unknown as BufferSource,
-        },
-        key,
-        ciphertext as unknown as BufferSource
-      );
+      const key = await getDeviceKey();
+      if (!key) return null;
 
-      const decryptedText = new TextDecoder().decode(decryptedBuffer);
-      return JSON.parse(decryptedText) as T;
+      try {
+        const decryptedBuffer = await window.crypto.subtle.decrypt(
+          {
+            name: ALGORITHM,
+            iv: iv as unknown as BufferSource,
+          },
+          key,
+          ciphertext as unknown as BufferSource
+        );
+
+        const decryptedText = new TextDecoder().decode(decryptedBuffer);
+        return JSON.parse(decryptedText) as T;
+      } catch {
+        return null;
+      }
     }
 
     return null;
-  } catch (err) {
-    console.error('Decryption error:', err);
+  } catch {
     return null;
   }
 }

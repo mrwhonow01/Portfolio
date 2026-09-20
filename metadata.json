@@ -2,5 +2,5 @@
   "name": "Juztin Yuen — Photography Portfolio",
   "description": "Photography and videography portfolio for Juztin Yuen, featuring sports, events, and stage galleries, video work, and contact details.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }

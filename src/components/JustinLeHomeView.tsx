@@ -69,10 +69,11 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
         {/* BLUE NAMETAG CARD (Above the text that is below the images) */}
         <div className="w-[170px] xs:w-[195px] sm:w-[240px] aspect-[1.6/1] mb-5 sm:mb-7 select-none rotate-[-1.5deg]">
           <img
-            src="/card-nametag-blue.png?v=4"
+            src="/card-nametag-blue.webp?v=4"
             alt="hello my name is JUZTIN!"
             className="w-full h-full object-contain pointer-events-none"
             loading="lazy"
+            decoding="async"
           />
         </div>
 
@@ -116,6 +117,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
                   alt="Singapore Muay Thai Association (SMTA) Logo"
                   className="max-h-16 max-w-[85px] object-contain"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">
@@ -135,6 +137,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
                   alt="Mercedes-AMG PETRONAS Formula 1 Logo"
                   className="max-h-14 max-w-[110px] object-contain"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">
@@ -150,10 +153,11 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
             >
               <div className="h-16 flex items-center justify-center">
                 <img
-                  src="/logo-ncc.png"
+                  src="/logo-ncc.webp"
                   alt="National Cadet Corps (Singapore) Official Crest"
                   className="max-h-16 max-w-[85px] object-contain"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">
@@ -169,10 +173,11 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
             >
               <div className="h-16 flex items-center justify-center">
                 <img
-                  src="/logo-bushido.png"
+                  src="/logo-bushido.webp"
                   alt="Bushido Fight Academy Singapore Logo"
                   className="max-h-14 max-w-[105px] object-contain"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">

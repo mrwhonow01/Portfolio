@@ -119,7 +119,7 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
         className="absolute w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-10 md:filter md:drop-shadow-[0_12px_24px_rgba(74,36,8,0.12)]"
       >
         <img
-          src="/card-nametag-brown.png?v=4"
+          src="/card-nametag-brown.webp?v=4"
           alt="i am a... Photographer, Architecture Student, Storyteller"
           loading="eager"
           decoding="async"
@@ -143,7 +143,7 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
         className="relative w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-20 md:filter md:drop-shadow-[0_14px_28px_rgba(0,0,0,0.12)]"
       >
         <img
-          src="/card-nametag-blue.png?v=4"
+          src="/card-nametag-blue.webp?v=4"
           alt="hello my name is JUZTIN!"
           loading="eager"
           decoding="async"

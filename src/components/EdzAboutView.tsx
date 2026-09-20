@@ -18,9 +18,9 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
   
   const [avatarSrc, setAvatarSrc] = useState<string>(() => {
     try {
-      return localStorage.getItem('juztin_portfolio_avatar_v2') || profile.avatar || '/DSC04070.jpg?v=2';
+      return localStorage.getItem('juztin_portfolio_avatar_v2') || profile.avatar || '/DSC04070.webp?v=3';
     } catch {
-      return profile.avatar || '/DSC04070.jpg?v=2';
+      return profile.avatar || '/DSC04070.webp?v=3';
     }
   });
   const [imgError, setImgError] = useState(false);
@@ -55,7 +55,7 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
           {/* Lanyard Badge Column */}
           <div className="md:col-span-5 flex flex-col items-center">
             <LanyardBadge
-              avatarSrc={!imgError ? (avatarSrc || '/DSC04070.jpg?v=2') : fallbackUrl}
+              avatarSrc={!imgError ? (avatarSrc || '/DSC04070.webp?v=3') : fallbackUrl}
               name={profile.name}
               location={profile.location || 'Singapore'}
             />

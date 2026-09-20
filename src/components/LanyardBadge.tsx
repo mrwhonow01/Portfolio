@@ -15,22 +15,13 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
+  const hasContactedRef = useRef(false);
   const lastMousePosRef = useRef<{ x: number; y: number } | null>(null);
   const lastTimeRef = useRef<number | null>(null);
-  const releaseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Exact motion values for badge position (used synchronously by both card and SVG strap)
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
-
-  // Clean up any pending release timers on unmount
-  React.useEffect(() => {
-    return () => {
-      if (releaseTimerRef.current) {
-        clearTimeout(releaseTimerRef.current);
-      }
-    };
-  }, []);
 
   // Natural tilt/rotation based on horizontal displacement
   // Subtle rotation centered at 50% 50% so the whole card translates together in unison
@@ -73,39 +64,17 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     return `${offsetX}px ${offsetY}px ${blur}px rgba(0, 0, 0, 0.16)`;
   });
 
-  // Natural pendulum gravity release: allows the lanyard to swing freely back to equilibrium
-  const releaseToGravity = (initialVx?: number, initialVy?: number) => {
-    const vx = initialVx !== undefined ? initialVx : dragX.getVelocity();
-    const vy = initialVy !== undefined ? initialVy : dragY.getVelocity();
-
-    // Harmonic underdamped spring: swings ~3 times with genuine gravity & momentum before resting
-    animate(dragX, 0, {
-      type: 'spring',
-      stiffness: 44,
-      damping: 5.4,
-      mass: 1.2,
-      velocity: Math.max(-500, Math.min(500, vx)),
-    });
-
-    animate(dragY, 0, {
-      type: 'spring',
-      stiffness: 70,
-      damping: 7.2,
-      mass: 1.0,
-      velocity: Math.max(-200, Math.min(200, vy)),
-    });
-  };
-
-  // Move the lanyard naturally when the mouse sweeps over it
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isDraggingRef.current) return;
+  // Trigger a natural physical pendulum swing in the direction of initial contact
+  const handleCardContact = (e: React.MouseEvent) => {
+    if (isDraggingRef.current || hasContactedRef.current) return;
+    hasContactedRef.current = true;
 
     const cardEl = cardRef.current;
     if (!cardEl) return;
 
     const now = performance.now();
-    const dt = lastTimeRef.current ? Math.max(8, Math.min(100, now - lastTimeRef.current)) : 16;
-    lastTimeRef.current = now;
+    const lastTime = lastTimeRef.current || (now - 16);
+    const dt = Math.max(8, Math.min(100, now - lastTime));
 
     let deltaX = 0;
     let deltaY = 0;
@@ -113,79 +82,75 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
       deltaX = e.clientX - lastMousePosRef.current.x;
       deltaY = e.clientY - lastMousePosRef.current.y;
     }
-    lastMousePosRef.current = { x: e.clientX, y: e.clientY };
 
-    if (Math.abs(deltaX) < 0.4 && Math.abs(deltaY) < 0.4) return;
+    // Determine contact velocity vector from cursor motion entering the card
+    let speedX = (deltaX / dt) * 1000;
+    let speedY = (deltaY / dt) * 1000;
 
-    // Mouse velocity in pixels per second
-    const speedX = (deltaX / dt) * 1000;
-    const speedY = (deltaY / dt) * 1000;
-
-    // Resting center of badge
+    // Measure card center to determine impact direction if cursor was slow
     const cardRect = cardEl.getBoundingClientRect();
-    const currentX = dragX.get();
-    const currentY = dragY.get();
-    const restingCenterX = cardRect.left + cardRect.width / 2 - currentX;
-    const restingCenterY = cardRect.top + cardRect.height / 2 - currentY;
+    const cardCenterX = cardRect.left + cardRect.width / 2;
+    const cardCenterY = cardRect.top + cardRect.height / 2;
+    const relX = e.clientX - cardCenterX;
+    const relY = e.clientY - cardCenterY;
 
-    const offsetX = e.clientX - restingCenterX;
-    const offsetY = e.clientY - restingCenterY;
-
-    // Fluid momentum transfer from mouse brush
-    const impulseX = Math.max(-360, Math.min(360, speedX * 0.24));
-    const impulseY = Math.max(-140, Math.min(140, speedY * 0.12));
-
-    // Dynamic deflection while brushing (whole card moves together)
-    const pushTargetX = Math.max(-45, Math.min(45, (offsetX * 0.12) + (deltaX * 1.6)));
-    // Pendulum arc lift: swinging sideways lifts slightly along circular arc against gravity
-    const arcLift = -Math.min(10, (pushTargetX * pushTargetX) / 380);
-    const pushTargetY = Math.max(-12, Math.min(8, (offsetY * 0.03) + (deltaY * 0.5) + arcLift));
-
-    // Responsive spring during active movement
-    animate(dragX, pushTargetX, {
-      type: 'spring',
-      stiffness: 90,
-      damping: 10,
-      mass: 0.9,
-      velocity: impulseX,
-    });
-
-    animate(dragY, pushTargetY, {
-      type: 'spring',
-      stiffness: 110,
-      damping: 12,
-      mass: 0.9,
-      velocity: impulseY,
-    });
-
-    // When mouse halts, seamlessly release into free pendulum gravity swing
-    if (releaseTimerRef.current) {
-      clearTimeout(releaseTimerRef.current);
+    // If approaching with minimal speed, push away from the edge of contact
+    if (Math.abs(speedX) < 60) {
+      speedX = relX < 0 ? 280 : -280;
     }
-    releaseTimerRef.current = setTimeout(() => {
-      if (isDraggingRef.current) return;
-      lastMousePosRef.current = null;
-      lastTimeRef.current = null;
-      releaseToGravity();
-    }, 85);
+    if (Math.abs(speedY) < 30) {
+      speedY = relY < 0 ? 100 : -70;
+    }
+
+    // Realistic physical contact momentum
+    const contactVx = Math.max(-550, Math.min(550, speedX * 0.35));
+    const contactVy = Math.max(-180, Math.min(180, speedY * 0.18));
+
+    // Underdamped harmonic pendulum gravity swing:
+    // Swings freely in the direction of contact, overshoots, and oscillates 3-4 times to rest
+    // without tracking the cursor!
+    animate(dragX, 0, {
+      type: 'spring',
+      stiffness: 36,
+      damping: 4.6,
+      mass: 1.25,
+      velocity: contactVx,
+    });
+
+    animate(dragY, 0, {
+      type: 'spring',
+      stiffness: 60,
+      damping: 6.4,
+      mass: 1.0,
+      velocity: contactVy,
+    });
   };
 
-  // Reset to equilibrium when mouse leaves the lanyard area
-  const handleMouseLeave = () => {
-    if (releaseTimerRef.current) {
-      clearTimeout(releaseTimerRef.current);
+  // While cursor moves inside the card, update position tracking but DO NOT follow the mouse!
+  const handleCardMouseMove = (e: React.MouseEvent) => {
+    lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+    lastTimeRef.current = performance.now();
+
+    if (!hasContactedRef.current && !isDraggingRef.current) {
+      handleCardContact(e);
     }
-    lastMousePosRef.current = null;
-    lastTimeRef.current = null;
-    if (isDraggingRef.current) return;
-    releaseToGravity();
+  };
+
+  // When cursor leaves the card, reset contact state so the next contact can trigger cleanly
+  const handleCardMouseLeave = () => {
+    hasContactedRef.current = false;
+  };
+
+  // Track cursor trajectory in the container space around the lanyard for contact velocity
+  const handleContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+    lastTimeRef.current = performance.now();
   };
 
   return (
     <div
       ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      onMouseMove={handleContainerMouseMove}
       className="relative w-full max-w-[340px] mx-auto min-h-[560px] flex flex-col items-center select-none overflow-visible pt-1 outline-none ring-0"
       style={{
         userSelect: 'none',
@@ -269,8 +234,8 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
           dragElastic={0.4}
           dragConstraints={{ left: -180, right: 180, top: -80, bottom: 180 }}
           dragTransition={{
-            bounceStiffness: 44,
-            bounceDamping: 5.4,
+            bounceStiffness: 36,
+            bounceDamping: 4.6,
             power: 0.3,
             restDelta: 0.5,
           }}
@@ -284,15 +249,16 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             outline: 'none',
           }}
           onDragStart={() => {
-            if (releaseTimerRef.current) {
-              clearTimeout(releaseTimerRef.current);
-            }
             isDraggingRef.current = true;
+            hasContactedRef.current = true;
           }}
           onDragEnd={() => {
             isDraggingRef.current = false;
             lastMousePosRef.current = null;
             lastTimeRef.current = null;
+            setTimeout(() => {
+              hasContactedRef.current = false;
+            }, 300);
           }}
           className="relative mt-[95px] flex flex-col items-center cursor-grab active:cursor-grabbing z-20 touch-none select-none outline-none ring-0"
         >
@@ -319,6 +285,9 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
 
           {/* The Credential Badge Pouch with Retro Vinyl Finish */}
           <motion.div
+            onMouseEnter={handleCardContact}
+            onMouseMove={handleCardMouseMove}
+            onMouseLeave={handleCardMouseLeave}
             style={{
               boxShadow: badgeShadow,
               userSelect: 'none',
@@ -396,8 +365,10 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
                 <div className="relative aspect-[3/3.6] w-full p-1 bg-[#fffdfa] rounded-sm border border-[#d8cfbe] shadow-sm select-none overflow-hidden">
                   <div className="relative w-full h-full rounded-xs overflow-hidden bg-zinc-200">
                     <img
-                      src={avatarSrc || '/DSC04070.jpg'}
+                      src={avatarSrc || '/DSC04070.webp'}
                       alt={`${name} — Photographer`}
+                      loading="eager"
+                      decoding="async"
                       className="w-full h-full object-cover select-none pointer-events-none"
                       draggable={false}
                       onDragStart={(e) => e.preventDefault()}
