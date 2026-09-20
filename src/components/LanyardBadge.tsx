@@ -29,7 +29,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
   const cardRotateX = useMotionValue(0); // 3D pitch tilt (bottom kick up/down)
 
   // Subtle drag tilt coupled with rotational pendulum
-  const dragTilt = useTransform(dragX, [-180, 180], [-10, 10]);
+  const dragTilt = useTransform(dragX, [-180, 180], [6, -6]);
   const totalRotateZ = useTransform([dragTilt, cardRotateZ], ([dt, cr]) => Number(dt) + Number(cr));
 
   // Dynamic SVG path for left strap strand (from top wall peg to crimp buckle)
@@ -65,7 +65,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
       const x = Number(latestX);
       const y = Number(latestY);
       const rz = Number(latestRz);
-      const offsetX = (x * 0.14 + rz * 0.35).toFixed(1);
+      const offsetX = (x * 0.14 - rz * 0.35).toFixed(1);
       const offsetY = (16 + y * 0.08 + Math.abs(x) * 0.04 + Math.abs(rz) * 0.25).toFixed(1);
       const blur = (26 + Math.abs(x) * 0.06 + Math.abs(rz) * 0.2).toFixed(1);
       return `${offsetX}px ${offsetY}px ${blur}px rgba(0, 0, 0, 0.18)`;
@@ -93,9 +93,15 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
 
   // Physically accurate compound pendulum contact simulation:
   // Hitting the bottom corner exerts maximum torque around the top clip pivot (transformOrigin: 50% 12px),
-  // causing the bottom corner to swing and tilt dramatically while the top stays anchored at the clasp!
-  const handleCardContact = (e: React.MouseEvent | { clientX: number; clientY: number }) => {
-    if (isDraggingRef.current || hasContactedRef.current) return;
+  // causing the bottom corner to swing and tilt naturally in the direction of cursor motion.
+  const lastContactTimeRef = useRef<number>(0);
+
+  const handleCardContact = (
+    e: React.MouseEvent | { clientX: number; clientY: number },
+    isContinuous = false
+  ) => {
+    if (isDraggingRef.current) return;
+    if (!isContinuous && hasContactedRef.current) return;
     hasContactedRef.current = true;
 
     const cardEl = cardRef.current;
@@ -113,8 +119,8 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     }
 
     // Cursor velocity vector in px/sec
-    let speedX = (deltaX / dt) * 1000;
-    let speedY = (deltaY / dt) * 1000;
+    const speedX = (deltaX / dt) * 1000;
+    const speedY = (deltaY / dt) * 1000;
 
     // Measure exact card dimensions & hit location
     const cardRect = cardEl.getBoundingClientRect();
@@ -127,41 +133,74 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     // hitRelY: 0.0 (top near clip eyelet) to 1.0 (bottom edge)
     const hitRelY = Math.max(0, Math.min(1, (e.clientY - cardTopY) / cardRect.height));
 
-    // Provide authentic impulse for gentle taps or static hovers based on hit location
-    if (Math.abs(speedX) < 45) {
-      speedX = hitRelX < 0 ? 320 : -320;
+    // Determine actual motion direction strictly from user's delta/speed vector
+    let dirX = 0;
+    if (Math.abs(deltaX) >= 0.5) {
+      dirX = Math.sign(deltaX);
+    } else if (Math.abs(speedX) >= 15) {
+      dirX = Math.sign(speedX);
+    } else {
+      // If cursor had zero delta (e.g. tap), nudge outward based on which side was tapped
+      dirX = hitRelX < 0 ? -1 : 1;
     }
-    if (Math.abs(speedY) < 25) {
-      speedY = 120;
+
+    let dirY = 0;
+    if (Math.abs(deltaY) >= 0.5) {
+      dirY = Math.sign(deltaY);
+    } else if (Math.abs(speedY) >= 15) {
+      dirY = Math.sign(speedY);
+    } else {
+      dirY = 1;
     }
+
+    let effectiveSpeedX = Math.abs(speedX);
+    let effectiveSpeedY = Math.abs(speedY);
+
+    // Provide authentic impulse for gentle taps or slow cursor hovers
+    if (effectiveSpeedX < 60) {
+      effectiveSpeedX = isContinuous ? 120 : 220;
+    }
+    if (effectiveSpeedY < 30) {
+      effectiveSpeedY = isContinuous ? 60 : 100;
+    }
+
+    // Clamp maximum velocity so violent flicks don't glitch
+    effectiveSpeedX = Math.min(850, effectiveSpeedX);
+    effectiveSpeedY = Math.min(500, effectiveSpeedY);
+
+    const appliedSpeedX = effectiveSpeedX * dirX;
+    const appliedSpeedY = effectiveSpeedY * dirY;
 
     // --- COMPOUND PENDULUM TORQUE & LEVER ARM DECOMPOSITION ---
-    // The physical pivot is at the top of the card (hitRelY ≈ 0).
+    // The physical pivot is at the top of the card (hitRelY ≈ 0, transformOrigin: 50% 12px).
     // The farther down the hit point, the larger the rotational lever arm!
-    const leverArm = Math.max(0.12, hitRelY);
+    const leverArm = Math.max(0.15, hitRelY);
 
-    // Rotational torque around Z-axis:
-    // ForceX * distanceY from top pivot
-    const torqueX = speedX * leverArm;
-    // Off-center vertical force also imparts angular momentum
-    const torqueY = -speedY * hitRelX * 0.42;
+    // In CSS screen coordinates (+X right, +Y down, pivot at top):
+    // Positive rotation (clockwise) swings the bottom to the LEFT (-X).
+    // Negative rotation (counter-clockwise) swings the bottom to the RIGHT (+X).
+    // Therefore, pushing right (+appliedSpeedX) requires NEGATIVE torque to swing bottom right!
+    // Pushing left (-appliedSpeedX) requires POSITIVE torque to swing bottom left!
+    const torqueX = -appliedSpeedX * leverArm;
+    // Off-center vertical force: pushing down on right side (hitRelX > 0) tilts right side down (clockwise / positive)
+    const torqueY = appliedSpeedY * hitRelX * 0.35;
     const totalTorque = torqueX + torqueY;
 
     // Angular velocity: At the bottom corner (leverArm ≈ 0.95, hitRelX ≈ ±0.8), angular velocity is MAXIMUM!
-    const angularVz = Math.max(-460, Math.min(460, totalTorque * 0.52));
+    const angularVz = Math.max(-480, Math.min(480, totalTorque * (isContinuous ? 0.35 : 0.52)));
 
     // 3D Yaw (RotateY): hitting the edge rotates the card in 3D around its vertical axis
-    const angularVy = Math.max(-300, Math.min(300, (-hitRelX * Math.abs(speedX) * 0.3) - (speedX * 0.15)));
+    const angularVy = Math.max(-280, Math.min(280, -appliedSpeedX * 0.22 - hitRelX * Math.abs(appliedSpeedX) * 0.25));
 
     // 3D Pitch (RotateX): hitting the bottom edge kicks the bottom outwards/inwards in 3D
-    const angularVx = Math.max(-250, Math.min(250, (leverArm * Math.abs(speedY) * 0.32) + (speedY * 0.1)));
+    const angularVx = Math.max(-220, Math.min(220, (leverArm * Math.abs(appliedSpeedY) * 0.28) + (appliedSpeedY * 0.1)));
 
     // Strap translation (lateral sway at the top clip):
     // When hitting the bottom corner, only a minor fraction of force translates the top strap!
     // When hitting the top near the clip, most of the force translates the strap.
-    const strapFactor = Math.max(0.18, 1 - leverArm * 0.78);
-    const contactVx = Math.max(-320, Math.min(320, speedX * strapFactor * 0.28));
-    const contactVy = Math.max(-120, Math.min(120, speedY * strapFactor * 0.14));
+    const strapFactor = Math.max(0.16, 1 - leverArm * 0.78);
+    const contactVx = Math.max(-300, Math.min(300, appliedSpeedX * strapFactor * 0.26));
+    const contactVy = Math.max(-110, Math.min(110, appliedSpeedY * strapFactor * 0.12));
 
     // Animate angular pendulum (card swings and oscillates freely around the top clip)
     animate(cardRotateZ, 0, {
@@ -210,11 +249,25 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
 
   // Track cursor velocity without sticky tracking
   const handleCardMouseMove = (e: React.MouseEvent) => {
+    const now = performance.now();
+    const prevPos = lastMousePosRef.current;
     lastMousePosRef.current = { x: e.clientX, y: e.clientY };
-    lastTimeRef.current = performance.now();
+    lastTimeRef.current = now;
 
-    if (!hasContactedRef.current && !isDraggingRef.current) {
+    if (isDraggingRef.current) return;
+
+    if (!hasContactedRef.current) {
       handleCardContact(e);
+      lastContactTimeRef.current = now;
+      return;
+    }
+
+    // Allow gentle continuous impulse when actively moving across the card
+    const dx = prevPos ? e.clientX - prevPos.x : 0;
+    const dy = prevPos ? e.clientY - prevPos.y : 0;
+    if (now - lastContactTimeRef.current > 150 && (Math.abs(dx) >= 3 || Math.abs(dy) >= 3)) {
+      lastContactTimeRef.current = now;
+      handleCardContact(e, true);
     }
   };
 

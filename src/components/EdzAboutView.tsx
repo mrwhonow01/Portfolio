@@ -42,13 +42,7 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
   }, []);
 
   return (
-    <article className="w-full max-w-[850px] mx-auto text-[#666666] leading-relaxed text-[14px]">
-      <header className="mb-10 pb-4 border-b border-gray-100">
-        <h1 className="text-xl font-bold text-black uppercase tracking-tight">
-          About
-        </h1>
-      </header>
-
+    <article className="w-full max-w-[850px] mx-auto text-[#666666] leading-relaxed text-[14px] pt-2">
       <main className="space-y-8">
         {/* Profile picture (Lanyard Pass) & Bio Intro Grid */}
         <section className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
@@ -62,7 +56,10 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
           </div>
 
           {/* Bio text — aligned with the lanyard credential card on desktop */}
-          <div className="md:col-span-7 space-y-4 text-[14px] leading-[1.7] md:pt-[150px]">
+          <div className="md:col-span-7 space-y-4 text-[14px] leading-[1.7] pt-2 sm:pt-4 md:pt-[115px]">
+            <h1 className="font-schoolbell text-[30px] sm:text-[34px] md:text-[38px] text-[#1a1a1a] tracking-normal select-none -mb-1">
+              About me
+            </h1>
             <p>
               I'm {profile.name}, a photographer and filmmaker based in {profile.location || 'Singapore'}. 
               Most of my time is spent documenting combat sports, live events, and stage performances.
