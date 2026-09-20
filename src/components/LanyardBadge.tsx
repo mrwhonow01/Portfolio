@@ -16,23 +16,25 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
   const cardRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
   const lastMousePosRef = useRef<{ x: number; y: number } | null>(null);
-  const settleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTimeRef = useRef<number | null>(null);
+  const releaseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Exact motion values for badge position (used synchronously by both card and SVG strap)
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
 
-  // Clean up any pending settle timers on unmount
+  // Clean up any pending release timers on unmount
   React.useEffect(() => {
     return () => {
-      if (settleTimerRef.current) {
-        clearTimeout(settleTimerRef.current);
+      if (releaseTimerRef.current) {
+        clearTimeout(releaseTimerRef.current);
       }
     };
   }, []);
 
   // Natural tilt/rotation based on horizontal displacement
-  const badgeRotate = useTransform(dragX, [-180, 180], [-18, 18]);
+  // Matched to the pendulum swing angle of the lanyard strap
+  const badgeRotate = useTransform(dragX, [-150, 150], [-25, 25]);
 
   // Dynamic SVG path for left strap strand (from top peg anchor directly to metal crimp buckle)
   // Zero lag because it reads dragX and dragY directly!
@@ -61,38 +63,50 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     return `M ${startX} ${startY} Q ${cpX} ${cpY} ${endX} ${endY}`;
   });
 
-  // Dynamic shadow displacement based on badge position
+  // Dynamic shadow displacement based on badge 3D position
   const badgeShadow = useTransform([dragX, dragY], ([latestX, latestY]) => {
     const x = Number(latestX);
     const y = Number(latestY);
-    const offsetX = (x * 0.12).toFixed(1);
-    const offsetY = (16 + y * 0.08).toFixed(1);
-    return `${offsetX}px ${offsetY}px 28px rgba(0, 0, 0, 0.16)`;
+    const offsetX = (x * 0.14).toFixed(1);
+    const offsetY = (16 + y * 0.08 + Math.abs(x) * 0.04).toFixed(1);
+    const blur = (26 + Math.abs(x) * 0.06).toFixed(1);
+    return `${offsetX}px ${offsetY}px ${blur}px rgba(0, 0, 0, 0.16)`;
   });
 
-  // Move the lanyard slightly in the direction the mouse moves in (zero auto-downward movement)
+  // Natural pendulum gravity release: allows the lanyard to swing freely back to equilibrium
+  const releaseToGravity = (initialVx?: number, initialVy?: number) => {
+    const vx = initialVx !== undefined ? initialVx : dragX.getVelocity();
+    const vy = initialVy !== undefined ? initialVy : dragY.getVelocity();
+
+    // Harmonic underdamped spring: swings ~3 times with genuine gravity & momentum before resting
+    animate(dragX, 0, {
+      type: 'spring',
+      stiffness: 44,
+      damping: 5.4,
+      mass: 1.2,
+      velocity: Math.max(-500, Math.min(500, vx)),
+    });
+
+    animate(dragY, 0, {
+      type: 'spring',
+      stiffness: 70,
+      damping: 7.2,
+      mass: 1.0,
+      velocity: Math.max(-200, Math.min(200, vy)),
+    });
+  };
+
+  // Move the lanyard naturally when the mouse sweeps over it
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isDraggingRef.current) return;
 
     const cardEl = cardRef.current;
-    const containerEl = containerRef.current;
-    if (!containerEl) return;
+    if (!cardEl) return;
 
-    // Calculate exact resting center of badge
-    let restingCenterX: number;
-    let restingCenterY: number;
+    const now = performance.now();
+    const dt = lastTimeRef.current ? Math.max(8, Math.min(100, now - lastTimeRef.current)) : 16;
+    lastTimeRef.current = now;
 
-    if (cardEl) {
-      const cardRect = cardEl.getBoundingClientRect();
-      restingCenterX = cardRect.left + cardRect.width / 2 - dragX.get();
-      restingCenterY = cardRect.top + cardRect.height / 2 - dragY.get();
-    } else {
-      const containerRect = containerEl.getBoundingClientRect();
-      restingCenterX = containerRect.left + containerRect.width / 2;
-      restingCenterY = containerRect.top + 366;
-    }
-
-    // Direction and velocity of mouse movement
     let deltaX = 0;
     let deltaY = 0;
     if (lastMousePosRef.current) {
@@ -101,46 +115,70 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     }
     lastMousePosRef.current = { x: e.clientX, y: e.clientY };
 
-    // Subtle position offset from card resting center (balanced around 0, zero downward bias)
+    if (Math.abs(deltaX) < 0.4 && Math.abs(deltaY) < 0.4) return;
+
+    // Mouse velocity in pixels per second
+    const speedX = (deltaX / dt) * 1000;
+    const speedY = (deltaY / dt) * 1000;
+
+    // Resting center of badge
+    const cardRect = cardEl.getBoundingClientRect();
+    const currentX = dragX.get();
+    const currentY = dragY.get();
+    const restingCenterX = cardRect.left + cardRect.width / 2 - currentX;
+    const restingCenterY = cardRect.top + cardRect.height / 2 - currentY;
+
     const offsetX = e.clientX - restingCenterX;
     const offsetY = e.clientY - restingCenterY;
 
-    // Movement impulse in the exact direction the user is moving their mouse
-    const pushX = deltaX * 0.45;
-    const pushY = deltaY * 0.30;
+    // Fluid momentum transfer from mouse brush
+    const impulseX = Math.max(-360, Math.min(360, speedX * 0.24));
+    const impulseY = Math.max(-140, Math.min(140, speedY * 0.12));
 
-    // Subtle positional tracking
-    const leanX = offsetX * 0.08;
-    const leanY = offsetY * 0.03;
+    // Dynamic deflection while brushing
+    const pushTargetX = Math.max(-45, Math.min(45, (offsetX * 0.12) + (deltaX * 1.6)));
+    // Pendulum arc lift: swinging sideways lifts slightly along circular arc against gravity
+    const arcLift = -Math.min(10, (pushTargetX * pushTargetX) / 380);
+    const pushTargetY = Math.max(-12, Math.min(8, (offsetY * 0.03) + (deltaY * 0.5) + arcLift));
 
-    // Target displacement: moves slightly in cursor direction with realistic limits
-    const targetX = Math.max(-28, Math.min(28, pushX + leanX));
-    const targetY = Math.max(-10, Math.min(10, pushY + leanY));
+    // Responsive spring during active movement
+    animate(dragX, pushTargetX, {
+      type: 'spring',
+      stiffness: 90,
+      damping: 10,
+      mass: 0.9,
+      velocity: impulseX,
+    });
 
-    animate(dragX, targetX, { type: 'spring', stiffness: 240, damping: 22 });
-    animate(dragY, targetY, { type: 'spring', stiffness: 240, damping: 22 });
+    animate(dragY, pushTargetY, {
+      type: 'spring',
+      stiffness: 110,
+      damping: 12,
+      mass: 0.9,
+      velocity: impulseY,
+    });
 
-    // Smoothly relax back to equilibrium when mouse stops moving
-    if (settleTimerRef.current) {
-      clearTimeout(settleTimerRef.current);
+    // When mouse halts, seamlessly release into free pendulum gravity swing
+    if (releaseTimerRef.current) {
+      clearTimeout(releaseTimerRef.current);
     }
-    settleTimerRef.current = setTimeout(() => {
+    releaseTimerRef.current = setTimeout(() => {
       if (isDraggingRef.current) return;
       lastMousePosRef.current = null;
-      animate(dragX, 0, { type: 'spring', stiffness: 180, damping: 18 });
-      animate(dragY, 0, { type: 'spring', stiffness: 180, damping: 18 });
-    }, 150);
+      lastTimeRef.current = null;
+      releaseToGravity();
+    }, 85);
   };
 
   // Reset to equilibrium when mouse leaves the lanyard area
   const handleMouseLeave = () => {
-    if (settleTimerRef.current) {
-      clearTimeout(settleTimerRef.current);
+    if (releaseTimerRef.current) {
+      clearTimeout(releaseTimerRef.current);
     }
     lastMousePosRef.current = null;
+    lastTimeRef.current = null;
     if (isDraggingRef.current) return;
-    animate(dragX, 0, { type: 'spring', stiffness: 190, damping: 16 });
-    animate(dragY, 0, { type: 'spring', stiffness: 190, damping: 16 });
+    releaseToGravity();
   };
 
   return (
@@ -166,19 +204,8 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
         </div>
       </div>
 
-      {/* Entrance Animation Wrapper: drops down from the ceiling */}
-      <motion.div
-        initial={{ y: -540, rotate: -8, opacity: 0 }}
-        animate={{ y: 0, rotate: 0, opacity: 1 }}
-        transition={{
-          type: 'spring',
-          stiffness: 120,
-          damping: 14,
-          mass: 1.15,
-          delay: 0.12,
-        }}
-        className="w-full h-full relative flex flex-col items-center select-none outline-none ring-0"
-      >
+      {/* Lanyard Assembly Wrapper (already in place on load, no drop-down delay) */}
+      <div className="w-full h-full relative flex flex-col items-center select-none outline-none ring-0">
         {/* SVG Ribbon / Lanyard Strap */}
         <svg
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[320px] h-[300px] pointer-events-none overflow-visible z-10 select-none"
@@ -239,27 +266,33 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
           ref={cardRef}
           drag
           dragSnapToOrigin
-          dragElastic={0.35}
-          dragConstraints={{ left: -160, right: 160, top: -70, bottom: 180 }}
-          dragTransition={{ bounceStiffness: 240, bounceDamping: 15 }}
+          dragElastic={0.4}
+          dragConstraints={{ left: -180, right: 180, top: -80, bottom: 180 }}
+          dragTransition={{
+            bounceStiffness: 44,
+            bounceDamping: 5.4,
+            power: 0.3,
+            restDelta: 0.5,
+          }}
           style={{
             x: dragX,
             y: dragY,
             rotate: badgeRotate,
-            transformOrigin: '50% 20px',
+            transformOrigin: '50% 10px',
             userSelect: 'none',
             WebkitUserSelect: 'none',
             outline: 'none',
           }}
           onDragStart={() => {
-            if (settleTimerRef.current) {
-              clearTimeout(settleTimerRef.current);
+            if (releaseTimerRef.current) {
+              clearTimeout(releaseTimerRef.current);
             }
             isDraggingRef.current = true;
           }}
           onDragEnd={() => {
             isDraggingRef.current = false;
             lastMousePosRef.current = null;
+            lastTimeRef.current = null;
           }}
           className="relative mt-[95px] flex flex-col items-center cursor-grab active:cursor-grabbing z-20 touch-none select-none outline-none ring-0"
         >
@@ -370,7 +403,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             <div className="absolute inset-0 rounded-xl pointer-events-none border border-white/50 shadow-inner select-none" />
           </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 };
