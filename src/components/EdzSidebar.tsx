@@ -495,9 +495,9 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="md:hidden fixed top-0 bottom-0 left-0 w-[275px] max-w-[85vw] h-[100dvh] max-h-[100dvh] bg-white z-50 shadow-2xl px-5 pt-3 pb-[max(1.75rem,env(safe-area-inset-bottom,20px))] overflow-hidden flex flex-col select-none touch-none overscroll-none"
+              className="md:hidden fixed top-0 bottom-0 left-0 w-[275px] max-w-[85vw] h-[100dvh] max-h-[100dvh] bg-white z-50 shadow-2xl px-5 pt-3 pb-[max(1.75rem,env(safe-area-inset-bottom,20px))] overflow-y-auto overscroll-contain flex flex-col select-none touch-pan-y"
             >
-              <div className="flex flex-col h-full justify-between overflow-hidden">
+              <div className="flex flex-col min-h-full justify-between">
                 {/* Top Section: Header with Blue Card & Close Button, and Navigation */}
                 <div className="flex flex-col">
                   {/* Top Header Row with Blue Card & Close 'X' */}

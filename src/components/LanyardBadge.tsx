@@ -65,7 +65,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
   });
 
   // Trigger a natural physical pendulum swing in the direction of initial contact
-  const handleCardContact = (e: React.MouseEvent) => {
+  const handleCardContact = (e: React.MouseEvent | { clientX: number; clientY: number }) => {
     if (isDraggingRef.current || hasContactedRef.current) return;
     hasContactedRef.current = true;
 
@@ -141,6 +141,23 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     hasContactedRef.current = false;
   };
 
+  // On touch screens, tap or touch also triggers the pendulum swing
+  const handleCardTouchStart = (e: React.TouchEvent) => {
+    if (isDraggingRef.current) return;
+    const touch = e.touches[0];
+    if (touch) {
+      lastMousePosRef.current = { x: touch.clientX, y: touch.clientY };
+      lastTimeRef.current = performance.now();
+      handleCardContact({ clientX: touch.clientX, clientY: touch.clientY });
+    }
+  };
+
+  const handleCardTouchEnd = () => {
+    setTimeout(() => {
+      hasContactedRef.current = false;
+    }, 200);
+  };
+
   // Track cursor trajectory in the container space around the lanyard for contact velocity
   const handleContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     lastMousePosRef.current = { x: e.clientX, y: e.clientY };
@@ -151,7 +168,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     <div
       ref={containerRef}
       onMouseMove={handleContainerMouseMove}
-      className="relative w-full max-w-[340px] mx-auto min-h-[560px] flex flex-col items-center select-none overflow-visible pt-1 outline-none ring-0"
+      className="relative w-full max-w-[340px] mx-auto min-h-[465px] md:min-h-[560px] flex flex-col items-center select-none overflow-visible pt-1 outline-none ring-0"
       style={{
         userSelect: 'none',
         WebkitUserSelect: 'none',
@@ -288,6 +305,8 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             onMouseEnter={handleCardContact}
             onMouseMove={handleCardMouseMove}
             onMouseLeave={handleCardMouseLeave}
+            onTouchStart={handleCardTouchStart}
+            onTouchEnd={handleCardTouchEnd}
             style={{
               boxShadow: badgeShadow,
               userSelect: 'none',
