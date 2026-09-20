@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Check, AlertCircle, Copy, ExternalLink } from 'lucide-react';
+import { Mail, Check, AlertCircle, Copy, ExternalLink, Instagram } from 'lucide-react';
 import { ContactInquiry, PortfolioProfile } from '../types';
 
 interface EdzContactViewProps {
@@ -142,27 +142,39 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-[850px] mx-auto text-[#666666]">
-      <header className="mb-10 pb-4 border-b border-gray-100">
-        <h1 className="text-xl font-bold text-black uppercase tracking-tight">
-          Contact
+    <div className="w-full max-w-[850px] mx-auto text-[#666666] pt-1">
+      {/* Header section matching user design */}
+      <header className="mb-8">
+        <h1 className="font-schoolbell text-[32px] sm:text-[38px] md:text-[42px] text-[#1a1a1a] tracking-normal select-none mb-2">
+          Let's work together!
         </h1>
-        <p className="text-xs text-[#888888] uppercase tracking-wider mt-1">
-          Inquiries, Bookings & Collaborations
+        <p className="text-[14px] sm:text-[15px] text-[#555555] leading-relaxed max-w-[720px]">
+          Have an upcoming fight night, performance, or media assignment? Drop a message below, or reach out directly via{' '}
+          <a
+            href={`mailto:${contactEmail}`}
+            className="text-black font-semibold underline underline-offset-2 hover:text-neutral-700 transition-colors"
+          >
+            email
+          </a>{' '}
+          or{' '}
+          <a
+            href={profile.instagram || 'https://www.instagram.com/quietframes.sg/'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-black font-semibold underline underline-offset-2 hover:text-neutral-700 transition-colors"
+          >
+            Instagram
+          </a>
+          .
         </p>
-      </header>
 
-      <div className="space-y-8">
-        {/* Intro text & copy action */}
-        <div className="text-[14px] leading-relaxed flex flex-col sm:flex-row sm:items-baseline gap-2">
-          <span>
-            Have an upcoming event, fight night, or project in mind? Drop a message below, or email me directly at:
-          </span>
-          <div className="inline-flex items-center gap-2 shrink-0">
+        {/* Quick Direct Contact Badges */}
+        <div className="flex flex-wrap items-center gap-3 mt-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-neutral-50 border border-neutral-200 text-[12px] text-[#333333]">
+            <Mail className="w-3.5 h-3.5 text-neutral-500" />
             <a
               href={`mailto:${contactEmail}`}
-              className="text-black font-semibold underline hover:text-black/80"
-              title="Click to email directly"
+              className="font-medium text-black hover:underline"
             >
               {contactEmail}
             </a>
@@ -170,7 +182,7 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
               type="button"
               id="contact-copy-email-btn"
               onClick={handleCopyEmail}
-              className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 border border-gray-200 hover:border-black text-black transition-colors cursor-pointer"
+              className="ml-1 inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded bg-white border border-gray-200 hover:border-black text-black transition-colors cursor-pointer"
               title="Copy email address to clipboard"
             >
               {copiedEmail ? (
@@ -186,7 +198,21 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
               )}
             </button>
           </div>
+
+          <a
+            href={profile.instagram || 'https://www.instagram.com/quietframes.sg/'}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-neutral-50 border border-neutral-200 text-[12px] text-[#333333] hover:border-black hover:text-black transition-colors"
+          >
+            <Instagram className="w-3.5 h-3.5 text-neutral-500" />
+            <span className="font-medium">@quietframes.sg</span>
+            <ExternalLink className="w-3 h-3 text-neutral-400 ml-0.5" />
+          </a>
         </div>
+      </header>
+
+      <div className="space-y-8">
 
         {/* Success Banner */}
         {submitted && (
