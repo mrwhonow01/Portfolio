@@ -16,12 +16,17 @@ export const MobileNextPageCue: React.FC<MobileNextPageCueProps> = ({
       <button
         type="button"
         onClick={onAdvance}
-        className="flex items-center justify-center p-4 text-black/40 hover:text-black/80 active:scale-90 transition-all cursor-pointer outline-none"
-        aria-label={nextTitle ? `Go to next page: ${nextTitle}` : 'Next page'}
+        className="group flex flex-col items-center justify-center p-3 text-black/45 hover:text-black/85 active:scale-95 transition-all cursor-pointer outline-none gap-1.5"
+        aria-label={nextTitle ? `Go to ${nextTitle}` : 'Next page'}
         title={nextTitle ? `Next: ${nextTitle}` : 'Next page'}
       >
+        {nextTitle && (
+          <span className="text-[11px] font-mono uppercase tracking-widest font-semibold text-black/50 group-hover:text-black transition-colors">
+            {nextTitle}
+          </span>
+        )}
         <motion.div
-          animate={{ y: [0, 8, 0] }}
+          animate={{ y: [0, 6, 0] }}
           transition={{
             duration: 1.5,
             repeat: Infinity,
@@ -29,7 +34,7 @@ export const MobileNextPageCue: React.FC<MobileNextPageCueProps> = ({
           }}
           className="flex items-center justify-center"
         >
-          <ChevronDown className="w-6 h-6 stroke-[1.75]" />
+          <ChevronDown className="w-5 h-5 stroke-[1.85]" />
         </motion.div>
       </button>
     </div>

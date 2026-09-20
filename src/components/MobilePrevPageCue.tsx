@@ -16,12 +16,12 @@ export const MobilePrevPageCue: React.FC<MobilePrevPageCueProps> = ({
       <button
         type="button"
         onClick={onBack}
-        className="flex items-center justify-center p-3 text-black/35 hover:text-black/80 active:scale-90 transition-all cursor-pointer outline-none"
-        aria-label={prevTitle ? `Back to: ${prevTitle}` : 'Previous page'}
+        className="group flex flex-col items-center justify-center p-3 text-black/45 hover:text-black/85 active:scale-95 transition-all cursor-pointer outline-none gap-1.5"
+        aria-label={prevTitle ? `Back to ${prevTitle}` : 'Previous page'}
         title={prevTitle ? `Back: ${prevTitle}` : 'Previous page'}
       >
         <motion.div
-          animate={{ y: [0, -7, 0] }}
+          animate={{ y: [0, -6, 0] }}
           transition={{
             duration: 1.5,
             repeat: Infinity,
@@ -29,8 +29,13 @@ export const MobilePrevPageCue: React.FC<MobilePrevPageCueProps> = ({
           }}
           className="flex items-center justify-center"
         >
-          <ChevronUp className="w-6 h-6 stroke-[1.75]" />
+          <ChevronUp className="w-5 h-5 stroke-[1.85]" />
         </motion.div>
+        {prevTitle && (
+          <span className="text-[11px] font-mono uppercase tracking-widest font-semibold text-black/50 group-hover:text-black transition-colors">
+            {prevTitle}
+          </span>
+        )}
       </button>
     </div>
   );

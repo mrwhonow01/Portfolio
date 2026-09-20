@@ -136,7 +136,7 @@ function getNextMobileRoute(currentView: NavView): MobileRouteInfo | null {
   if (currentView === 'videography') {
     return {
       view: 'instagram',
-      title: 'Instagram Posts',
+      title: 'Instagram',
       subtitle: 'View social highlights & featured stories',
       pageNumber: 4,
     };
@@ -144,7 +144,7 @@ function getNextMobileRoute(currentView: NavView): MobileRouteInfo | null {
   if (currentView === 'instagram') {
     return {
       view: 'about',
-      title: 'About Juztin',
+      title: 'About',
       subtitle: 'Read biography, credentials & equipment',
       pageNumber: 5,
     };
@@ -188,7 +188,7 @@ function getPrevMobileRoute(currentView: NavView): MobileRouteInfo | null {
   if (currentView === 'about') {
     return {
       view: 'instagram',
-      title: 'Instagram Posts',
+      title: 'Instagram',
       subtitle: 'Return to social media posts',
       pageNumber: 4,
     };
@@ -196,7 +196,7 @@ function getPrevMobileRoute(currentView: NavView): MobileRouteInfo | null {
   if (currentView === 'contact') {
     return {
       view: 'about',
-      title: 'About Juztin',
+      title: 'About',
       subtitle: 'Return to credentials & about section',
       pageNumber: 5,
     };
