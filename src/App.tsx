@@ -14,6 +14,7 @@ import { EdzContactView } from './components/EdzContactView';
 import { ContentScroll } from './components/ContentScroll';
 import { Lightbox } from './components/Lightbox';
 import { MobileNextPageCue } from './components/MobileNextPageCue';
+import { MobilePrevPageCue } from './components/MobilePrevPageCue';
 import {
   loadPhotos,
   loadProfile,
@@ -159,10 +160,54 @@ function getNextMobileRoute(currentView: NavView): MobileRouteInfo | null {
   return null; // contact is the final page
 }
 
+function getPrevMobileRoute(currentView: NavView): MobileRouteInfo | null {
+  if (currentView === 'photography' || currentView === 'album') {
+    return {
+      view: 'home',
+      title: 'Home',
+      subtitle: 'Return to home highlights',
+      pageNumber: 1,
+    };
+  }
+  if (currentView === 'videography') {
+    return {
+      view: 'photography',
+      title: 'Photography',
+      subtitle: 'Return to photography gallery',
+      pageNumber: 2,
+    };
+  }
+  if (currentView === 'instagram') {
+    return {
+      view: 'videography',
+      title: 'Videography',
+      subtitle: 'Return to video reel',
+      pageNumber: 3,
+    };
+  }
+  if (currentView === 'about') {
+    return {
+      view: 'instagram',
+      title: 'Instagram Posts',
+      subtitle: 'Return to social media posts',
+      pageNumber: 4,
+    };
+  }
+  if (currentView === 'contact') {
+    return {
+      view: 'about',
+      title: 'About Juztin',
+      subtitle: 'Return to credentials & about section',
+      pageNumber: 5,
+    };
+  }
+  return null; // home is the first page
+}
+
 const pageVariants: Variants = {
-  initial: (direction: 'next' | 'standard') => ({
+  initial: (direction: 'next' | 'prev' | 'standard') => ({
     opacity: 0,
-    y: direction === 'next' ? 44 : 8,
+    y: direction === 'next' ? 44 : direction === 'prev' ? -44 : 8,
   }),
   animate: {
     opacity: 1,
@@ -172,9 +217,9 @@ const pageVariants: Variants = {
       ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
     },
   },
-  exit: (direction: 'next' | 'standard') => ({
+  exit: (direction: 'next' | 'prev' | 'standard') => ({
     opacity: 0,
-    y: direction === 'next' ? -32 : -8,
+    y: direction === 'next' ? -32 : direction === 'prev' ? 32 : -8,
     transition: {
       duration: 0.26,
       ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
@@ -202,7 +247,7 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.innerWidth < 768 : false
   );
-  const [transitionDirection, setTransitionDirection] = useState<'next' | 'standard'>('standard');
+  const [transitionDirection, setTransitionDirection] = useState<'next' | 'prev' | 'standard'>('standard');
   const isTransitioningRef = useRef(false);
 
   useEffect(() => {
@@ -309,6 +354,7 @@ export default function App() {
   };
 
   const nextMobileRoute = isMobile ? getNextMobileRoute(currentView) : null;
+  const prevMobileRoute = isMobile ? getPrevMobileRoute(currentView) : null;
 
   const triggerMobileAdvance = () => {
     if (isTransitioningRef.current) return;
@@ -325,14 +371,28 @@ export default function App() {
     }, 900);
   };
 
-  // Mobile-only: Detect scrolling to the end and scrolling further down to move to the next page
+  const triggerMobileBack = () => {
+    if (isTransitioningRef.current) return;
+    const prev = getPrevMobileRoute(currentView);
+    if (!prev) return;
+
+    isTransitioningRef.current = true;
+    setTransitionDirection('prev');
+    handleNavigate(prev.view, prev.album, prev.subAlbum, true);
+
+    setTimeout(() => {
+      isTransitioningRef.current = false;
+      setTransitionDirection('standard');
+    }, 900);
+  };
+
+  // Mobile-only: Detect scrolling to the end (next page) or scrolling to top (previous page)
   useEffect(() => {
     if (!isMobile) return;
-    const next = getNextMobileRoute(currentView);
-    if (!next) return;
 
     let touchStartY = 0;
     let isAtBottom = false;
+    let isAtTop = false;
 
     const checkIsAtBottom = () => {
       const scrollY = window.scrollY || window.pageYOffset || 0;
@@ -349,31 +409,50 @@ export default function App() {
       return scrollY + windowHeight >= docHeight - 30;
     };
 
+    const checkIsAtTop = () => {
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      return scrollY <= 15;
+    };
+
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
       touchStartY = e.touches[0].clientY;
       isAtBottom = checkIsAtBottom();
+      isAtTop = checkIsAtTop();
     };
 
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length !== 1 || isTransitioningRef.current) return;
       const currentY = e.touches[0].clientY;
-      const deltaY = touchStartY - currentY; // positive when swiping up / scrolling down
+      const deltaY = touchStartY - currentY; // positive when swiping up / scrolling down, negative when swiping down / scrolling up
 
+      // Scroll further down at the bottom -> Next page
       if (isAtBottom && deltaY > 48) {
         triggerMobileAdvance();
       } else if (!isAtBottom && checkIsAtBottom()) {
         isAtBottom = true;
         touchStartY = currentY;
       }
+
+      // Scroll further up at the top -> Previous page
+      if (isAtTop && deltaY < -48) {
+        triggerMobileBack();
+      } else if (!isAtTop && checkIsAtTop()) {
+        isAtTop = true;
+        touchStartY = currentY;
+      }
     };
 
     const onTouchEnd = (e: TouchEvent) => {
       if (isTransitioningRef.current) return;
-      if (isAtBottom && e.changedTouches.length === 1) {
+      if (e.changedTouches.length === 1) {
         const endY = e.changedTouches[0].clientY;
-        if (touchStartY - endY > 40) {
+        const deltaY = touchStartY - endY;
+
+        if (isAtBottom && deltaY > 40) {
           triggerMobileAdvance();
+        } else if (isAtTop && deltaY < -40) {
+          triggerMobileBack();
         }
       }
     };
@@ -382,6 +461,8 @@ export default function App() {
       if (isTransitioningRef.current) return;
       if (checkIsAtBottom() && e.deltaY > 25) {
         triggerMobileAdvance();
+      } else if (checkIsAtTop() && e.deltaY < -25) {
+        triggerMobileBack();
       }
     };
 
@@ -501,6 +582,14 @@ export default function App() {
               exit="exit"
               className="w-full"
             >
+              {/* Mobile-Only Sequential Previous Page Arrow Cue */}
+              {isMobile && prevMobileRoute && (
+                <MobilePrevPageCue
+                  prevTitle={prevMobileRoute.title}
+                  onBack={triggerMobileBack}
+                />
+              )}
+
               {/* 1. Home View: JustinLe Card Reveal, Highlight Carousel, Logos & Action Cards */}
               {currentView === 'home' && (
                 <JustinLeHomeView
