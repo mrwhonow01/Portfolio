@@ -177,11 +177,11 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     >
       {/* Top Wall Hook / Hanging Peg */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none select-none">
-        {/* Brushed metal cylindrical wall peg */}
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-200 via-zinc-400 to-zinc-600 shadow-md border-2 border-zinc-400/80 flex items-center justify-center -mt-2">
+        {/* Brushed metal cylindrical wall peg with concentric bevels */}
+        <div className="w-8.5 h-8.5 rounded-full bg-gradient-to-br from-zinc-200 via-zinc-400 to-zinc-600 shadow-[0_4px_10px_rgba(0,0,0,0.3)] border-2 border-zinc-300/90 flex items-center justify-center -mt-2">
           {/* Inner metallic bevel ring */}
-          <div className="w-4 h-4 rounded-full bg-gradient-to-tl from-zinc-300 via-zinc-100 to-zinc-400 shadow-inner flex items-center justify-center">
-            <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 shadow-xs" />
+          <div className="w-5 h-5 rounded-full bg-gradient-to-tl from-zinc-400 via-zinc-100 to-zinc-300 shadow-inner flex items-center justify-center border border-zinc-400">
+            <div className="w-2 h-2 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 shadow-xs" />
           </div>
         </div>
       </div>
@@ -194,52 +194,113 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
           viewBox="0 0 320 300"
         >
           <defs>
+            {/* Woven Twill Ribbon Texture Pattern */}
+            <pattern id="ribbonWeave" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect width="2" height="4" fill="#242429" />
+              <rect x="2" width="2" height="4" fill="#141417" />
+              <line x1="0" y1="0" x2="4" y2="0" stroke="#383842" strokeWidth="0.75" opacity="0.7" />
+            </pattern>
+
+            {/* Depth Shadow Filter */}
+            <filter id="strapDropShadow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="4" stdDeviation="3.5" floodColor="#000000" floodOpacity="0.25" />
+            </filter>
+
             {/* Dark woven ribbon gradient */}
             <linearGradient id="ribbonDark" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#18181b" />
-              <stop offset="25%" stopColor="#27272a" />
-              <stop offset="50%" stopColor="#18181b" />
-              <stop offset="75%" stopColor="#27272a" />
-              <stop offset="100%" stopColor="#18181b" />
+              <stop offset="0%" stopColor="#101013" />
+              <stop offset="18%" stopColor="#25252b" />
+              <stop offset="50%" stopColor="#161619" />
+              <stop offset="82%" stopColor="#25252b" />
+              <stop offset="100%" stopColor="#101013" />
+            </linearGradient>
+
+            {/* Gold Thread Accent for Edge Stitching */}
+            <linearGradient id="threadGold" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#967744" />
+              <stop offset="50%" stopColor="#cca562" />
+              <stop offset="100%" stopColor="#7a5d30" />
             </linearGradient>
           </defs>
 
-          {/* Left Ribbon Strand - Outer Width */}
+          {/* Left Ribbon Ambient Shadow */}
           <motion.path
             d={leftStrapPath}
-            stroke="url(#ribbonDark)"
-            strokeWidth={14}
+            stroke="rgba(0,0,0,0.2)"
+            strokeWidth={19}
             strokeLinecap="round"
             fill="none"
-          />
-          {/* Left Ribbon Strand - Fine Edge Stitching */}
-          <motion.path
-            d={leftStrapPath}
-            stroke="#71717a"
-            strokeWidth={10}
-            strokeDasharray="2 3"
-            strokeLinecap="round"
-            fill="none"
-            opacity={0.5}
+            filter="url(#strapDropShadow)"
           />
 
-          {/* Right Ribbon Strand - Outer Width */}
+          {/* Left Ribbon Outer Webbing */}
           <motion.path
-            d={rightStrapPath}
+            d={leftStrapPath}
             stroke="url(#ribbonDark)"
-            strokeWidth={14}
+            strokeWidth={15}
             strokeLinecap="round"
             fill="none"
           />
-          {/* Right Ribbon Strand - Fine Edge Stitching */}
+
+          {/* Left Ribbon Twill Weave Texture Overlay */}
           <motion.path
-            d={rightStrapPath}
-            stroke="#71717a"
-            strokeWidth={10}
-            strokeDasharray="2 3"
+            d={leftStrapPath}
+            stroke="url(#ribbonWeave)"
+            strokeWidth={13}
             strokeLinecap="round"
             fill="none"
-            opacity={0.5}
+            opacity={0.9}
+          />
+
+          {/* Left Ribbon Fine Edge Stitching (Twin golden thread stitch) */}
+          <motion.path
+            d={leftStrapPath}
+            stroke="url(#threadGold)"
+            strokeWidth={11}
+            strokeDasharray="2.5 2.5"
+            strokeLinecap="round"
+            fill="none"
+            opacity={0.75}
+          />
+
+          {/* Right Ribbon Ambient Shadow */}
+          <motion.path
+            d={rightStrapPath}
+            stroke="rgba(0,0,0,0.2)"
+            strokeWidth={19}
+            strokeLinecap="round"
+            fill="none"
+            filter="url(#strapDropShadow)"
+          />
+
+          {/* Right Ribbon Outer Webbing */}
+          <motion.path
+            d={rightStrapPath}
+            stroke="url(#ribbonDark)"
+            strokeWidth={15}
+            strokeLinecap="round"
+            fill="none"
+          />
+
+          {/* Right Ribbon Twill Weave Texture Overlay */}
+          <motion.path
+            d={rightStrapPath}
+            stroke="url(#ribbonWeave)"
+            strokeWidth={13}
+            strokeLinecap="round"
+            fill="none"
+            opacity={0.9}
+          />
+
+          {/* Right Ribbon Fine Edge Stitching (Twin golden thread stitch) */}
+          <motion.path
+            d={rightStrapPath}
+            stroke="url(#threadGold)"
+            strokeWidth={11}
+            strokeDasharray="2.5 2.5"
+            strokeLinecap="round"
+            fill="none"
+            opacity={0.75}
           />
         </svg>
 
@@ -280,27 +341,37 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
           className="relative mt-[95px] flex flex-col items-center cursor-grab active:cursor-grabbing z-20 touch-none select-none outline-none ring-0"
         >
           {/* Metal Swivel Clasp & Crimp Hardware */}
-          <div className="relative flex flex-col items-center -mb-2 z-30 pointer-events-none select-none">
-            {/* Ribbon Crimp Buckle */}
-            <div className="w-8 h-4 rounded-xs bg-gradient-to-r from-zinc-400 via-zinc-100 to-zinc-500 shadow-xs border border-zinc-400/80 flex items-center justify-center">
-              <div className="w-6 h-[1.5px] bg-zinc-600/40" />
+          <div className="relative flex flex-col items-center -mb-2.5 z-30 pointer-events-none select-none filter drop-shadow-[0_4px_7px_rgba(0,0,0,0.25)]">
+            {/* Ribbon Crimp Buckle (Folded stamped steel band with grip teeth) */}
+            <div className="relative w-9 h-4.5 rounded-xs bg-gradient-to-b from-zinc-300 via-zinc-100 to-zinc-400 border border-zinc-400/90 shadow-sm flex items-center justify-between px-1.5 overflow-hidden">
+              {/* Metallic reflection shimmer */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/15 via-transparent to-black/15 pointer-events-none" />
+              {/* Stamped crimp tooth indentation ridges */}
+              <div className="w-[1.5px] h-full bg-zinc-500/60 shadow-xs" />
+              <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-br from-zinc-400 via-zinc-200 to-zinc-600 shadow-inner border border-zinc-400/90" />
+              <div className="w-[1.5px] h-full bg-zinc-500/60 shadow-xs" />
             </div>
 
-            {/* Swivel Ring Link */}
-            <div className="w-3.5 h-3.5 rounded-full border-2 border-zinc-300 bg-zinc-100 -mt-1 shadow-xs" />
+            {/* Machined Swivel Ring Joint */}
+            <div className="w-4 h-4 rounded-full border-2 border-zinc-300 bg-gradient-to-br from-zinc-100 to-zinc-300 -mt-1 shadow-xs flex items-center justify-center">
+              <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 shadow-inner" />
+            </div>
 
-            {/* Lobster Hook Body */}
-            <div className="w-4 h-6 -mt-1 relative flex items-center justify-center">
-              <div className="w-3 h-5 rounded-t-sm rounded-b-md bg-gradient-to-b from-zinc-300 via-zinc-100 to-zinc-400 border border-zinc-400 shadow-sm flex items-center justify-center">
-                <div className="w-1.5 h-3 bg-zinc-600/30 rounded-xs" />
+            {/* Lobster Hook Body with trigger snap lever */}
+            <div className="w-5 h-7 -mt-1 relative flex items-center justify-center">
+              <div className="w-3.5 h-5.5 rounded-t-sm rounded-b-lg bg-gradient-to-b from-zinc-200 via-zinc-100 to-zinc-400 border border-zinc-400 shadow-sm flex items-center justify-center relative">
+                {/* Trigger thumb lever on side */}
+                <div className="absolute -left-1.5 top-1.5 w-1.5 h-2.5 rounded-l-xs bg-gradient-to-r from-zinc-400 to-zinc-200 border-l border-t border-b border-zinc-400 shadow-xs" />
+                {/* Snap gate slot */}
+                <div className="w-1.5 h-3.5 bg-zinc-600/35 rounded-xs shadow-inner" />
               </div>
             </div>
 
-            {/* Metal Ring looping through the badge slot hole */}
-            <div className="w-6 h-4 -mt-1 rounded-full border-2 border-zinc-300 bg-transparent shadow-xs" />
+            {/* Heavy-duty Stainless Steel Split Ring */}
+            <div className="w-7 h-4.5 -mt-1.5 rounded-full border-[2.5px] border-zinc-300 bg-transparent shadow-xs" />
           </div>
 
-          {/* The Credential Badge Pouch with Retro Vinyl Finish */}
+          {/* The Credential Badge Pouch with Clear Vinyl Finish */}
           <motion.div
             onMouseEnter={handleCardContact}
             onMouseMove={handleCardMouseMove}
@@ -313,67 +384,93 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
               WebkitUserSelect: 'none',
               outline: 'none',
             }}
-            className="w-[264px] sm:w-[274px] rounded-2xl bg-[#fdfcf9]/85 backdrop-blur-[2px] border border-[#d6cebe]/90 p-3.5 pt-2 flex flex-col relative select-none outline-none ring-0 focus:outline-none active:outline-none shadow-md overflow-hidden"
+            className="w-[268px] sm:w-[278px] rounded-2xl bg-white/75 backdrop-blur-[2px] border-2 border-[#d2c7b5]/90 p-3.5 pt-2 flex flex-col relative select-none outline-none ring-0 focus:outline-none active:outline-none shadow-xl overflow-hidden"
           >
+            {/* Ultrasonic Welded Edge Perimeter Seam (Authentic vinyl sleeve heat-weld) */}
+            <div className="absolute inset-1 rounded-xl pointer-events-none border-2 border-dotted border-[#bdae97]/40 z-30" />
+
+            {/* High-Gloss Vinyl Surface Reflection Glare */}
+            <div
+              className="absolute -inset-full pointer-events-none z-30 rotate-35 opacity-40 mix-blend-screen"
+              style={{
+                background: 'linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0.15) 54%, transparent 62%)',
+              }}
+            />
+
             {/* Retro Brass Grommet Slot Punch Hole */}
-            <div className="w-full flex justify-center pb-2.5 pt-0.5 select-none pointer-events-none">
-              <div className="w-14 h-3 rounded-full bg-gradient-to-r from-[#8a682c] via-[#dfc48b] to-[#8a682c] p-[1.5px] shadow-xs flex items-center justify-center">
-                <div className="w-full h-full rounded-full bg-[#2d2215] flex items-center justify-center shadow-inner">
-                  <div className="w-9 h-1 rounded-full bg-[#18120b]" />
+            <div className="w-full flex justify-center pb-2.5 pt-0.5 select-none pointer-events-none relative z-20">
+              <div className="w-15 h-3.5 rounded-full bg-gradient-to-r from-[#8a682c] via-[#ecd298] to-[#8a682c] p-[1.5px] shadow-sm flex items-center justify-center border border-[#715421]">
+                <div className="w-full h-full rounded-full bg-[#2e2215] flex items-center justify-center shadow-inner">
+                  <div className="w-10 h-1.5 rounded-full bg-[#18120b]" />
                 </div>
               </div>
             </div>
 
             {/* Badge Inner Retro Textured Cardstock */}
             <div
-              className="relative rounded-xl shadow-xs flex flex-col select-none overflow-hidden border border-[#d4cbba]"
+              className="relative rounded-xl shadow-xs flex flex-col select-none overflow-hidden border border-[#d2c5b0]"
               style={{
-                background: 'linear-gradient(160deg, #fdfbf7 0%, #f6f0e4 50%, #eee4d2 100%)',
-                boxShadow: 'inset 0 0 28px rgba(160, 130, 85, 0.14), inset 0 0 2px rgba(100, 75, 45, 0.2)',
+                background: 'linear-gradient(158deg, #fcf9f2 0%, #f6efe1 35%, #ecdeca 75%, #e0ceb4 100%)',
+                boxShadow: 'inset 0 0 32px rgba(145, 110, 65, 0.2), inset 0 0 3px rgba(90, 65, 35, 0.35)',
               }}
             >
               {/* Tactile Paper Texture & Fiber Grain Overlay */}
               <div className="absolute inset-0 pointer-events-none z-10 select-none overflow-hidden">
                 {/* SVG Grain Noise Filter */}
-                <svg className="w-full h-full opacity-35 mix-blend-multiply" xmlns="http://www.w3.org/2000/svg">
+                <svg className="w-full h-full opacity-45 mix-blend-multiply" xmlns="http://www.w3.org/2000/svg">
                   <filter id="retroPaperTexture">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch" />
+                    <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
                     <feColorMatrix type="matrix" values="
-                      0 0 0 0 0.55
-                      0 0 0 0 0.45
-                      0 0 0 0 0.35
-                      0 0 0 0.38 0" />
+                      0 0 0 0 0.58
+                      0 0 0 0 0.48
+                      0 0 0 0 0.36
+                      0 0 0 0 0.42 0" />
                   </filter>
                   <rect width="100%" height="100%" filter="url(#retroPaperTexture)" />
                 </svg>
 
-                {/* Retro Diagonal Crease Marks (like pocketed credentials) */}
-                <div className="absolute top-[32%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-black/[0.07] to-transparent rotate-[-9deg]" />
-                <div className="absolute top-[32%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-white/[0.22] to-transparent translate-y-[1px] rotate-[-9deg]" />
+                {/* Retro Diagonal Crease Marks (Handling folds like pocketed credentials) */}
+                <div className="absolute top-[30%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-black/[0.09] to-transparent rotate-[-8deg]" />
+                <div className="absolute top-[30%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-white/[0.28] to-transparent translate-y-[1px] rotate-[-8deg]" />
                 
-                <div className="absolute top-[68%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-black/[0.06] to-transparent rotate-[7deg]" />
-                <div className="absolute top-[68%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-white/[0.18] to-transparent translate-y-[1px] rotate-[7deg]" />
+                <div className="absolute top-[66%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-black/[0.08] to-transparent rotate-[6deg]" />
+                <div className="absolute top-[66%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-white/[0.24] to-transparent translate-y-[1px] rotate-[6deg]" />
 
-                {/* Scattered Paper Pulp Fiber Specks */}
-                <div className="absolute top-4 left-6 w-1 h-0.5 bg-[#4a3a2a]/20 rounded-full rotate-45" />
-                <div className="absolute top-16 right-8 w-1.5 h-0.5 bg-[#4a3a2a]/15 rounded-full -rotate-12" />
-                <div className="absolute bottom-12 left-10 w-1 h-0.5 bg-[#4a3a2a]/20 rounded-full rotate-30" />
-                <div className="absolute bottom-6 right-12 w-1.5 h-0.5 bg-[#4a3a2a]/15 rounded-full -rotate-45" />
+                {/* Natural Organic Wood Pulp Fiber Specks */}
+                <div className="absolute top-4 left-6 w-1.5 h-0.5 bg-[#4a3a2a]/25 rounded-full rotate-45" />
+                <div className="absolute top-14 right-8 w-2 h-0.5 bg-[#4a3a2a]/20 rounded-full -rotate-15" />
+                <div className="absolute top-36 left-12 w-1.5 h-0.5 bg-[#4a3a2a]/25 rounded-full rotate-75" />
+                <div className="absolute bottom-12 left-10 w-2 h-0.5 bg-[#4a3a2a]/25 rounded-full rotate-30" />
+                <div className="absolute bottom-6 right-12 w-1.5 h-0.5 bg-[#4a3a2a]/20 rounded-full -rotate-45" />
+                <div className="absolute bottom-24 right-5 w-1 h-0.5 bg-[#4a3a2a]/20 rounded-full rotate-12" />
+
+                {/* Faded Archival Red Watermark Accreditation Seal */}
+                <div className="absolute bottom-10 right-4 w-28 h-28 rounded-full border-2 border-red-800/18 flex items-center justify-center rotate-[-18deg] pointer-events-none select-none">
+                  <div className="w-24 h-24 rounded-full border border-dashed border-red-800/15 flex flex-col items-center justify-center p-2 text-center">
+                    <span className="text-[7.5px] font-mono font-bold tracking-widest uppercase text-red-900/22">
+                      SINGAPORE MEDIA
+                    </span>
+                    <span className="text-[9px] text-red-900/25 my-0.5">★</span>
+                    <span className="text-[6.5px] font-mono tracking-widest uppercase text-red-900/20">
+                      ACCREDITED 2026
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              {/* Retro Header Band (matching the brown retro cards on home screen) */}
-              <div className="relative bg-[#422108] text-[#f7f2e8] px-3 py-2 border-b-2 border-[#2b1504] shadow-xs flex items-center justify-between z-20 select-none">
+              {/* Retro Header Band (matching the deep espresso cards on home screen) */}
+              <div className="relative bg-[#381c06] text-[#f7f2e8] px-3.5 py-2.5 border-b-2 border-[#1f0f03] shadow-xs flex items-center justify-between z-20 select-none">
                 {/* Subtle texture highlight on header */}
-                <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/20 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-white/12 via-transparent to-black/25 pointer-events-none" />
                 
                 <div className="relative flex items-center gap-1.5 z-10">
-                  <span className="text-[#e2c199] text-[10px] select-none font-bold">★</span>
+                  <span className="text-[#e2c199] text-[10.5px] select-none font-bold">★</span>
                   <span className="text-[9.5px] font-mono font-black tracking-widest uppercase text-[#fdfbf7] select-none">
                     OFFICIAL PRESS PASS
                   </span>
                 </div>
 
-                <span className="relative z-10 text-[8.5px] font-mono tracking-wider text-[#d4bca0] select-none">
+                <span className="relative z-10 text-[8.5px] font-mono tracking-wider text-[#d4bca0] select-none font-bold">
                   #JY-2026-SG
                 </span>
               </div>
@@ -381,7 +478,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
               {/* Card Body Content */}
               <div className="p-3 pt-2.5 relative z-20 flex flex-col select-none pointer-events-none">
                 {/* Analog Glossy Photo Print Frame */}
-                <div className="relative aspect-[3/3.6] w-full p-1 bg-[#fffdfa] rounded-sm border border-[#d8cfbe] shadow-sm select-none overflow-hidden">
+                <div className="relative aspect-[3/3.6] w-full p-1.5 bg-[#ffffff] rounded-xs border border-[#cfc4b1] shadow-[0_2px_8px_rgba(0,0,0,0.12)] select-none overflow-hidden">
                   <div className="relative w-full h-full rounded-xs overflow-hidden bg-zinc-200">
                     <img
                       src={avatarSrc || '/DSC04070.webp'}
@@ -393,18 +490,23 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
                       onDragStart={(e) => e.preventDefault()}
                       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                     />
-                    {/* Subtle vintage photo sheen reflection */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/15 to-transparent pointer-events-none select-none" />
+                    {/* Glossy photographic paper sheen reflection */}
+                    <div
+                      className="absolute inset-0 pointer-events-none select-none"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.05) 40%, transparent 60%, rgba(255,255,255,0.12) 100%)',
+                      }}
+                    />
                   </div>
                 </div>
 
                 {/* Badge Credential Identity Info */}
                 <div className="pt-2.5 flex flex-col select-none">
                   <div className="flex items-baseline justify-between select-none">
-                    <h2 className="text-[14px] font-black text-[#1f1915] uppercase tracking-tight leading-none select-none">
+                    <h2 className="text-[14.5px] font-black text-[#1a140f] uppercase tracking-tight leading-none select-none">
                       {name}
                     </h2>
-                    <span className="text-[9px] font-mono uppercase tracking-wider text-[#82715e] select-none font-semibold">
+                    <span className="text-[9px] font-mono uppercase tracking-wider text-[#7a6a57] select-none font-bold">
                       {location}
                     </span>
                   </div>
@@ -414,32 +516,50 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
                     * Photographer & Storyteller
                   </p>
 
-                  {/* Barcode Footer with Perforated Dotted Border */}
-                  <div className="mt-2.5 pt-2 border-t border-dashed border-[#cfc4b2] flex items-center justify-between select-none">
-                    <span className="text-[8px] font-mono uppercase tracking-widest text-[#7d6c59] select-none font-semibold">
-                      MEDIA ACCESS PASS
-                    </span>
+                  {/* Barcode & Security Hologram Footer with Perforated Dotted Border */}
+                  <div className="mt-2.5 pt-2 border-t border-dashed border-[#cbbfa9] flex items-center justify-between select-none relative">
+                    <div className="flex flex-col">
+                      <span className="text-[8px] font-mono uppercase tracking-widest text-[#72614e] select-none font-bold">
+                        MEDIA ACCESS PASS
+                      </span>
 
-                    {/* Vintage Barcode */}
-                    <div className="flex items-end gap-[1.5px] h-3.5 opacity-60 select-none">
-                      <div className="w-[1px] h-full bg-[#1f1915]" />
-                      <div className="w-[2px] h-full bg-[#1f1915]" />
-                      <div className="w-[1px] h-full bg-[#1f1915]" />
-                      <div className="w-[1.5px] h-full bg-[#1f1915]" />
-                      <div className="w-[1px] h-full bg-[#1f1915]" />
-                      <div className="w-[2.5px] h-full bg-[#1f1915]" />
-                      <div className="w-[1px] h-full bg-[#1f1915]" />
-                      <div className="w-[1.5px] h-full bg-[#1f1915]" />
-                      <div className="w-[2px] h-full bg-[#1f1915]" />
-                      <div className="w-[1px] h-full bg-[#1f1915]" />
+                      {/* Vintage Barcode with alternating line weights */}
+                      <div className="flex items-end gap-[1.5px] h-3.5 opacity-70 mt-1 select-none">
+                        <div className="w-[1px] h-full bg-[#1f1915]" />
+                        <div className="w-[2px] h-full bg-[#1f1915]" />
+                        <div className="w-[1px] h-full bg-[#1f1915]" />
+                        <div className="w-[1.5px] h-full bg-[#1f1915]" />
+                        <div className="w-[1px] h-full bg-[#1f1915]" />
+                        <div className="w-[2.5px] h-full bg-[#1f1915]" />
+                        <div className="w-[1px] h-full bg-[#1f1915]" />
+                        <div className="w-[1.5px] h-full bg-[#1f1915]" />
+                        <div className="w-[2px] h-full bg-[#1f1915]" />
+                        <div className="w-[1px] h-full bg-[#1f1915]" />
+                        <div className="w-[2px] h-full bg-[#1f1915]" />
+                        <div className="w-[1.5px] h-full bg-[#1f1915]" />
+                      </div>
+                    </div>
+
+                    {/* Holographic Security Foil Seal */}
+                    <div
+                      className="w-6 h-6 rounded-xs shadow-xs border border-white/60 flex items-center justify-center overflow-hidden relative select-none"
+                      style={{
+                        background: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 35%, #8fd3f4 70%, #f6d365 100%)',
+                      }}
+                      title="Security Hologram"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/30 via-transparent to-white/40" />
+                      <span className="text-[6.5px] font-mono font-black text-black/65 tracking-tighter uppercase rotate-[-25deg]">
+                        VALID
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Clear Vinyl Sleeve Border Reflection Highlights */}
-            <div className="absolute inset-0 rounded-2xl pointer-events-none border border-white/60 shadow-inner select-none" />
+            {/* Clear Vinyl Sleeve Perimeter Reflection Highlights */}
+            <div className="absolute inset-0 rounded-2xl pointer-events-none border border-white/70 shadow-inner select-none z-30" />
           </motion.div>
         </motion.div>
       </div>
