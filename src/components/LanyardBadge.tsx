@@ -19,16 +19,20 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
   const lastMousePosRef = useRef<{ x: number; y: number } | null>(null);
   const lastTimeRef = useRef<number | null>(null);
 
-  // Exact motion values for badge position (used synchronously by both card and SVG strap)
+  // Translation motion values for the top hardware / strap connection point
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
 
-  // Natural tilt/rotation based on horizontal displacement
-  // Subtle rotation centered at 50% 50% so the whole card translates together in unison
-  const badgeRotate = useTransform(dragX, [-160, 160], [-4.5, 4.5]);
+  // Independent rotational pendulum motion values for true rigid-body mechanics
+  const cardRotateZ = useMotionValue(0); // 2D swing around the top clip eyelet
+  const cardRotateY = useMotionValue(0); // 3D yaw twist (left/right tilt)
+  const cardRotateX = useMotionValue(0); // 3D pitch tilt (bottom kick up/down)
 
-  // Dynamic SVG path for left strap strand (from top peg anchor directly to metal crimp buckle)
-  // Zero lag because it reads dragX and dragY directly!
+  // Subtle drag tilt coupled with rotational pendulum
+  const dragTilt = useTransform(dragX, [-180, 180], [-10, 10]);
+  const totalRotateZ = useTransform([dragTilt, cardRotateZ], ([dt, cr]) => Number(dt) + Number(cr));
+
+  // Dynamic SVG path for left strap strand (from top wall peg to crimp buckle)
   const leftStrapPath = useTransform([dragX, dragY], ([latestX, latestY]) => {
     const x = Number(latestX);
     const y = Number(latestY);
@@ -54,17 +58,42 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     return `M ${startX} ${startY} Q ${cpX} ${cpY} ${endX} ${endY}`;
   });
 
-  // Dynamic shadow displacement based on badge 3D position
-  const badgeShadow = useTransform([dragX, dragY], ([latestX, latestY]) => {
-    const x = Number(latestX);
-    const y = Number(latestY);
-    const offsetX = (x * 0.14).toFixed(1);
-    const offsetY = (16 + y * 0.08 + Math.abs(x) * 0.04).toFixed(1);
-    const blur = (26 + Math.abs(x) * 0.06).toFixed(1);
-    return `${offsetX}px ${offsetY}px ${blur}px rgba(0, 0, 0, 0.16)`;
-  });
+  // Dynamic ambient drop shadow on the wall that reacts to both translation and rotational swing
+  const badgeShadow = useTransform(
+    [dragX, dragY, totalRotateZ],
+    ([latestX, latestY, latestRz]) => {
+      const x = Number(latestX);
+      const y = Number(latestY);
+      const rz = Number(latestRz);
+      const offsetX = (x * 0.14 + rz * 0.35).toFixed(1);
+      const offsetY = (16 + y * 0.08 + Math.abs(x) * 0.04 + Math.abs(rz) * 0.25).toFixed(1);
+      const blur = (26 + Math.abs(x) * 0.06 + Math.abs(rz) * 0.2).toFixed(1);
+      return `${offsetX}px ${offsetY}px ${blur}px rgba(0, 0, 0, 0.18)`;
+    }
+  );
 
-  // Trigger a natural physical pendulum swing in the direction of initial contact
+  // Dynamic specular light glare across the clear vinyl sleeve that shifts with 3D rotation
+  const vinylGlareBackground = useTransform(
+    [cardRotateY, totalRotateZ],
+    ([ry, rz]) => {
+      const posX = (50 + Number(ry) * 2.2).toFixed(1);
+      const angle = (115 + Number(rz) * 0.8).toFixed(1);
+      return `linear-gradient(${angle}deg, transparent ${Math.max(10, Number(posX) - 24)}%, rgba(255,255,255,0.45) ${posX}%, rgba(255,255,255,0.14) ${Number(posX) + 4}%, transparent ${Math.min(90, Number(posX) + 24)}%)`;
+    }
+  );
+
+  // Dynamic iridescent hologram gradient angle reacting to rotation
+  const holoGradient = useTransform(
+    [totalRotateZ, cardRotateY],
+    ([rz, ry]) => {
+      const angle = (135 + Number(rz) * 2.2 + Number(ry) * 1.5).toFixed(0);
+      return `linear-gradient(${angle}deg, #fbc2eb 0%, #a6c1ee 35%, #8fd3f4 70%, #f6d365 100%)`;
+    }
+  );
+
+  // Physically accurate compound pendulum contact simulation:
+  // Hitting the bottom corner exerts maximum torque around the top clip pivot (transformOrigin: 50% 12px),
+  // causing the bottom corner to swing and tilt dramatically while the top stays anchored at the clasp!
   const handleCardContact = (e: React.MouseEvent | { clientX: number; clientY: number }) => {
     if (isDraggingRef.current || hasContactedRef.current) return;
     hasContactedRef.current = true;
@@ -83,50 +112,103 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
       deltaY = e.clientY - lastMousePosRef.current.y;
     }
 
-    // Determine contact velocity vector from cursor motion entering the card
+    // Cursor velocity vector in px/sec
     let speedX = (deltaX / dt) * 1000;
     let speedY = (deltaY / dt) * 1000;
 
-    // Measure card center to determine impact direction if cursor was slow
+    // Measure exact card dimensions & hit location
     const cardRect = cardEl.getBoundingClientRect();
     const cardCenterX = cardRect.left + cardRect.width / 2;
-    const cardCenterY = cardRect.top + cardRect.height / 2;
-    const relX = e.clientX - cardCenterX;
-    const relY = e.clientY - cardCenterY;
+    const cardTopY = cardRect.top;
 
-    // If approaching with minimal speed, push away from the edge of contact
-    if (Math.abs(speedX) < 60) {
-      speedX = relX < 0 ? 280 : -280;
+    // Normalized hit coordinates:
+    // hitRelX: -1.0 (left edge) to 0.0 (center) to +1.0 (right edge)
+    const hitRelX = Math.max(-1, Math.min(1, (e.clientX - cardCenterX) / (cardRect.width / 2)));
+    // hitRelY: 0.0 (top near clip eyelet) to 1.0 (bottom edge)
+    const hitRelY = Math.max(0, Math.min(1, (e.clientY - cardTopY) / cardRect.height));
+
+    // Provide authentic impulse for gentle taps or static hovers based on hit location
+    if (Math.abs(speedX) < 45) {
+      speedX = hitRelX < 0 ? 320 : -320;
     }
-    if (Math.abs(speedY) < 30) {
-      speedY = relY < 0 ? 100 : -70;
+    if (Math.abs(speedY) < 25) {
+      speedY = 120;
     }
 
-    // Realistic physical contact momentum
-    const contactVx = Math.max(-550, Math.min(550, speedX * 0.35));
-    const contactVy = Math.max(-180, Math.min(180, speedY * 0.18));
+    // --- COMPOUND PENDULUM TORQUE & LEVER ARM DECOMPOSITION ---
+    // The physical pivot is at the top of the card (hitRelY ≈ 0).
+    // The farther down the hit point, the larger the rotational lever arm!
+    const leverArm = Math.max(0.12, hitRelY);
 
-    // Underdamped harmonic pendulum gravity swing:
-    // Swings freely in the direction of contact, overshoots, and oscillates 3-4 times to rest
-    // without tracking the cursor!
+    // Rotational torque around Z-axis:
+    // ForceX * distanceY from top pivot
+    const torqueX = speedX * leverArm;
+    // Off-center vertical force also imparts angular momentum
+    const torqueY = -speedY * hitRelX * 0.42;
+    const totalTorque = torqueX + torqueY;
+
+    // Angular velocity: At the bottom corner (leverArm ≈ 0.95, hitRelX ≈ ±0.8), angular velocity is MAXIMUM!
+    const angularVz = Math.max(-460, Math.min(460, totalTorque * 0.52));
+
+    // 3D Yaw (RotateY): hitting the edge rotates the card in 3D around its vertical axis
+    const angularVy = Math.max(-300, Math.min(300, (-hitRelX * Math.abs(speedX) * 0.3) - (speedX * 0.15)));
+
+    // 3D Pitch (RotateX): hitting the bottom edge kicks the bottom outwards/inwards in 3D
+    const angularVx = Math.max(-250, Math.min(250, (leverArm * Math.abs(speedY) * 0.32) + (speedY * 0.1)));
+
+    // Strap translation (lateral sway at the top clip):
+    // When hitting the bottom corner, only a minor fraction of force translates the top strap!
+    // When hitting the top near the clip, most of the force translates the strap.
+    const strapFactor = Math.max(0.18, 1 - leverArm * 0.78);
+    const contactVx = Math.max(-320, Math.min(320, speedX * strapFactor * 0.28));
+    const contactVy = Math.max(-120, Math.min(120, speedY * strapFactor * 0.14));
+
+    // Animate angular pendulum (card swings and oscillates freely around the top clip)
+    animate(cardRotateZ, 0, {
+      type: 'spring',
+      stiffness: 38,
+      damping: 3.5, // underdamped oscillation for natural physical decay
+      mass: 0.85,
+      velocity: angularVz,
+    });
+
+    // Animate 3D yaw twist
+    animate(cardRotateY, 0, {
+      type: 'spring',
+      stiffness: 62,
+      damping: 6.2,
+      mass: 0.75,
+      velocity: angularVy,
+    });
+
+    // Animate 3D pitch tilt
+    animate(cardRotateX, 0, {
+      type: 'spring',
+      stiffness: 70,
+      damping: 6.8,
+      mass: 0.75,
+      velocity: angularVx,
+    });
+
+    // Animate top hardware strap sway
     animate(dragX, 0, {
       type: 'spring',
-      stiffness: 36,
-      damping: 4.6,
-      mass: 1.25,
+      stiffness: 28,
+      damping: 5.0,
+      mass: 1.1,
       velocity: contactVx,
     });
 
     animate(dragY, 0, {
       type: 'spring',
-      stiffness: 60,
-      damping: 6.4,
+      stiffness: 52,
+      damping: 6.2,
       mass: 1.0,
       velocity: contactVy,
     });
   };
 
-  // While cursor moves inside the card, update position tracking but DO NOT follow the mouse!
+  // Track cursor velocity without sticky tracking
   const handleCardMouseMove = (e: React.MouseEvent) => {
     lastMousePosRef.current = { x: e.clientX, y: e.clientY };
     lastTimeRef.current = performance.now();
@@ -136,12 +218,11 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     }
   };
 
-  // When cursor leaves the card, reset contact state so the next contact can trigger cleanly
   const handleCardMouseLeave = () => {
     hasContactedRef.current = false;
   };
 
-  // On touch screens, tap or touch also triggers the pendulum swing
+  // Touch screen support
   const handleCardTouchStart = (e: React.TouchEvent) => {
     if (isDraggingRef.current) return;
     const touch = e.touches[0];
@@ -158,7 +239,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     }, 200);
   };
 
-  // Track cursor trajectory in the container space around the lanyard for contact velocity
+  // Track container-level cursor motion
   const handleContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     lastMousePosRef.current = { x: e.clientX, y: e.clientY };
     lastTimeRef.current = performance.now();
@@ -173,20 +254,24 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
         userSelect: 'none',
         WebkitUserSelect: 'none',
         WebkitTapHighlightColor: 'transparent',
+        perspective: 1000,
       }}
     >
       {/* Top Wall Hook / Hanging Peg */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none select-none">
-        {/* Brushed metal cylindrical wall peg with concentric bevels */}
-        <div className="w-8.5 h-8.5 rounded-full bg-gradient-to-br from-zinc-200 via-zinc-400 to-zinc-600 shadow-[0_4px_10px_rgba(0,0,0,0.3)] border-2 border-zinc-300/90 flex items-center justify-center -mt-2">
+        {/* Brushed stainless steel cylindrical wall peg with concentric bevels */}
+        <div className="w-8.5 h-8.5 rounded-full bg-gradient-to-br from-zinc-200 via-zinc-400 to-zinc-600 shadow-[0_4px_12px_rgba(0,0,0,0.35)] border-2 border-zinc-300/90 flex items-center justify-center -mt-2">
           {/* Inner metallic bevel ring */}
           <div className="w-5 h-5 rounded-full bg-gradient-to-tl from-zinc-400 via-zinc-100 to-zinc-300 shadow-inner flex items-center justify-center border border-zinc-400">
-            <div className="w-2 h-2 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 shadow-xs" />
+            {/* Center mounting hex bolt */}
+            <div className="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-950 shadow-xs flex items-center justify-center">
+              <div className="w-1 h-1 bg-zinc-400/50 rounded-full" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Lanyard Assembly Wrapper (already in place on load, no drop-down delay) */}
+      {/* Lanyard Assembly Wrapper */}
       <div className="w-full h-full relative flex flex-col items-center select-none outline-none ring-0">
         {/* SVG Ribbon / Lanyard Strap */}
         <svg
@@ -304,9 +389,8 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
           />
         </svg>
 
-        {/* Draggable Lanyard Clasp & Badge Assembly (Whole card moves together in unison) */}
+        {/* Draggable Lanyard Hardware Anchor (moves by dragX, dragY) */}
         <motion.div
-          ref={cardRef}
           drag
           dragSnapToOrigin
           dragElastic={0.4}
@@ -320,8 +404,6 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
           style={{
             x: dragX,
             y: dragY,
-            rotate: badgeRotate,
-            transformOrigin: '50% 50%',
             userSelect: 'none',
             WebkitUserSelect: 'none',
             outline: 'none',
@@ -341,10 +423,9 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
           className="relative mt-[95px] flex flex-col items-center cursor-grab active:cursor-grabbing z-20 touch-none select-none outline-none ring-0"
         >
           {/* Metal Swivel Clasp & Crimp Hardware */}
-          <div className="relative flex flex-col items-center -mb-2.5 z-30 pointer-events-none select-none filter drop-shadow-[0_4px_7px_rgba(0,0,0,0.25)]">
+          <div className="relative flex flex-col items-center -mb-3 z-30 pointer-events-none select-none filter drop-shadow-[0_4px_7px_rgba(0,0,0,0.25)]">
             {/* Ribbon Crimp Buckle (Folded stamped steel band with grip teeth) */}
             <div className="relative w-9 h-4.5 rounded-xs bg-gradient-to-b from-zinc-300 via-zinc-100 to-zinc-400 border border-zinc-400/90 shadow-sm flex items-center justify-between px-1.5 overflow-hidden">
-              {/* Metallic reflection shimmer */}
               <div className="absolute inset-0 bg-gradient-to-r from-black/15 via-transparent to-black/15 pointer-events-none" />
               {/* Stamped crimp tooth indentation ridges */}
               <div className="w-[1.5px] h-full bg-zinc-500/60 shadow-xs" />
@@ -352,7 +433,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
               <div className="w-[1.5px] h-full bg-zinc-500/60 shadow-xs" />
             </div>
 
-            {/* Machined Swivel Ring Joint */}
+            {/* Machined Swivel Collar Joint */}
             <div className="w-4 h-4 rounded-full border-2 border-zinc-300 bg-gradient-to-br from-zinc-100 to-zinc-300 -mt-1 shadow-xs flex items-center justify-center">
               <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 shadow-inner" />
             </div>
@@ -360,53 +441,72 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             {/* Lobster Hook Body with trigger snap lever */}
             <div className="w-5 h-7 -mt-1 relative flex items-center justify-center">
               <div className="w-3.5 h-5.5 rounded-t-sm rounded-b-lg bg-gradient-to-b from-zinc-200 via-zinc-100 to-zinc-400 border border-zinc-400 shadow-sm flex items-center justify-center relative">
-                {/* Trigger thumb lever on side */}
-                <div className="absolute -left-1.5 top-1.5 w-1.5 h-2.5 rounded-l-xs bg-gradient-to-r from-zinc-400 to-zinc-200 border-l border-t border-b border-zinc-400 shadow-xs" />
-                {/* Snap gate slot */}
+                {/* Trigger thumb lever on side with grip ridges */}
+                <div className="absolute -left-1.5 top-1.5 w-1.5 h-2.5 rounded-l-xs bg-gradient-to-r from-zinc-400 to-zinc-200 border-l border-t border-b border-zinc-400 shadow-xs flex flex-col justify-center gap-[1.5px] py-0.5">
+                  <div className="w-1 h-[0.75px] bg-zinc-600" />
+                  <div className="w-1 h-[0.75px] bg-zinc-600" />
+                </div>
+                {/* Snap gate mechanical slot */}
                 <div className="w-1.5 h-3.5 bg-zinc-600/35 rounded-xs shadow-inner" />
               </div>
             </div>
 
-            {/* Heavy-duty Stainless Steel Split Ring */}
-            <div className="w-7 h-4.5 -mt-1.5 rounded-full border-[2.5px] border-zinc-300 bg-transparent shadow-xs" />
+            {/* Heavy-duty Stainless Steel Double-Loop Split Ring (loops through the punch slot) */}
+            <div className="w-7 h-4.5 -mt-1.5 rounded-full border-[2.5px] border-zinc-300 bg-transparent shadow-xs relative">
+              <div className="absolute inset-0 rounded-full border border-zinc-500/40 pointer-events-none" />
+            </div>
           </div>
 
-          {/* The Credential Badge Pouch with Clear Vinyl Finish */}
+          {/* The Credential Badge Pouch with TOP-PIVOT COMPOUND PENDULUM:
+              transformOrigin is set to '50% 12px' (the top split-ring punch eyelet).
+              When you hit the bottom corner, the bottom rotates and swings wide in 3D,
+              while the top stays anchored at the clasp! */}
           <motion.div
+            ref={cardRef}
             onMouseEnter={handleCardContact}
             onMouseMove={handleCardMouseMove}
             onMouseLeave={handleCardMouseLeave}
             onTouchStart={handleCardTouchStart}
             onTouchEnd={handleCardTouchEnd}
             style={{
+              rotateZ: totalRotateZ,
+              rotateY: cardRotateY,
+              rotateX: cardRotateX,
+              transformOrigin: '50% 12px',
+              transformStyle: 'preserve-3d',
               boxShadow: badgeShadow,
               userSelect: 'none',
               WebkitUserSelect: 'none',
               outline: 'none',
             }}
-            className="w-[268px] sm:w-[278px] rounded-2xl bg-white/75 backdrop-blur-[2px] border-2 border-[#d2c7b5]/90 p-3.5 pt-2 flex flex-col relative select-none outline-none ring-0 focus:outline-none active:outline-none shadow-xl overflow-hidden"
+            className="w-[270px] sm:w-[282px] rounded-2xl bg-white/80 backdrop-blur-[3px] border-2 border-[#d2c7b5]/90 p-3.5 pt-2 flex flex-col relative select-none outline-none ring-0 focus:outline-none active:outline-none shadow-xl overflow-hidden cursor-pointer"
           >
-            {/* Ultrasonic Welded Edge Perimeter Seam (Authentic vinyl sleeve heat-weld) */}
-            <div className="absolute inset-1 rounded-xl pointer-events-none border-2 border-dotted border-[#bdae97]/40 z-30" />
+            {/* Ultrasonic Welded Edge Perimeter Seam (Frosted 3.5mm bond line) */}
+            <div className="absolute inset-1 rounded-xl pointer-events-none border-2 border-dotted border-[#bdae97]/45 z-30" />
 
-            {/* High-Gloss Vinyl Surface Reflection Glare */}
-            <div
-              className="absolute -inset-full pointer-events-none z-30 rotate-35 opacity-40 mix-blend-screen"
+            {/* Card Insertion Slit Line (Realistic vinyl opening across top) */}
+            <div className="absolute top-[28px] left-3 right-3 h-[1px] bg-gradient-to-r from-transparent via-[#bdae97]/30 to-transparent z-30 pointer-events-none" />
+            <div className="absolute top-[29px] left-3 right-3 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent z-30 pointer-events-none" />
+
+            {/* High-Gloss Dynamic Specular Surface Glare (Shifts dynamically with 3D rotation) */}
+            <motion.div
+              className="absolute -inset-full pointer-events-none z-30 opacity-45 mix-blend-screen"
               style={{
-                background: 'linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0.15) 54%, transparent 62%)',
+                background: vinylGlareBackground,
               }}
             />
 
-            {/* Retro Brass Grommet Slot Punch Hole */}
+            {/* Clear Die-Cut Slot Punch Hole with Reinforced Brass Grommet Frame */}
             <div className="w-full flex justify-center pb-2.5 pt-0.5 select-none pointer-events-none relative z-20">
               <div className="w-15 h-3.5 rounded-full bg-gradient-to-r from-[#8a682c] via-[#ecd298] to-[#8a682c] p-[1.5px] shadow-sm flex items-center justify-center border border-[#715421]">
+                {/* Clear die-cut slot hole where the steel split ring loops through */}
                 <div className="w-full h-full rounded-full bg-[#2e2215] flex items-center justify-center shadow-inner">
                   <div className="w-10 h-1.5 rounded-full bg-[#18120b]" />
                 </div>
               </div>
             </div>
 
-            {/* Badge Inner Retro Textured Cardstock */}
+            {/* Inner Retro Textured Cardstock */}
             <div
               className="relative rounded-xl shadow-xs flex flex-col select-none overflow-hidden border border-[#d2c5b0]"
               style={{
@@ -458,7 +558,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
                 </div>
               </div>
 
-              {/* Retro Header Band (matching the deep espresso cards on home screen) */}
+              {/* Retro Header Band (matching deep espresso cards on home screen) */}
               <div className="relative bg-[#381c06] text-[#f7f2e8] px-3.5 py-2.5 border-b-2 border-[#1f0f03] shadow-xs flex items-center justify-between z-20 select-none">
                 {/* Subtle texture highlight on header */}
                 <div className="absolute inset-0 bg-gradient-to-b from-white/12 via-transparent to-black/25 pointer-events-none" />
@@ -511,7 +611,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
                     </span>
                   </div>
 
-                  {/* Subtitle in Schoolbell font matching the retro home screen cards */}
+                  {/* Subtitle in Schoolbell font matching retro home screen cards */}
                   <p className="font-schoolbell text-[13.5px] text-[#4a2e19] mt-1 select-none font-bold tracking-normal leading-tight">
                     * Photographer & Storyteller
                   </p>
@@ -540,11 +640,11 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
                       </div>
                     </div>
 
-                    {/* Holographic Security Foil Seal */}
-                    <div
+                    {/* Dynamic Holographic Security Foil Seal (Shifts iridescent gradient with rotation) */}
+                    <motion.div
                       className="w-6 h-6 rounded-xs shadow-xs border border-white/60 flex items-center justify-center overflow-hidden relative select-none"
                       style={{
-                        background: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 35%, #8fd3f4 70%, #f6d365 100%)',
+                        background: holoGradient,
                       }}
                       title="Security Hologram"
                     >
@@ -552,13 +652,13 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
                       <span className="text-[6.5px] font-mono font-black text-black/65 tracking-tighter uppercase rotate-[-25deg]">
                         VALID
                       </span>
-                    </div>
+                    </motion.div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Clear Vinyl Sleeve Perimeter Reflection Highlights */}
+            {/* Clear Vinyl Sleeve Perimeter Bevel Reflection */}
             <div className="absolute inset-0 rounded-2xl pointer-events-none border border-white/70 shadow-inner select-none z-30" />
           </motion.div>
         </motion.div>
