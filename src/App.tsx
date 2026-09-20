@@ -620,13 +620,10 @@ export default function App() {
                 />
               )}
 
-              {/* Mobile-Only Sequential Next Page Cue */}
+              {/* Mobile-Only Sequential Next Page Arrow Cue */}
               {isMobile && nextMobileRoute && (
                 <MobileNextPageCue
                   nextTitle={nextMobileRoute.title}
-                  nextSubtitle={nextMobileRoute.subtitle}
-                  pageNumber={nextMobileRoute.pageNumber}
-                  totalNumberedPages={6}
                   onAdvance={triggerMobileAdvance}
                 />
               )}
