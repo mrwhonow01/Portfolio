@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PortfolioProfile, TimelineMilestone } from '../types';
 import { getStoredImage, saveStoredImage, compressImage } from '../utils/imageStorage';
+import { LanyardBadge } from './LanyardBadge';
 
 interface EdzAboutViewProps {
   profile: PortfolioProfile;
@@ -116,79 +117,37 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
       </header>
 
       <main className="space-y-8">
-        {/* Profile picture & Bio Intro Grid */}
+        {/* Profile picture (Lanyard Pass) & Bio Intro Grid */}
         <section className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-          {/* Portrait Photo Frame */}
-          <div className="md:col-span-5">
-            <div
-              onDragOver={(e) => {
-                e.preventDefault();
-                setIsDragHover(true);
-              }}
-              onDragLeave={() => setIsDragHover(false)}
-              onDrop={handleDrop}
-              title="Drag & drop DSC04070.jpg or click Set Photo to save permanently for all visitors"
-              className={`group bg-[#f8f8f8] border transition-all duration-200 overflow-hidden shadow-xs relative ${
-                isDragHover ? 'border-black ring-2 ring-black/10' : 'border-gray-200'
-              }`}
-            >
-              <div className="aspect-[3/4] w-full overflow-hidden relative">
-                <img
-                  src={!imgError ? (avatarSrc || '/DSC04070.jpg?v=2') : fallbackUrl}
-                  alt={`${profile.name} — Photographer`}
-                  onError={() => setImgError(true)}
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover select-none"
-                />
+          {/* Lanyard Badge Column */}
+          <div className="md:col-span-5 flex flex-col items-center">
+            <LanyardBadge
+              avatarSrc={!imgError ? (avatarSrc || '/DSC04070.jpg?v=2') : fallbackUrl}
+              name={profile.name}
+              location={profile.location || 'Singapore'}
+              fileInputRef={fileInputRef}
+              onSetPhotoClick={() => fileInputRef.current?.click()}
+            />
 
-                {/* Subtle saved confirmation */}
-                {showSavedNotification && (
-                  <div className="absolute inset-x-3 bottom-3 bg-black/95 text-white text-[11px] py-2 px-3 text-center backdrop-blur-xs transition-opacity duration-300 rounded shadow-md flex items-center justify-center gap-1.5 z-10">
-                    <span className="text-emerald-400 font-bold">✓</span> Saved permanently to server for all visitors
-                  </div>
-                )}
-
-                {/* Discreet owner button on hover */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fileInputRef.current?.click();
-                  }}
-                  title="Choose DSC04070.jpg to save permanently for all visitors"
-                  className="absolute top-2.5 right-2.5 px-2 py-1 bg-black/75 hover:bg-black text-white rounded text-[10px] tracking-wide uppercase opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer flex items-center gap-1 shadow-sm"
-                >
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span>Set Photo</span>
-                </button>
+            {/* Subtle saved confirmation */}
+            {showSavedNotification && (
+              <div className="mt-3 bg-black/95 text-white text-[11px] py-2 px-3 text-center backdrop-blur-xs transition-opacity duration-300 rounded shadow-md flex items-center justify-center gap-1.5 z-30">
+                <span className="text-emerald-400 font-bold">✓</span> Saved permanently to server for all visitors
               </div>
+            )}
 
-              {/* Hidden file input for selection */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    handleImageFile(e.target.files[0]);
-                  }
-                }}
-                className="hidden"
-              />
-            </div>
-
-            {/* Photo caption */}
-            <div className="mt-2.5 flex items-center justify-between text-[11px] text-[#888888]">
-              <span className="font-medium text-black">
-                {profile.name}
-              </span>
-              <span className="text-[10px] uppercase tracking-wider font-mono text-[#888888]">
-                {profile.location || 'Singapore'}
-              </span>
-            </div>
+            {/* Hidden file input for selection */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  handleImageFile(e.target.files[0]);
+                }
+              }}
+              className="hidden"
+            />
           </div>
 
           {/* Bio text */}
