@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ExternalLink, Instagram, X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import { ExternalLink, Instagram, X, Maximize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export interface InstagramPost {
@@ -331,21 +331,6 @@ export const EdzInstagramView: React.FC = () => {
               className="relative flex-1 w-full flex items-center justify-center min-h-0 py-2"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Prev button */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEnlargedIndex((prev) =>
-                    prev !== null && prev > 0 ? prev - 1 : INSTAGRAM_POSTS.length - 1
-                  );
-                }}
-                className="absolute left-2 sm:left-6 z-30 p-3.5 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black border border-zinc-200/90 shadow-md backdrop-blur-md transition-all cursor-pointer"
-                aria-label="Previous image"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </button>
-
               <AnimatePresence mode="wait">
                 <motion.img
                   key={INSTAGRAM_POSTS[enlargedIndex].id}
@@ -358,21 +343,6 @@ export const EdzInstagramView: React.FC = () => {
                   className="max-h-[80vh] max-w-[92vw] object-contain select-none shadow-xl border border-black/5"
                 />
               </AnimatePresence>
-
-              {/* Next button */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEnlargedIndex((prev) =>
-                    prev !== null && prev < INSTAGRAM_POSTS.length - 1 ? prev + 1 : 0
-                  );
-                }}
-                className="absolute right-2 sm:right-6 z-30 p-3.5 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black border border-zinc-200/90 shadow-md backdrop-blur-md transition-all cursor-pointer"
-                aria-label="Next image"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </button>
             </div>
 
             {/* Bottom Bar: Post Details & Counter */}

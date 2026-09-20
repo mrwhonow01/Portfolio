@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   X,
-  ChevronLeft,
-  ChevronRight,
   Maximize2,
   Minimize2,
   Share2,
-  Download,
   Check,
   ZoomIn,
   ZoomOut,
@@ -177,20 +174,6 @@ export const Lightbox: React.FC<LightboxProps> = ({
                 {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
               </motion.button>
 
-              {/* Download Original */}
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href={currentPhoto.src}
-                target="_blank"
-                rel="noopener noreferrer"
-                download={`${currentPhoto.title.replace(/\s+/g, '_')}.jpg`}
-                className="p-2 rounded-full text-zinc-500 hover:text-black hover:bg-zinc-100 transition-colors"
-                title="Open Full Resolution"
-              >
-                <Download className="w-4 h-4" />
-              </motion.a>
-
               {/* Close Lightbox */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -207,20 +190,6 @@ export const Lightbox: React.FC<LightboxProps> = ({
 
           {/* Main Image Stage - Pure Enlarged Photograph With Full Visual Focus */}
           <div className="relative flex-1 flex items-center justify-center overflow-hidden">
-            {/* Navigation Arrow Left */}
-            {photos.length > 1 && (
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.92 }}
-                onClick={handlePrev}
-                id="lightbox-prev-btn"
-                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 p-3.5 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black border border-zinc-200 shadow-md backdrop-blur-md transition-all cursor-pointer"
-                aria-label="Previous photograph"
-              >
-                <ChevronLeft className="w-6 h-6" />
-              </motion.button>
-            )}
-
             {/* Center Canvas Area - Pure full-screen expansion */}
             <div
               className={`w-full h-full relative flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-auto ${
@@ -252,20 +221,6 @@ export const Lightbox: React.FC<LightboxProps> = ({
                 />
               </AnimatePresence>
             </div>
-
-            {/* Navigation Arrow Right */}
-            {photos.length > 1 && (
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.92 }}
-                onClick={handleNext}
-                id="lightbox-next-btn"
-                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 p-3.5 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black border border-zinc-200 shadow-md backdrop-blur-md transition-all cursor-pointer"
-                aria-label="Next photograph"
-              >
-                <ChevronRight className="w-6 h-6" />
-              </motion.button>
-            )}
           </div>
         </motion.div>
       )}

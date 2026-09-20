@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PhotoItem } from '../types';
 import { AlbumCategory, ALBUMS } from './EdzSidebar';
@@ -215,29 +215,11 @@ export const EdzAlbumGridView: React.FC<EdzAlbumGridViewProps> = ({
               </button>
             </div>
 
-            {/* Center Stage: Enlarged Image with Arrow Navigation */}
+            {/* Center Stage: Enlarged Image */}
             <div
               className="relative flex-1 w-full flex items-center justify-center min-h-0 py-2"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Prev button */}
-              {photos.length > 1 && (
-                <button
-                  type="button"
-                  id="subalbum-modal-prev-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEnlargedIndex((prev) =>
-                      prev !== null && prev > 0 ? prev - 1 : photos.length - 1
-                    );
-                  }}
-                  className="absolute left-2 sm:left-6 z-30 p-3.5 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black border border-zinc-200/90 shadow-md backdrop-blur-md transition-all cursor-pointer"
-                  aria-label="Previous photograph"
-                >
-                  <ChevronLeft className="w-6 h-6" />
-                </button>
-              )}
-
               {/* Pure Enlarged Photograph - Zero metadata, full visual focus */}
               <AnimatePresence mode="wait">
                 <motion.img
@@ -251,24 +233,6 @@ export const EdzAlbumGridView: React.FC<EdzAlbumGridViewProps> = ({
                   className="max-h-[82vh] max-w-[92vw] object-contain select-none shadow-xl border border-black/5"
                 />
               </AnimatePresence>
-
-              {/* Next button */}
-              {photos.length > 1 && (
-                <button
-                  type="button"
-                  id="subalbum-modal-next-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setEnlargedIndex((prev) =>
-                      prev !== null && prev < photos.length - 1 ? prev + 1 : 0
-                    );
-                  }}
-                  className="absolute right-2 sm:right-6 z-30 p-3.5 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black border border-zinc-200/90 shadow-md backdrop-blur-md transition-all cursor-pointer"
-                  aria-label="Next photograph"
-                >
-                  <ChevronRight className="w-6 h-6" />
-                </button>
-              )}
             </div>
 
             {/* Bottom Bar: Number of picture in the tab ONLY */}
