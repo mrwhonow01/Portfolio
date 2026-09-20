@@ -13,11 +13,23 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
   location = 'Singapore',
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
+  const lastMousePosRef = useRef<{ x: number; y: number } | null>(null);
+  const settleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Exact motion values for badge position (used synchronously by both card and SVG strap)
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
+
+  // Clean up any pending settle timers on unmount
+  React.useEffect(() => {
+    return () => {
+      if (settleTimerRef.current) {
+        clearTimeout(settleTimerRef.current);
+      }
+    };
+  }, []);
 
   // Natural tilt/rotation based on horizontal displacement
   const badgeRotate = useTransform(dragX, [-180, 180], [-18, 18]);
@@ -58,31 +70,77 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     return `${offsetX}px ${offsetY}px 28px rgba(0, 0, 0, 0.16)`;
   });
 
-  // Move the lanyard when the mouse moves over it
+  // Move the lanyard slightly in the direction the mouse moves in (zero auto-downward movement)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isDraggingRef.current) return;
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
 
-    // Relative mouse position from badge rest center
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + 240;
-    const mouseOffsetX = e.clientX - centerX;
-    const mouseOffsetY = e.clientY - centerY;
+    const cardEl = cardRef.current;
+    const containerEl = containerRef.current;
+    if (!containerEl) return;
 
-    // Gentle physical sway following cursor position
-    const targetX = Math.max(-50, Math.min(50, mouseOffsetX * 0.28));
-    const targetY = Math.max(-15, Math.min(40, mouseOffsetY * 0.18));
+    // Calculate exact resting center of badge
+    let restingCenterX: number;
+    let restingCenterY: number;
 
-    animate(dragX, targetX, { type: 'spring', stiffness: 260, damping: 20 });
-    animate(dragY, targetY, { type: 'spring', stiffness: 260, damping: 20 });
+    if (cardEl) {
+      const cardRect = cardEl.getBoundingClientRect();
+      restingCenterX = cardRect.left + cardRect.width / 2 - dragX.get();
+      restingCenterY = cardRect.top + cardRect.height / 2 - dragY.get();
+    } else {
+      const containerRect = containerEl.getBoundingClientRect();
+      restingCenterX = containerRect.left + containerRect.width / 2;
+      restingCenterY = containerRect.top + 366;
+    }
+
+    // Direction and velocity of mouse movement
+    let deltaX = 0;
+    let deltaY = 0;
+    if (lastMousePosRef.current) {
+      deltaX = e.clientX - lastMousePosRef.current.x;
+      deltaY = e.clientY - lastMousePosRef.current.y;
+    }
+    lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+
+    // Subtle position offset from card resting center (balanced around 0, zero downward bias)
+    const offsetX = e.clientX - restingCenterX;
+    const offsetY = e.clientY - restingCenterY;
+
+    // Movement impulse in the exact direction the user is moving their mouse
+    const pushX = deltaX * 0.45;
+    const pushY = deltaY * 0.30;
+
+    // Subtle positional tracking
+    const leanX = offsetX * 0.08;
+    const leanY = offsetY * 0.03;
+
+    // Target displacement: moves slightly in cursor direction with realistic limits
+    const targetX = Math.max(-28, Math.min(28, pushX + leanX));
+    const targetY = Math.max(-10, Math.min(10, pushY + leanY));
+
+    animate(dragX, targetX, { type: 'spring', stiffness: 240, damping: 22 });
+    animate(dragY, targetY, { type: 'spring', stiffness: 240, damping: 22 });
+
+    // Smoothly relax back to equilibrium when mouse stops moving
+    if (settleTimerRef.current) {
+      clearTimeout(settleTimerRef.current);
+    }
+    settleTimerRef.current = setTimeout(() => {
+      if (isDraggingRef.current) return;
+      lastMousePosRef.current = null;
+      animate(dragX, 0, { type: 'spring', stiffness: 180, damping: 18 });
+      animate(dragY, 0, { type: 'spring', stiffness: 180, damping: 18 });
+    }, 150);
   };
 
   // Reset to equilibrium when mouse leaves the lanyard area
   const handleMouseLeave = () => {
+    if (settleTimerRef.current) {
+      clearTimeout(settleTimerRef.current);
+    }
+    lastMousePosRef.current = null;
     if (isDraggingRef.current) return;
-    animate(dragX, 0, { type: 'spring', stiffness: 190, damping: 14 });
-    animate(dragY, 0, { type: 'spring', stiffness: 190, damping: 14 });
+    animate(dragX, 0, { type: 'spring', stiffness: 190, damping: 16 });
+    animate(dragY, 0, { type: 'spring', stiffness: 190, damping: 16 });
   };
 
   return (
@@ -178,6 +236,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
 
         {/* Draggable Lanyard Clasp & Badge Assembly */}
         <motion.div
+          ref={cardRef}
           drag
           dragSnapToOrigin
           dragElastic={0.35}
@@ -193,10 +252,14 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             outline: 'none',
           }}
           onDragStart={() => {
+            if (settleTimerRef.current) {
+              clearTimeout(settleTimerRef.current);
+            }
             isDraggingRef.current = true;
           }}
           onDragEnd={() => {
             isDraggingRef.current = false;
+            lastMousePosRef.current = null;
           }}
           className="relative mt-[95px] flex flex-col items-center cursor-grab active:cursor-grabbing z-20 touch-none select-none outline-none ring-0"
         >
