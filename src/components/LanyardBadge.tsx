@@ -1,83 +1,105 @@
-import React, { useState } from 'react';
-import { motion, useMotionValue, useTransform, useSpring } from 'motion/react';
-import { Camera, Sparkles } from 'lucide-react';
+import React, { useRef } from 'react';
+import { motion, useMotionValue, useTransform, animate } from 'motion/react';
+import { Sparkles } from 'lucide-react';
 
 interface LanyardBadgeProps {
   avatarSrc: string;
   name: string;
   location?: string;
-  onSetPhotoClick?: () => void;
-  fileInputRef?: React.RefObject<HTMLInputElement | null>;
-  onImageFile?: (file: File) => void;
 }
 
 export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
   avatarSrc,
   name,
   location = 'Singapore',
-  onSetPhotoClick,
-  fileInputRef,
 }) => {
-  const [imgError, setImgError] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDraggingRef = useRef(false);
 
-  // Motion values for badge dragging
+  // Exact motion values for badge position (used synchronously by both card and SVG strap)
   const dragX = useMotionValue(0);
   const dragY = useMotionValue(0);
 
-  // Smooth springs for strap follow-through
-  const smoothX = useSpring(dragX, { stiffness: 350, damping: 25 });
-  const smoothY = useSpring(dragY, { stiffness: 350, damping: 25 });
-
   // Natural tilt/rotation based on horizontal displacement
-  const badgeRotate = useTransform(smoothX, [-180, 180], [-18, 18]);
+  const badgeRotate = useTransform(dragX, [-180, 180], [-18, 18]);
 
-  // Dynamic SVG path for left strap strand (from top anchor to badge clip)
-  // Anchor width is centered at 160px; top anchor is at (142, 0) and (178, 0)
-  const leftStrapPath = useTransform([smoothX, smoothY], ([latestX, latestY]) => {
+  // Dynamic SVG path for left strap strand (from top peg anchor directly to metal crimp buckle)
+  // Zero lag because it reads dragX and dragY directly!
+  const leftStrapPath = useTransform([dragX, dragY], ([latestX, latestY]) => {
     const x = Number(latestX);
     const y = Number(latestY);
-    const startX = 142;
+    const startX = 146;
     const startY = 0;
-    const endX = 160 + x;
-    const endY = 112 + y;
-    // Control point bends naturally with displacement
-    const cpX = (startX + endX) / 2 + x * 0.15;
+    const endX = 156 + x;
+    const endY = 96 + y;
+    const cpX = (startX + endX) / 2 + x * 0.12;
     const cpY = (startY + endY) * 0.45;
     return `M ${startX} ${startY} Q ${cpX} ${cpY} ${endX} ${endY}`;
   });
 
   // Dynamic SVG path for right strap strand
-  const rightStrapPath = useTransform([smoothX, smoothY], ([latestX, latestY]) => {
+  const rightStrapPath = useTransform([dragX, dragY], ([latestX, latestY]) => {
     const x = Number(latestX);
     const y = Number(latestY);
-    const startX = 178;
+    const startX = 174;
     const startY = 0;
-    const endX = 160 + x;
-    const endY = 112 + y;
-    const cpX = (startX + endX) / 2 + x * 0.15;
+    const endX = 164 + x;
+    const endY = 96 + y;
+    const cpX = (startX + endX) / 2 + x * 0.12;
     const cpY = (startY + endY) * 0.45;
     return `M ${startX} ${startY} Q ${cpX} ${cpY} ${endX} ${endY}`;
   });
 
-  // Shadow displacement based on badge position
-  const badgeShadow = useTransform(
-    [smoothX, smoothY],
-    ([latestX, latestY]) => {
-      const x = Number(latestX);
-      const y = Number(latestY);
-      const offsetX = (x * 0.15).toFixed(1);
-      const offsetY = (18 + y * 0.1).toFixed(1);
-      return `${offsetX}px ${offsetY}px 32px rgba(0, 0, 0, 0.18)`;
-    }
-  );
+  // Dynamic shadow displacement based on badge position
+  const badgeShadow = useTransform([dragX, dragY], ([latestX, latestY]) => {
+    const x = Number(latestX);
+    const y = Number(latestY);
+    const offsetX = (x * 0.12).toFixed(1);
+    const offsetY = (16 + y * 0.08).toFixed(1);
+    return `${offsetX}px ${offsetY}px 28px rgba(0, 0, 0, 0.16)`;
+  });
+
+  // Move the lanyard when the mouse moves over it
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isDraggingRef.current) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    // Relative mouse position from badge rest center
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + 240;
+    const mouseOffsetX = e.clientX - centerX;
+    const mouseOffsetY = e.clientY - centerY;
+
+    // Gentle physical sway following cursor position
+    const targetX = Math.max(-50, Math.min(50, mouseOffsetX * 0.28));
+    const targetY = Math.max(-15, Math.min(40, mouseOffsetY * 0.18));
+
+    animate(dragX, targetX, { type: 'spring', stiffness: 260, damping: 20 });
+    animate(dragY, targetY, { type: 'spring', stiffness: 260, damping: 20 });
+  };
+
+  // Reset to equilibrium when mouse leaves the lanyard area
+  const handleMouseLeave = () => {
+    if (isDraggingRef.current) return;
+    animate(dragX, 0, { type: 'spring', stiffness: 190, damping: 14 });
+    animate(dragY, 0, { type: 'spring', stiffness: 190, damping: 14 });
+  };
 
   return (
     <div
-      className="relative w-full max-w-[340px] mx-auto min-h-[560px] flex flex-col items-center select-none overflow-visible pt-1"
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative w-full max-w-[340px] mx-auto min-h-[560px] flex flex-col items-center select-none overflow-visible pt-1 outline-none ring-0"
+      style={{
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        WebkitTapHighlightColor: 'transparent',
+      }}
     >
       {/* Top Wall Hook / Hanging Peg */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none select-none">
         {/* Brushed metal cylindrical wall peg */}
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-zinc-200 via-zinc-400 to-zinc-600 shadow-md border-2 border-zinc-400/80 flex items-center justify-center -mt-2">
           {/* Inner metallic bevel ring */}
@@ -88,13 +110,9 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
       </div>
 
       {/* Interactive Helper Hint */}
-      <div
-        className={`absolute top-2 right-2 z-30 transition-opacity duration-300 pointer-events-none text-[10px] font-mono tracking-wider uppercase flex items-center gap-1 px-2.5 py-1 rounded-full bg-zinc-100/90 text-zinc-600 border border-zinc-200 shadow-2xs backdrop-blur-xs ${
-          hasInteracted ? 'opacity-0' : 'opacity-85'
-        }`}
-      >
+      <div className="absolute top-2 right-2 z-30 pointer-events-none text-[10px] font-mono tracking-wider uppercase flex items-center gap-1 px-2.5 py-1 rounded-full bg-zinc-100/90 text-zinc-600 border border-zinc-200 shadow-2xs backdrop-blur-xs select-none">
         <Sparkles className="w-2.5 h-2.5 text-amber-500 animate-pulse" />
-        <span>drag me</span>
+        <span>move mouse over me</span>
       </div>
 
       {/* Entrance Animation Wrapper: drops down from the ceiling */}
@@ -108,11 +126,11 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
           mass: 1.15,
           delay: 0.12,
         }}
-        className="w-full h-full relative flex flex-col items-center"
+        className="w-full h-full relative flex flex-col items-center select-none outline-none ring-0"
       >
         {/* SVG Ribbon / Lanyard Strap */}
         <svg
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[320px] h-[300px] pointer-events-none overflow-visible z-10"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[320px] h-[300px] pointer-events-none overflow-visible z-10 select-none"
           viewBox="0 0 320 300"
         >
           <defs>
@@ -177,12 +195,20 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             y: dragY,
             rotate: badgeRotate,
             transformOrigin: '50% 20px',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
+            outline: 'none',
           }}
-          onDragStart={() => setHasInteracted(true)}
-          className="relative mt-[95px] flex flex-col items-center cursor-grab active:cursor-grabbing z-20 touch-none group/badge"
+          onDragStart={() => {
+            isDraggingRef.current = true;
+          }}
+          onDragEnd={() => {
+            isDraggingRef.current = false;
+          }}
+          className="relative mt-[95px] flex flex-col items-center cursor-grab active:cursor-grabbing z-20 touch-none select-none outline-none ring-0"
         >
           {/* Metal Swivel Clasp & Crimp Hardware */}
-          <div className="relative flex flex-col items-center -mb-2 z-30 pointer-events-none">
+          <div className="relative flex flex-col items-center -mb-2 z-30 pointer-events-none select-none">
             {/* Ribbon Crimp Buckle */}
             <div className="w-8 h-4 rounded-xs bg-gradient-to-r from-zinc-400 via-zinc-100 to-zinc-500 shadow-xs border border-zinc-400/80 flex items-center justify-center">
               <div className="w-6 h-[1.5px] bg-zinc-600/40" />
@@ -204,89 +230,71 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
 
           {/* The Credential Badge Pouch & Card */}
           <motion.div
-            style={{ boxShadow: badgeShadow }}
-            className="w-[260px] sm:w-[270px] rounded-xl bg-white/95 border border-zinc-300/80 p-3.5 pt-2 flex flex-col relative transition-transform duration-200 group-hover/badge:border-zinc-400"
+            style={{
+              boxShadow: badgeShadow,
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              outline: 'none',
+            }}
+            className="w-[260px] sm:w-[270px] rounded-xl bg-white/95 border border-zinc-300/80 p-3.5 pt-2 flex flex-col relative select-none outline-none ring-0 focus:outline-none active:outline-none"
           >
             {/* Acrylic Badge Header Slot Punch Hole */}
-            <div className="w-full flex justify-center pb-2.5 pt-0.5">
+            <div className="w-full flex justify-center pb-2.5 pt-0.5 select-none pointer-events-none">
               <div className="w-12 h-2.5 rounded-full bg-zinc-200/90 border border-zinc-400/60 shadow-inner flex items-center justify-center">
                 <div className="w-8 h-1 rounded-full bg-zinc-300/60" />
               </div>
             </div>
 
             {/* Badge Inner Card */}
-            <div className="bg-[#fcfcfc] border border-zinc-200/80 rounded-lg p-3 shadow-xs relative overflow-hidden flex flex-col">
-              {/* Top Pass Header */}
-              <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-                  <span className="text-[9.5px] font-mono font-bold tracking-widest uppercase text-black">
-                    OFFICIAL PRESS
-                  </span>
-                </div>
-                <span className="text-[8.5px] font-mono text-zinc-400 tracking-wider">
+            <div className="bg-[#fcfcfc] border border-zinc-200/80 rounded-lg p-3 shadow-xs relative overflow-hidden flex flex-col select-none pointer-events-none">
+              {/* Top Pass Header (clean, without red dot) */}
+              <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2.5 select-none">
+                <span className="text-[9.5px] font-mono font-bold tracking-widest uppercase text-black select-none">
+                  OFFICIAL PRESS
+                </span>
+                <span className="text-[8.5px] font-mono text-zinc-400 tracking-wider select-none">
                   #JY-2026-SG
                 </span>
               </div>
 
-              {/* Portrait Photo Frame with Gloss Sheen */}
-              <div className="relative aspect-[3/3.6] w-full bg-zinc-100 rounded border border-zinc-200 overflow-hidden group/photo shadow-xs">
+              {/* Portrait Photo Frame with Gloss Sheen (clean, no Set Photo button) */}
+              <div className="relative aspect-[3/3.6] w-full bg-zinc-100 rounded border border-zinc-200 overflow-hidden shadow-xs select-none">
                 <img
-                  src={!imgError ? avatarSrc : '/DSC04070.jpg'}
+                  src={avatarSrc || '/DSC04070.jpg'}
                   alt={`${name} — Photographer`}
-                  onError={() => setImgError(true)}
                   className="w-full h-full object-cover select-none pointer-events-none"
                   draggable={false}
+                  onDragStart={(e) => e.preventDefault()}
+                  style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
                 />
 
                 {/* Diagonal Glass Sheen Reflection Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none" />
-
-                {/* Subtle Owner Action: Click to change photo */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (onSetPhotoClick) {
-                      onSetPhotoClick();
-                    } else {
-                      fileInputRef?.current?.click();
-                    }
-                  }}
-                  className="absolute top-2 right-2 px-2 py-1 bg-black/75 hover:bg-black text-white rounded text-[9.5px] tracking-wider uppercase opacity-0 group-hover/badge:opacity-100 transition-opacity cursor-pointer flex items-center gap-1 shadow-sm backdrop-blur-xs pointer-events-auto"
-                  title="Choose new photo to save permanently"
-                >
-                  <Camera className="w-3 h-3" />
-                  <span>Set Photo</span>
-                </button>
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none select-none" />
               </div>
 
               {/* Badge Credential Identity Info */}
-              <div className="pt-2.5 flex flex-col">
-                <div className="flex items-baseline justify-between">
-                  <h2 className="text-[14px] font-bold text-black uppercase tracking-tight leading-none">
+              <div className="pt-2.5 flex flex-col select-none">
+                <div className="flex items-baseline justify-between select-none">
+                  <h2 className="text-[14px] font-bold text-black uppercase tracking-tight leading-none select-none">
                     {name}
                   </h2>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-zinc-400">
+                  <span className="text-[9px] font-mono uppercase tracking-wider text-zinc-400 select-none">
                     {location}
                   </span>
                 </div>
 
-                <p className="text-[9.5px] uppercase tracking-wider font-mono text-zinc-600 mt-1">
+                <p className="text-[9.5px] uppercase tracking-wider font-mono text-zinc-600 mt-1 select-none">
                   Photographer & Storyteller
                 </p>
 
-                {/* Holographic Strip & Barcode Footer */}
-                <div className="mt-2.5 pt-2 border-t border-dashed border-zinc-200 flex items-center justify-between">
-                  {/* Faux Holographic Accreditation Seal */}
-                  <div className="px-2 py-0.5 rounded bg-gradient-to-r from-teal-200 via-purple-200 to-amber-200 border border-zinc-200/60 flex items-center gap-1 shadow-2xs">
-                    <span className="text-[7.5px] font-mono font-bold tracking-widest uppercase text-zinc-700">
-                      ACCREDITED
-                    </span>
-                  </div>
+                {/* Barcode Footer (clean, without ACCREDITED) */}
+                <div className="mt-2.5 pt-2 border-t border-dashed border-zinc-200 flex items-center justify-between select-none">
+                  <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-400 select-none">
+                    MEDIA ACCESS PASS
+                  </span>
 
                   {/* Faux Barcode */}
-                  <div className="flex items-end gap-[1.5px] h-3.5 opacity-60">
+                  <div className="flex items-end gap-[1.5px] h-3.5 opacity-50 select-none">
                     <div className="w-[1px] h-full bg-black" />
                     <div className="w-[2px] h-full bg-black" />
                     <div className="w-[1px] h-full bg-black" />
@@ -303,7 +311,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             </div>
 
             {/* Clear Vinyl Sleeve Border Reflection Highlights */}
-            <div className="absolute inset-0 rounded-xl pointer-events-none border border-white/50 shadow-inner" />
+            <div className="absolute inset-0 rounded-xl pointer-events-none border border-white/50 shadow-inner select-none" />
           </motion.div>
         </motion.div>
       </motion.div>

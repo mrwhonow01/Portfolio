@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PortfolioProfile, TimelineMilestone } from '../types';
-import { getStoredImage, saveStoredImage, compressImage } from '../utils/imageStorage';
+import { getStoredImage } from '../utils/imageStorage';
 import { LanyardBadge } from './LanyardBadge';
 
 interface EdzAboutViewProps {
@@ -14,7 +14,6 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
   timeline,
   onNavigateToContact,
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const fallbackUrl = 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&w=1200&q=85';
   
   const [avatarSrc, setAvatarSrc] = useState<string>(() => {
@@ -25,8 +24,6 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
     }
   });
   const [imgError, setImgError] = useState(false);
-  const [isDragHover, setIsDragHover] = useState(false);
-  const [showSavedNotification, setShowSavedNotification] = useState(false);
 
   // Load custom portrait if saved in IndexedDB
   useEffect(() => {
@@ -42,70 +39,6 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
     return () => {
       isMounted = false;
     };
-  }, []);
-
-  const handleImageFile = async (file: File) => {
-    if (!file.type.startsWith('image/')) return;
-    
-    // 1. Instantly display preview
-    const tempUrl = URL.createObjectURL(file);
-    setAvatarSrc(tempUrl);
-    setImgError(false);
-
-    try {
-      // 2. Compress high-res Sony image safely for web without quota errors
-      const compressed = await compressImage(file, 1600, 2000, 0.9);
-      await saveStoredImage('juztin_portfolio_avatar_v2', compressed);
-
-      // 3. Write directly to server disk (/public/DSC04070.jpg) so ALL users see it permanently
-      try {
-        const response = await fetch('/api/save-photo', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dataUrl: compressed }),
-        });
-        if (response.ok) {
-          setAvatarSrc(`/DSC04070.jpg?v=${Date.now()}`);
-        } else {
-          setAvatarSrc(compressed);
-        }
-      } catch (uploadErr) {
-        console.warn('Server sync failed, retained local copy:', uploadErr);
-        setAvatarSrc(compressed);
-      }
-
-      setShowSavedNotification(true);
-      setTimeout(() => setShowSavedNotification(false), 3500);
-    } catch (err) {
-      console.error('Error saving image:', err);
-    }
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragHover(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleImageFile(e.dataTransfer.files[0]);
-    }
-  };
-
-  // Support paste (Ctrl+V / Cmd+V)
-  useEffect(() => {
-    const handlePaste = (e: ClipboardEvent) => {
-      const items = e.clipboardData?.items;
-      if (!items) return;
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.startsWith('image/')) {
-          const file = items[i].getAsFile();
-          if (file) {
-            handleImageFile(file);
-            break;
-          }
-        }
-      }
-    };
-    window.addEventListener('paste', handlePaste);
-    return () => window.removeEventListener('paste', handlePaste);
   }, []);
 
   return (
@@ -125,33 +58,11 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
               avatarSrc={!imgError ? (avatarSrc || '/DSC04070.jpg?v=2') : fallbackUrl}
               name={profile.name}
               location={profile.location || 'Singapore'}
-              fileInputRef={fileInputRef}
-              onSetPhotoClick={() => fileInputRef.current?.click()}
-            />
-
-            {/* Subtle saved confirmation */}
-            {showSavedNotification && (
-              <div className="mt-3 bg-black/95 text-white text-[11px] py-2 px-3 text-center backdrop-blur-xs transition-opacity duration-300 rounded shadow-md flex items-center justify-center gap-1.5 z-30">
-                <span className="text-emerald-400 font-bold">✓</span> Saved permanently to server for all visitors
-              </div>
-            )}
-
-            {/* Hidden file input for selection */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                if (e.target.files?.[0]) {
-                  handleImageFile(e.target.files[0]);
-                }
-              }}
-              className="hidden"
             />
           </div>
 
-          {/* Bio text */}
-          <div className="md:col-span-7 space-y-4 text-[14px] leading-[1.7]">
+          {/* Bio text — aligned with the lanyard credential card on desktop */}
+          <div className="md:col-span-7 space-y-4 text-[14px] leading-[1.7] md:pt-[105px]">
             <p>
               I'm {profile.name}, a photographer and filmmaker based in {profile.location || 'Singapore'}. 
               Most of my time is spent documenting combat sports, live events, and stage performances.
