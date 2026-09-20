@@ -56,7 +56,7 @@ export const EdzAboutView: React.FC<EdzAboutViewProps> = ({
           </div>
 
           {/* Bio text — aligned with the lanyard credential card on desktop */}
-          <div className="md:col-span-7 space-y-4 text-[14px] leading-[1.7] pt-2 sm:pt-4 md:pt-[115px]">
+          <div className="md:col-span-7 space-y-4 text-[14px] leading-[1.7] pt-4 sm:pt-6 md:pt-[150px]">
             <h1 className="font-schoolbell text-[30px] sm:text-[34px] md:text-[38px] text-[#1a1a1a] tracking-normal select-none -mb-1">
               About me
             </h1>
