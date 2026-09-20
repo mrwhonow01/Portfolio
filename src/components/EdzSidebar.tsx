@@ -40,6 +40,9 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
   const [termsModalOpen, setTermsModalOpen] = useState(false);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [sportsHovered, setSportsHovered] = useState(false);
+  const [mobileSportsExpanded, setMobileSportsExpanded] = useState(
+    currentView === 'album' && selectedAlbum === 'sports'
+  );
 
   // Global '?' keyboard shortcut to toggle helper guide
   useEffect(() => {
@@ -55,10 +58,12 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, []);
 
-  // Reset sports hovered state if leaving sports album
+  // Sync mobileSportsExpanded: keep open while in sports, collapse when moved to another tab
   useEffect(() => {
-    if (currentView !== 'album' || selectedAlbum !== 'sports') {
-      setSportsHovered(false);
+    if (currentView === 'album' && selectedAlbum === 'sports') {
+      setMobileSportsExpanded(true);
+    } else {
+      setMobileSportsExpanded(false);
     }
   }, [currentView, selectedAlbum]);
 
@@ -197,7 +202,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                           key={album.id}
                           className={album.id === 'sports' ? 'relative group/sports' : undefined}
                           onMouseEnter={() => {
-                            if (album.id === 'sports' && isSportsActive) {
+                            if (album.id === 'sports') {
                               setSportsHovered(true);
                             }
                           }}
@@ -207,7 +212,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                             }
                           }}
                           onFocus={() => {
-                            if (album.id === 'sports' && isSportsActive) {
+                            if (album.id === 'sports') {
                               setSportsHovered(true);
                             }
                           }}
@@ -224,14 +229,7 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                             href={`#album-${album.id}`}
                             onClick={(e) => {
                               e.preventDefault();
-                              if (album.id === 'sports' && isSportsActive) {
-                                setSportsHovered((prev) => !prev);
-                              } else {
-                                handleLinkClick('album', album.id, undefined);
-                                if (album.id === 'sports') {
-                                  setSportsHovered(true);
-                                }
-                              }
+                              handleLinkClick('album', album.id, undefined);
                             }}
                             className={`block py-0.5 text-[10px] tracking-wider transition-colors cursor-pointer ${
                               album.id === 'sports'
@@ -247,15 +245,12 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                           </a>
 
                           {/* Sub-tabs for Sports & Action:
-                              - Mobile: stay visible so touchscreen users can browse Muay Thai & Formula 1 directly
-                              - Desktop: only appear if hovered over SPORTS AND ACTION and if in SPORTS AND ACTION tab */}
-                          {album.id === 'sports' && (isMobile || isSportsActive) && (
+                              - Desktop: reveal whenever hovered over Sports & Action */}
+                          {album.id === 'sports' && (
                             <ul
                               className={`mt-1 ml-2 pl-2 border-l border-gray-200 space-y-0.5 overflow-hidden transition-all duration-200 ease-out ${
-                                isMobile
+                                sportsHovered
                                   ? 'opacity-100 max-h-28 pointer-events-auto block'
-                                  : sportsHovered
-                                  ? 'opacity-100 max-h-28 pointer-events-auto'
                                   : 'opacity-0 max-h-0 pointer-events-none group-hover/sports:opacity-100 group-hover/sports:max-h-28 group-hover/sports:pointer-events-auto group-focus-within/sports:opacity-100 group-focus-within/sports:max-h-28 group-focus-within/sports:pointer-events-auto'
                               }`}
                             >
@@ -599,24 +594,93 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                               {ALBUMS.map((album) => {
                                 const isAlbumActive =
                                   currentView === 'album' && selectedAlbum === album.id;
+                                const isSports = album.id === 'sports';
+                                const isSportsActive =
+                                  currentView === 'album' && selectedAlbum === 'sports';
+                                const isSportsMainActive =
+                                  isAlbumActive && !selectedSubAlbum;
 
                                 return (
-                                  <li key={album.id}>
+                                  <li key={album.id} className={isSports ? 'relative' : undefined}>
                                     <a
-                                      href={`#album/${album.id}`}
+                                      href={`#album-${album.id}`}
                                       aria-current={isAlbumActive ? 'page' : undefined}
                                       onClick={(e) => {
                                         e.preventDefault();
-                                        handleLinkClick('album', album.id);
+                                        if (isSports) {
+                                          if (!mobileSportsExpanded) {
+                                            // Click Sports & Action: reveal sub-tabs below it, navigate to sports album, keep drawer open
+                                            setMobileSportsExpanded(true);
+                                            onNavigate('album', 'sports');
+                                          } else {
+                                            // Already expanded: clicking Sports & Action navigates to sports and closes drawer
+                                            handleLinkClick('album', 'sports');
+                                          }
+                                        } else {
+                                          handleLinkClick('album', album.id);
+                                        }
                                       }}
                                       className={`block py-0.5 text-[10px] transition-colors cursor-pointer ${
-                                        isAlbumActive
+                                        isSports
+                                          ? isSportsMainActive
+                                            ? 'font-bold text-black'
+                                            : 'font-normal text-[#666666] hover:text-black'
+                                          : isAlbumActive
                                           ? 'font-bold text-black'
                                           : 'font-normal text-[#666666] hover:text-black'
                                       }`}
                                     >
                                       {album.label}
                                     </a>
+
+                                    {/* Mobile Sub-tabs for Sports & Action:
+                                        shown after clicking Sports & Action until moving to another tab */}
+                                    {isSports && (
+                                      <AnimatePresence>
+                                        {mobileSportsExpanded && (
+                                          <motion.ul
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.18, ease: 'easeOut' }}
+                                            className="mt-1 ml-2 pl-2 border-l border-gray-200 space-y-0.5 overflow-hidden"
+                                          >
+                                            <li>
+                                              <a
+                                                href="#subalbum-muay-thai"
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  handleLinkClick('album', 'sports', 'muay-thai');
+                                                }}
+                                                className={`block py-0.5 text-[9.5px] tracking-wider transition-colors cursor-pointer ${
+                                                  isSportsActive && selectedSubAlbum === 'muay-thai'
+                                                    ? 'font-bold text-black'
+                                                    : 'font-normal text-[#888888] hover:text-black'
+                                                }`}
+                                              >
+                                                Muay Thai
+                                              </a>
+                                            </li>
+                                            <li>
+                                              <a
+                                                href="#subalbum-formula-1"
+                                                onClick={(e) => {
+                                                  e.preventDefault();
+                                                  handleLinkClick('album', 'sports', 'formula-1');
+                                                }}
+                                                className={`block py-0.5 text-[9.5px] tracking-wider transition-colors cursor-pointer ${
+                                                  isSportsActive && selectedSubAlbum === 'formula-1'
+                                                    ? 'font-bold text-black'
+                                                    : 'font-normal text-[#888888] hover:text-black'
+                                                }`}
+                                              >
+                                                Formula 1
+                                              </a>
+                                            </li>
+                                          </motion.ul>
+                                        )}
+                                      </AnimatePresence>
+                                    )}
                                   </li>
                                 );
                               })}
