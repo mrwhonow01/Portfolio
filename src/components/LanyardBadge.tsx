@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'motion/react';
-import { Sparkles } from 'lucide-react';
 
 interface LanyardBadgeProps {
   avatarSrc: string;
@@ -107,12 +106,6 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 shadow-xs" />
           </div>
         </div>
-      </div>
-
-      {/* Interactive Helper Hint */}
-      <div className="absolute top-2 right-2 z-30 pointer-events-none text-[10px] font-mono tracking-wider uppercase flex items-center gap-1 px-2.5 py-1 rounded-full bg-zinc-100/90 text-zinc-600 border border-zinc-200 shadow-2xs backdrop-blur-xs select-none">
-        <Sparkles className="w-2.5 h-2.5 text-amber-500 animate-pulse" />
-        <span>move mouse over me</span>
       </div>
 
       {/* Entrance Animation Wrapper: drops down from the ceiling */}
