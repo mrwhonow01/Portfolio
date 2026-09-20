@@ -33,8 +33,8 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
   }, []);
 
   // Natural tilt/rotation based on horizontal displacement
-  // Matched to the pendulum swing angle of the lanyard strap
-  const badgeRotate = useTransform(dragX, [-150, 150], [-25, 25]);
+  // Subtle rotation centered at 50% 50% so the whole card translates together in unison
+  const badgeRotate = useTransform(dragX, [-160, 160], [-4.5, 4.5]);
 
   // Dynamic SVG path for left strap strand (from top peg anchor directly to metal crimp buckle)
   // Zero lag because it reads dragX and dragY directly!
@@ -135,7 +135,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     const impulseX = Math.max(-360, Math.min(360, speedX * 0.24));
     const impulseY = Math.max(-140, Math.min(140, speedY * 0.12));
 
-    // Dynamic deflection while brushing
+    // Dynamic deflection while brushing (whole card moves together)
     const pushTargetX = Math.max(-45, Math.min(45, (offsetX * 0.12) + (deltaX * 1.6)));
     // Pendulum arc lift: swinging sideways lifts slightly along circular arc against gravity
     const arcLift = -Math.min(10, (pushTargetX * pushTargetX) / 380);
@@ -261,7 +261,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
           />
         </svg>
 
-        {/* Draggable Lanyard Clasp & Badge Assembly */}
+        {/* Draggable Lanyard Clasp & Badge Assembly (Whole card moves together in unison) */}
         <motion.div
           ref={cardRef}
           drag
@@ -278,7 +278,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             x: dragX,
             y: dragY,
             rotate: badgeRotate,
-            transformOrigin: '50% 10px',
+            transformOrigin: '50% 50%',
             userSelect: 'none',
             WebkitUserSelect: 'none',
             outline: 'none',
@@ -317,7 +317,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             <div className="w-6 h-4 -mt-1 rounded-full border-2 border-zinc-300 bg-transparent shadow-xs" />
           </div>
 
-          {/* The Credential Badge Pouch & Card */}
+          {/* The Credential Badge Pouch with Retro Vinyl Finish */}
           <motion.div
             style={{
               boxShadow: badgeShadow,
@@ -325,82 +325,131 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
               WebkitUserSelect: 'none',
               outline: 'none',
             }}
-            className="w-[260px] sm:w-[270px] rounded-xl bg-white/95 border border-zinc-300/80 p-3.5 pt-2 flex flex-col relative select-none outline-none ring-0 focus:outline-none active:outline-none"
+            className="w-[264px] sm:w-[274px] rounded-2xl bg-[#fdfcf9]/85 backdrop-blur-[2px] border border-[#d6cebe]/90 p-3.5 pt-2 flex flex-col relative select-none outline-none ring-0 focus:outline-none active:outline-none shadow-md overflow-hidden"
           >
-            {/* Acrylic Badge Header Slot Punch Hole */}
+            {/* Retro Brass Grommet Slot Punch Hole */}
             <div className="w-full flex justify-center pb-2.5 pt-0.5 select-none pointer-events-none">
-              <div className="w-12 h-2.5 rounded-full bg-zinc-200/90 border border-zinc-400/60 shadow-inner flex items-center justify-center">
-                <div className="w-8 h-1 rounded-full bg-zinc-300/60" />
+              <div className="w-14 h-3 rounded-full bg-gradient-to-r from-[#8a682c] via-[#dfc48b] to-[#8a682c] p-[1.5px] shadow-xs flex items-center justify-center">
+                <div className="w-full h-full rounded-full bg-[#2d2215] flex items-center justify-center shadow-inner">
+                  <div className="w-9 h-1 rounded-full bg-[#18120b]" />
+                </div>
               </div>
             </div>
 
-            {/* Badge Inner Card */}
-            <div className="bg-[#fcfcfc] border border-zinc-200/80 rounded-lg p-3 shadow-xs relative overflow-hidden flex flex-col select-none pointer-events-none">
-              {/* Top Pass Header (clean, without red dot) */}
-              <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2.5 select-none">
-                <span className="text-[9.5px] font-mono font-bold tracking-widest uppercase text-black select-none">
-                  OFFICIAL PRESS
-                </span>
-                <span className="text-[8.5px] font-mono text-zinc-400 tracking-wider select-none">
+            {/* Badge Inner Retro Textured Cardstock */}
+            <div
+              className="relative rounded-xl shadow-xs flex flex-col select-none overflow-hidden border border-[#d4cbba]"
+              style={{
+                background: 'linear-gradient(160deg, #fdfbf7 0%, #f6f0e4 50%, #eee4d2 100%)',
+                boxShadow: 'inset 0 0 28px rgba(160, 130, 85, 0.14), inset 0 0 2px rgba(100, 75, 45, 0.2)',
+              }}
+            >
+              {/* Tactile Paper Texture & Fiber Grain Overlay */}
+              <div className="absolute inset-0 pointer-events-none z-10 select-none overflow-hidden">
+                {/* SVG Grain Noise Filter */}
+                <svg className="w-full h-full opacity-35 mix-blend-multiply" xmlns="http://www.w3.org/2000/svg">
+                  <filter id="retroPaperTexture">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3" stitchTiles="stitch" />
+                    <feColorMatrix type="matrix" values="
+                      0 0 0 0 0.55
+                      0 0 0 0 0.45
+                      0 0 0 0 0.35
+                      0 0 0 0.38 0" />
+                  </filter>
+                  <rect width="100%" height="100%" filter="url(#retroPaperTexture)" />
+                </svg>
+
+                {/* Retro Diagonal Crease Marks (like pocketed credentials) */}
+                <div className="absolute top-[32%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-black/[0.07] to-transparent rotate-[-9deg]" />
+                <div className="absolute top-[32%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-white/[0.22] to-transparent translate-y-[1px] rotate-[-9deg]" />
+                
+                <div className="absolute top-[68%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-black/[0.06] to-transparent rotate-[7deg]" />
+                <div className="absolute top-[68%] -left-6 w-[130%] h-[1px] bg-gradient-to-r from-transparent via-white/[0.18] to-transparent translate-y-[1px] rotate-[7deg]" />
+
+                {/* Scattered Paper Pulp Fiber Specks */}
+                <div className="absolute top-4 left-6 w-1 h-0.5 bg-[#4a3a2a]/20 rounded-full rotate-45" />
+                <div className="absolute top-16 right-8 w-1.5 h-0.5 bg-[#4a3a2a]/15 rounded-full -rotate-12" />
+                <div className="absolute bottom-12 left-10 w-1 h-0.5 bg-[#4a3a2a]/20 rounded-full rotate-30" />
+                <div className="absolute bottom-6 right-12 w-1.5 h-0.5 bg-[#4a3a2a]/15 rounded-full -rotate-45" />
+              </div>
+
+              {/* Retro Header Band (matching the brown retro cards on home screen) */}
+              <div className="relative bg-[#422108] text-[#f7f2e8] px-3 py-2 border-b-2 border-[#2b1504] shadow-xs flex items-center justify-between z-20 select-none">
+                {/* Subtle texture highlight on header */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-black/20 pointer-events-none" />
+                
+                <div className="relative flex items-center gap-1.5 z-10">
+                  <span className="text-[#e2c199] text-[10px] select-none font-bold">★</span>
+                  <span className="text-[9.5px] font-mono font-black tracking-widest uppercase text-[#fdfbf7] select-none">
+                    OFFICIAL PRESS PASS
+                  </span>
+                </div>
+
+                <span className="relative z-10 text-[8.5px] font-mono tracking-wider text-[#d4bca0] select-none">
                   #JY-2026-SG
                 </span>
               </div>
 
-              {/* Portrait Photo Frame with Gloss Sheen (clean, no Set Photo button) */}
-              <div className="relative aspect-[3/3.6] w-full bg-zinc-100 rounded border border-zinc-200 overflow-hidden shadow-xs select-none">
-                <img
-                  src={avatarSrc || '/DSC04070.jpg'}
-                  alt={`${name} — Photographer`}
-                  className="w-full h-full object-cover select-none pointer-events-none"
-                  draggable={false}
-                  onDragStart={(e) => e.preventDefault()}
-                  style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
-                />
-
-                {/* Diagonal Glass Sheen Reflection Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none select-none" />
-              </div>
-
-              {/* Badge Credential Identity Info */}
-              <div className="pt-2.5 flex flex-col select-none">
-                <div className="flex items-baseline justify-between select-none">
-                  <h2 className="text-[14px] font-bold text-black uppercase tracking-tight leading-none select-none">
-                    {name}
-                  </h2>
-                  <span className="text-[9px] font-mono uppercase tracking-wider text-zinc-400 select-none">
-                    {location}
-                  </span>
+              {/* Card Body Content */}
+              <div className="p-3 pt-2.5 relative z-20 flex flex-col select-none pointer-events-none">
+                {/* Analog Glossy Photo Print Frame */}
+                <div className="relative aspect-[3/3.6] w-full p-1 bg-[#fffdfa] rounded-sm border border-[#d8cfbe] shadow-sm select-none overflow-hidden">
+                  <div className="relative w-full h-full rounded-xs overflow-hidden bg-zinc-200">
+                    <img
+                      src={avatarSrc || '/DSC04070.jpg'}
+                      alt={`${name} — Photographer`}
+                      className="w-full h-full object-cover select-none pointer-events-none"
+                      draggable={false}
+                      onDragStart={(e) => e.preventDefault()}
+                      style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                    />
+                    {/* Subtle vintage photo sheen reflection */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/15 to-transparent pointer-events-none select-none" />
+                  </div>
                 </div>
 
-                <p className="text-[9.5px] uppercase tracking-wider font-mono text-zinc-600 mt-1 select-none">
-                  Photographer & Storyteller
-                </p>
+                {/* Badge Credential Identity Info */}
+                <div className="pt-2.5 flex flex-col select-none">
+                  <div className="flex items-baseline justify-between select-none">
+                    <h2 className="text-[14px] font-black text-[#1f1915] uppercase tracking-tight leading-none select-none">
+                      {name}
+                    </h2>
+                    <span className="text-[9px] font-mono uppercase tracking-wider text-[#82715e] select-none font-semibold">
+                      {location}
+                    </span>
+                  </div>
 
-                {/* Barcode Footer (clean, without ACCREDITED) */}
-                <div className="mt-2.5 pt-2 border-t border-dashed border-zinc-200 flex items-center justify-between select-none">
-                  <span className="text-[8px] font-mono uppercase tracking-widest text-zinc-400 select-none">
-                    MEDIA ACCESS PASS
-                  </span>
+                  {/* Subtitle in Schoolbell font matching the retro home screen cards */}
+                  <p className="font-schoolbell text-[13.5px] text-[#4a2e19] mt-1 select-none font-bold tracking-normal leading-tight">
+                    * Photographer & Storyteller
+                  </p>
 
-                  {/* Faux Barcode */}
-                  <div className="flex items-end gap-[1.5px] h-3.5 opacity-50 select-none">
-                    <div className="w-[1px] h-full bg-black" />
-                    <div className="w-[2px] h-full bg-black" />
-                    <div className="w-[1px] h-full bg-black" />
-                    <div className="w-[1.5px] h-full bg-black" />
-                    <div className="w-[1px] h-full bg-black" />
-                    <div className="w-[2.5px] h-full bg-black" />
-                    <div className="w-[1px] h-full bg-black" />
-                    <div className="w-[1.5px] h-full bg-black" />
-                    <div className="w-[2px] h-full bg-black" />
-                    <div className="w-[1px] h-full bg-black" />
+                  {/* Barcode Footer with Perforated Dotted Border */}
+                  <div className="mt-2.5 pt-2 border-t border-dashed border-[#cfc4b2] flex items-center justify-between select-none">
+                    <span className="text-[8px] font-mono uppercase tracking-widest text-[#7d6c59] select-none font-semibold">
+                      MEDIA ACCESS PASS
+                    </span>
+
+                    {/* Vintage Barcode */}
+                    <div className="flex items-end gap-[1.5px] h-3.5 opacity-60 select-none">
+                      <div className="w-[1px] h-full bg-[#1f1915]" />
+                      <div className="w-[2px] h-full bg-[#1f1915]" />
+                      <div className="w-[1px] h-full bg-[#1f1915]" />
+                      <div className="w-[1.5px] h-full bg-[#1f1915]" />
+                      <div className="w-[1px] h-full bg-[#1f1915]" />
+                      <div className="w-[2.5px] h-full bg-[#1f1915]" />
+                      <div className="w-[1px] h-full bg-[#1f1915]" />
+                      <div className="w-[1.5px] h-full bg-[#1f1915]" />
+                      <div className="w-[2px] h-full bg-[#1f1915]" />
+                      <div className="w-[1px] h-full bg-[#1f1915]" />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Clear Vinyl Sleeve Border Reflection Highlights */}
-            <div className="absolute inset-0 rounded-xl pointer-events-none border border-white/50 shadow-inner select-none" />
+            <div className="absolute inset-0 rounded-2xl pointer-events-none border border-white/60 shadow-inner select-none" />
           </motion.div>
         </motion.div>
       </div>
