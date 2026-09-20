@@ -5,12 +5,8 @@ import {
   ChevronRight,
   Maximize2,
   Minimize2,
-  Info,
-  Camera,
   Share2,
   Download,
-  Calendar,
-  MapPin,
   Check,
   ZoomIn,
   ZoomOut,
@@ -33,7 +29,6 @@ export const Lightbox: React.FC<LightboxProps> = ({
   onClose,
   onNavigate,
 }) => {
-  const [showInfo, setShowInfo] = useState(true);
   const [isZoomed, setIsZoomed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -81,7 +76,6 @@ export const Lightbox: React.FC<LightboxProps> = ({
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight') handleNext();
       if (e.key === 'ArrowLeft') handlePrev();
-      if (e.key.toLowerCase() === 'i') setShowInfo((prev) => !prev);
       if (e.key.toLowerCase() === 'f') toggleFullscreen();
     };
 
@@ -172,21 +166,6 @@ export const Lightbox: React.FC<LightboxProps> = ({
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </motion.button>
 
-              {/* Info Toggle */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowInfo(!showInfo)}
-                className={`p-2 rounded-full transition-colors ${
-                  showInfo
-                    ? 'text-black bg-zinc-100 font-medium'
-                    : 'text-zinc-500 hover:text-black hover:bg-zinc-100'
-                }`}
-                title="Toggle Shot Info & EXIF (I)"
-              >
-                <Info className="w-4 h-4" />
-              </motion.button>
-
               {/* Share */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -226,23 +205,25 @@ export const Lightbox: React.FC<LightboxProps> = ({
             </div>
           </div>
 
-          {/* Main Image Stage & Drawer */}
-          <div className="relative flex-1 flex overflow-hidden">
+          {/* Main Image Stage - Pure Enlarged Photograph With Full Visual Focus */}
+          <div className="relative flex-1 flex items-center justify-center overflow-hidden">
             {/* Navigation Arrow Left */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={handlePrev}
-              id="lightbox-prev-btn"
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 p-3.5 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black border border-zinc-200 shadow-md backdrop-blur-md transition-all cursor-pointer"
-              aria-label="Previous photograph"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </motion.button>
+            {photos.length > 1 && (
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.92 }}
+                onClick={handlePrev}
+                id="lightbox-prev-btn"
+                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 p-3.5 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black border border-zinc-200 shadow-md backdrop-blur-md transition-all cursor-pointer"
+                aria-label="Previous photograph"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </motion.button>
+            )}
 
-            {/* Center Canvas Area */}
+            {/* Center Canvas Area - Pure full-screen expansion */}
             <div
-              className={`flex-1 relative flex items-center justify-center p-4 sm:p-10 overflow-auto ${
+              className={`w-full h-full relative flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-auto ${
                 isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'
               }`}
               onClick={() => setIsZoomed(!isZoomed)}
@@ -257,154 +238,34 @@ export const Lightbox: React.FC<LightboxProps> = ({
               <AnimatePresence mode="wait">
                 <motion.img
                   key={currentPhoto.id}
-                  initial={{ opacity: 0, scale: 0.97 }}
+                  initial={{ opacity: 0, scale: 0.98 }}
                   animate={{
                     opacity: imageLoaded ? 1 : 0,
                     scale: isZoomed ? 1.5 : 1,
                   }}
                   exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.3 }}
+                  transition={{ duration: 0.25 }}
                   src={currentPhoto.src}
                   alt={currentPhoto.title}
                   onLoad={() => setImageLoaded(true)}
-                  className="max-h-full max-w-full object-contain rounded-xl shadow-xl transition-transform duration-300 transform-gpu border border-black/5"
+                  className="max-h-[86vh] max-w-[94vw] object-contain rounded-xl shadow-2xl transition-transform duration-300 transform-gpu border border-black/5 select-none"
                 />
               </AnimatePresence>
             </div>
 
             {/* Navigation Arrow Right */}
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.92 }}
-              onClick={handleNext}
-              id="lightbox-next-btn"
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 p-3.5 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black border border-zinc-200 shadow-md backdrop-blur-md transition-all cursor-pointer"
-              aria-label="Next photograph"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </motion.button>
-
-            {/* EXIF & Metadata Sidebar Drawer with AnimatePresence */}
-            <AnimatePresence>
-              {showInfo && (
-                <motion.aside
-                  key="lightbox-drawer"
-                  initial={{ x: 340, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: 340, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  id="lightbox-info-drawer"
-                  className="w-full sm:w-84 lg:w-96 bg-white/98 border-l border-zinc-200 backdrop-blur-2xl p-7 overflow-y-auto flex flex-col justify-between absolute sm:relative inset-y-0 right-0 z-20 shadow-xl text-zinc-800"
-                >
-                  <div className="space-y-6">
-                    {/* Category & Date */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-semibold tracking-wider uppercase px-3 py-1 rounded-full bg-zinc-100 text-zinc-800 border border-zinc-200">
-                        {currentPhoto.category}
-                      </span>
-                      {currentPhoto.date ? (
-                        <span className="text-xs text-zinc-500 flex items-center gap-1.5">
-                          <Calendar className="w-3.5 h-3.5" />
-                          {currentPhoto.date}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    {/* Title & Project */}
-                    <div>
-                      <h3 className="text-xl font-bold tracking-tight text-zinc-900 leading-snug">
-                        {currentPhoto.title}
-                      </h3>
-                      {currentPhoto.clientOrProject && (
-                        <p className="text-xs text-zinc-600 mt-1.5 font-medium">
-                          {currentPhoto.clientOrProject}
-                        </p>
-                      )}
-                      {currentPhoto.story && (
-                        <p className="text-xs text-zinc-600 leading-relaxed mt-2.5 font-normal">
-                          {currentPhoto.story}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Camera & EXIF Information Grid */}
-                    <div className="pt-3.5 border-t border-zinc-200">
-                      <div className="flex items-center gap-2 mb-3.5">
-                        <Camera className="w-4 h-4 text-zinc-500" />
-                        <span className="text-xs font-semibold uppercase tracking-wider text-zinc-800">
-                          Camera & Settings
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2.5 text-xs">
-                        <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200/80">
-                          <span className="block text-[10px] text-zinc-500 uppercase">Camera</span>
-                          <span className="font-mono text-zinc-900 truncate block mt-0.5">
-                            {currentPhoto.cameraInfo?.camera || 'Sony Alpha 7 II (A7M2)'}
-                          </span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200/80">
-                          <span className="block text-[10px] text-zinc-500 uppercase">Lens</span>
-                          <span className="font-mono text-zinc-900 truncate block mt-0.5">
-                            {currentPhoto.cameraInfo?.lens || 'Tamron 28-75mm f/2.8 Di III VXD G2'}
-                          </span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200/80">
-                          <span className="block text-[10px] text-zinc-500 uppercase">Aperture</span>
-                          <span className="font-mono text-zinc-900 block mt-0.5">
-                            {currentPhoto.cameraInfo?.aperture || 'f/2.8'}
-                          </span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200/80">
-                          <span className="block text-[10px] text-zinc-500 uppercase">Shutter</span>
-                          <span className="font-mono text-zinc-900 block mt-0.5">
-                            {currentPhoto.cameraInfo?.shutter || '1/1000s'}
-                          </span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200/80">
-                          <span className="block text-[10px] text-zinc-500 uppercase">ISO</span>
-                          <span className="font-mono text-zinc-900 block mt-0.5">
-                            {currentPhoto.cameraInfo?.iso || '800'}
-                          </span>
-                        </div>
-                        <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200/80">
-                          <span className="block text-[10px] text-zinc-500 uppercase">Focal Length</span>
-                          <span className="font-mono text-zinc-900 block mt-0.5">
-                            {currentPhoto.cameraInfo?.focalLength || '50mm'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Tags */}
-                    {currentPhoto.tags && currentPhoto.tags.length > 0 && (
-                      <div className="pt-3.5 border-t border-zinc-200">
-                        <div className="flex flex-wrap gap-1.5">
-                          {currentPhoto.tags.map((tag) => (
-                            <span
-                              key={tag}
-                              className="text-[11px] px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200"
-                            >
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Mobile close info button */}
-                  <div className="pt-6 sm:hidden">
-                    <button
-                      onClick={() => setShowInfo(false)}
-                      className="w-full py-2.5 text-xs text-zinc-700 bg-zinc-100 rounded-xl"
-                    >
-                      Hide Details
-                    </button>
-                  </div>
-                </motion.aside>
-              )}
-            </AnimatePresence>
+            {photos.length > 1 && (
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.92 }}
+                onClick={handleNext}
+                id="lightbox-next-btn"
+                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 p-3.5 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black border border-zinc-200 shadow-md backdrop-blur-md transition-all cursor-pointer"
+                aria-label="Next photograph"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </motion.button>
+            )}
           </div>
         </motion.div>
       )}
