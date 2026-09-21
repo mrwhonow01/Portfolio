@@ -16,7 +16,39 @@ interface EdzAlbumGridViewProps {
   onSelectSubAlbum?: (sub: SportsSubCategory) => void;
 }
 
-export const EdzAlbumGridView: React.FC<EdzAlbumGridViewProps> = ({
+interface AlbumGridItemProps {
+  photo: PhotoItem;
+  index: number;
+  onSelect: (index: number) => void;
+}
+
+const AlbumGridItem = React.memo<AlbumGridItemProps>(({ photo, index, onSelect }) => (
+  <figure
+    onClick={() => onSelect(index)}
+    className="kpgriditem group cursor-pointer block"
+  >
+    {/* Image Frame with natural aspect ratio & #f4f4f4 frame */}
+    <div className="bg-[#f4f4f4] overflow-hidden relative">
+      <ProgressiveImage
+        src={photo.thumbnailSrc || photo.src}
+        thumbnailSrc={photo.thumbnailSrc}
+        alt={photo.title}
+        loading={index < 6 ? 'eager' : 'lazy'}
+        decoding="async"
+        className="w-full h-auto block object-cover group-hover:opacity-90 transition-opacity duration-300"
+      />
+
+      {/* "CLICK TO VIEW" badge at bottom left on hover */}
+      <div className="absolute bottom-2.5 left-2.5 pointer-events-none z-10">
+        <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/95 text-black border border-black/10 px-2.5 py-1 text-[9.5px] tracking-wider uppercase font-semibold shadow-sm block select-none">
+          Click to View
+        </span>
+      </div>
+    </div>
+  </figure>
+));
+
+const EdzAlbumGridViewComponent: React.FC<EdzAlbumGridViewProps> = ({
   photos,
   currentAlbum,
   selectedSubAlbum,
@@ -152,30 +184,12 @@ export const EdzAlbumGridView: React.FC<EdzAlbumGridViewProps> = ({
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-[30px] items-start w-full"
         >
           {photos.map((photo, index) => (
-            <figure
+            <AlbumGridItem
               key={photo.id}
-              onClick={() => setEnlargedIndex(index)}
-              className="kpgriditem group cursor-pointer block"
-            >
-              {/* Image Frame with natural aspect ratio & #f4f4f4 frame */}
-              <div className="bg-[#f4f4f4] overflow-hidden relative">
-                <ProgressiveImage
-                  src={photo.thumbnailSrc || photo.src}
-                  thumbnailSrc={photo.thumbnailSrc}
-                  alt={photo.title}
-                  loading={index < 6 ? 'eager' : 'lazy'}
-                  decoding="async"
-                  className="w-full h-auto block object-cover group-hover:opacity-90 transition-opacity duration-300"
-                />
-
-                {/* "CLICK TO VIEW" badge at bottom left on hover */}
-                <div className="absolute bottom-2.5 left-2.5 pointer-events-none z-10">
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/95 text-black border border-black/10 px-2.5 py-1 text-[9.5px] tracking-wider uppercase font-semibold shadow-sm block select-none">
-                    Click to View
-                  </span>
-                </div>
-              </div>
-            </figure>
+              photo={photo}
+              index={index}
+              onSelect={setEnlargedIndex}
+            />
           ))}
         </div>
       ) : (
@@ -253,3 +267,5 @@ export const EdzAlbumGridView: React.FC<EdzAlbumGridViewProps> = ({
     </div>
   );
 };
+
+export const EdzAlbumGridView = React.memo(EdzAlbumGridViewComponent);

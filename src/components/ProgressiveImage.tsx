@@ -11,7 +11,7 @@ interface ProgressiveImageProps {
   onClick?: () => void;
 }
 
-export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
+const ProgressiveImageComponent: React.FC<ProgressiveImageProps> = ({
   src,
   alt,
   thumbnailSrc,
@@ -73,3 +73,5 @@ export const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
     </div>
   );
 };
+
+export const ProgressiveImage = React.memo(ProgressiveImageComponent);

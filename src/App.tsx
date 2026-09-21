@@ -249,14 +249,21 @@ export default function App() {
   const isTransitioningRef = useRef(false);
 
   useEffect(() => {
+    let timeoutId: number | null = null;
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile((prev) => (prev !== mobile ? mobile : prev));
+    };
+    const debouncedCheck = () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(checkMobile, 120);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    window.addEventListener('orientationchange', checkMobile);
+    window.addEventListener('resize', debouncedCheck, { passive: true });
+    window.addEventListener('orientationchange', checkMobile, { passive: true });
     return () => {
-      window.removeEventListener('resize', checkMobile);
+      if (timeoutId) window.clearTimeout(timeoutId);
+      window.removeEventListener('resize', debouncedCheck);
       window.removeEventListener('orientationchange', checkMobile);
     };
   }, []);
@@ -274,10 +281,17 @@ export default function App() {
       return;
     }
 
+    let ticking = false;
     const handleScroll = () => {
-      // Threshold when the user has scrolled past the cards
-      const threshold = Math.max(280, window.innerHeight * 0.35);
-      setIsPastHeroCards(window.scrollY > threshold);
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          const threshold = Math.max(280, window.innerHeight * 0.35);
+          const past = window.scrollY > threshold;
+          setIsPastHeroCards((prev) => (prev !== past ? past : prev));
+          ticking = false;
+        });
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -383,20 +397,20 @@ export default function App() {
     let touchStartY = 0;
     let isAtBottom = false;
     let isAtTop = false;
+    let cachedDocHeight = 0;
+    let cachedWinHeight = 0;
+
+    const measureDimensions = () => {
+      cachedWinHeight = window.innerHeight;
+      cachedDocHeight = Math.max(
+        document.body.scrollHeight,
+        document.documentElement.scrollHeight
+      );
+    };
 
     const checkIsAtBottom = () => {
       const scrollY = window.scrollY || window.pageYOffset || 0;
-      const windowHeight = window.innerHeight;
-      const docHeight = Math.max(
-        document.body.scrollHeight,
-        document.documentElement.scrollHeight,
-        document.body.offsetHeight,
-        document.documentElement.offsetHeight,
-        document.body.clientHeight,
-        document.documentElement.clientHeight
-      );
-      // Within 30px of the very bottom
-      return scrollY + windowHeight >= docHeight - 30;
+      return scrollY + cachedWinHeight >= cachedDocHeight - 35;
     };
 
     const checkIsAtTop = () => {
@@ -407,6 +421,7 @@ export default function App() {
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
       touchStartY = e.touches[0].clientY;
+      measureDimensions();
       isAtBottom = checkIsAtBottom();
       isAtTop = checkIsAtTop();
     };
@@ -414,12 +429,12 @@ export default function App() {
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length !== 1 || isTransitioningRef.current) return;
       const currentY = e.touches[0].clientY;
-      const deltaY = touchStartY - currentY; // positive when swiping up / scrolling down, negative when swiping down / scrolling up
+      const deltaY = touchStartY - currentY;
 
       // Scroll further down at the bottom -> Next page
       if (isAtBottom && deltaY > 48) {
         triggerMobileAdvance();
-      } else if (!isAtBottom && checkIsAtBottom()) {
+      } else if (!isAtBottom && deltaY > 20 && checkIsAtBottom()) {
         isAtBottom = true;
         touchStartY = currentY;
       }
@@ -427,7 +442,7 @@ export default function App() {
       // Scroll further up at the top -> Previous page
       if (isAtTop && deltaY < -48) {
         triggerMobileBack();
-      } else if (!isAtTop && checkIsAtTop()) {
+      } else if (!isAtTop && deltaY < -20 && checkIsAtTop()) {
         isAtTop = true;
         touchStartY = currentY;
       }
@@ -449,12 +464,15 @@ export default function App() {
 
     const onWheel = (e: WheelEvent) => {
       if (isTransitioningRef.current) return;
-      if (checkIsAtBottom() && e.deltaY > 25) {
-        triggerMobileAdvance();
-      } else if (checkIsAtTop() && e.deltaY < -25) {
-        triggerMobileBack();
+      if (e.deltaY > 25) {
+        measureDimensions();
+        if (checkIsAtBottom()) triggerMobileAdvance();
+      } else if (e.deltaY < -25) {
+        if (checkIsAtTop()) triggerMobileBack();
       }
     };
+
+    measureDimensions();
 
     window.addEventListener('touchstart', onTouchStart, { passive: true });
     window.addEventListener('touchmove', onTouchMove, { passive: true });

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, animate } from 'motion/react';
 
 interface LanyardBadgeProps {
@@ -14,10 +14,20 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const cachedCardRectRef = useRef<DOMRect | null>(null);
   const isDraggingRef = useRef(false);
   const hasContactedRef = useRef(false);
   const lastMousePosRef = useRef<{ x: number; y: number } | null>(null);
   const lastTimeRef = useRef<number | null>(null);
+
+  // Invalidate cached rect on resize
+  useEffect(() => {
+    const handleResize = () => {
+      cachedCardRectRef.current = null;
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Translation motion values for the top hardware / strap connection point
   const dragX = useMotionValue(0);
@@ -122,8 +132,11 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
     const speedX = (deltaX / dt) * 1000;
     const speedY = (deltaY / dt) * 1000;
 
-    // Measure exact card dimensions & hit location
-    const cardRect = cardEl.getBoundingClientRect();
+    // Measure exact card dimensions & hit location (cached for 60/120fps performance)
+    if (!cachedCardRectRef.current) {
+      cachedCardRectRef.current = cardEl.getBoundingClientRect();
+    }
+    const cardRect = cachedCardRectRef.current;
     const cardCenterX = cardRect.left + cardRect.width / 2;
     const cardTopY = cardRect.top;
 
@@ -273,6 +286,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
 
   const handleCardMouseLeave = () => {
     hasContactedRef.current = false;
+    cachedCardRectRef.current = null;
   };
 
   // Touch screen support
@@ -460,6 +474,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
             userSelect: 'none',
             WebkitUserSelect: 'none',
             outline: 'none',
+            willChange: 'transform',
           }}
           onDragStart={() => {
             isDraggingRef.current = true;
@@ -473,7 +488,7 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
               hasContactedRef.current = false;
             }, 300);
           }}
-          className="relative mt-[95px] flex flex-col items-center cursor-grab active:cursor-grabbing z-20 touch-none select-none outline-none ring-0"
+          className="relative mt-[95px] flex flex-col items-center cursor-grab active:cursor-grabbing z-20 touch-none select-none outline-none ring-0 transform-gpu"
         >
           {/* Metal Swivel Clasp & Crimp Hardware */}
           <div className="relative flex flex-col items-center -mb-3 z-30 pointer-events-none select-none filter drop-shadow-[0_4px_7px_rgba(0,0,0,0.25)]">
@@ -531,8 +546,9 @@ export const LanyardBadge: React.FC<LanyardBadgeProps> = ({
               userSelect: 'none',
               WebkitUserSelect: 'none',
               outline: 'none',
+              willChange: 'transform',
             }}
-            className="w-[270px] sm:w-[282px] rounded-2xl bg-white/80 backdrop-blur-[3px] border-2 border-[#d2c7b5]/90 p-3.5 pt-2 flex flex-col relative select-none outline-none ring-0 focus:outline-none active:outline-none shadow-xl overflow-hidden cursor-pointer"
+            className="w-[270px] sm:w-[282px] rounded-2xl bg-white/80 backdrop-blur-[3px] border-2 border-[#d2c7b5]/90 p-3.5 pt-2 flex flex-col relative select-none outline-none ring-0 focus:outline-none active:outline-none shadow-xl overflow-hidden cursor-pointer transform-gpu"
           >
             {/* Ultrasonic Welded Edge Perimeter Seam (Frosted 3.5mm bond line) */}
             <div className="absolute inset-1 rounded-xl pointer-events-none border-2 border-dotted border-[#bdae97]/45 z-30" />

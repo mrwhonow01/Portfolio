@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useSpring, useMotionValue } from 'motion/react';
 
-export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPastHeroCards = false }) => {
+const NametagHeroCardComponent: React.FC<{ isPastHeroCards?: boolean }> = ({ isPastHeroCards = false }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [isHovered, setIsHovered] = useState<boolean>(false);
@@ -9,12 +9,21 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
 
   // Check window size for responsive scroll distances
   useEffect(() => {
+    let timeoutId: number | null = null;
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      const mobile = window.innerWidth < 768;
+      setIsMobile((prev) => (prev !== mobile ? mobile : prev));
+    };
+    const debouncedCheck = () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(checkMobile, 120);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener('resize', debouncedCheck, { passive: true });
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+      window.removeEventListener('resize', debouncedCheck);
+    };
   }, []);
 
   // Global window scroll tracking
@@ -113,10 +122,11 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
           rotate: card2Rotate,
           rotateX: isHovered ? tiltRotateX : 0,
           rotateY: isHovered ? tiltRotateY : 0,
+          willChange: 'transform',
         }}
         whileHover={{ scale: 1.02 }}
         transition={{ type: 'spring', stiffness: 260, damping: 25 }}
-        className="absolute w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-10 md:filter md:drop-shadow-[0_12px_24px_rgba(74,36,8,0.12)]"
+        className="absolute w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-10 md:filter md:drop-shadow-[0_12px_24px_rgba(74,36,8,0.12)] transform-gpu"
       >
         <img
           src="/card-nametag-brown.webp?v=4"
@@ -137,10 +147,11 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
           rotate: card1Rotate,
           rotateX: isHovered ? tiltRotateX : 0,
           rotateY: isHovered ? tiltRotateY : 0,
+          willChange: 'transform',
         }}
         whileHover={{ scale: 1.02 }}
         transition={{ type: 'spring', stiffness: 260, damping: 25 }}
-        className="relative w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-20 md:filter md:drop-shadow-[0_14px_28px_rgba(0,0,0,0.12)]"
+        className="relative w-[290px] xs:w-[340px] sm:w-[420px] md:w-[460px] aspect-[1.6/1] z-20 md:filter md:drop-shadow-[0_14px_28px_rgba(0,0,0,0.12)] transform-gpu"
       >
         <img
           src="/card-nametag-blue.webp?v=4"
@@ -153,3 +164,5 @@ export const NametagHeroCard: React.FC<{ isPastHeroCards?: boolean }> = ({ isPas
     </div>
   );
 };
+
+export const NametagHeroCard = React.memo(NametagHeroCardComponent);

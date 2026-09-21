@@ -83,10 +83,28 @@ button, a, .kpgriditem, figure, [role="button"] {
   contain-intrinsic-size: 700px;
 }
 
+.kpgriditem {
+  content-visibility: auto;
+  contain-intrinsic-size: 360px;
+}
+
+/* Hardware GPU compositor acceleration helper */
+.transform-gpu {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
 /* Prevent accidental image drag on mobile touch devices */
 img {
   -webkit-user-drag: none;
   user-select: none;
+}
+
+/* Prevent unwanted pull-to-refresh rubber-banding during app navigation */
+html, body {
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Infinite Running Marquee Animation matching justinle.xyz */
@@ -104,5 +122,21 @@ img {
   width: max-content;
   animation: marquee 28s linear infinite;
   will-change: transform;
+}
+
+/* Respect user system preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-marquee {
+    animation: none;
+    transform: none;
+  }
 }
 
