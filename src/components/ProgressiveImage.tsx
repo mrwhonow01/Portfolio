@@ -44,7 +44,11 @@ const ProgressiveImageComponent: React.FC<ProgressiveImageProps> = ({
           aria-hidden="true"
           loading="eager"
           decoding="async"
-          className={`absolute inset-0 w-full h-full object-contain filter blur-md scale-105 opacity-60 transition-opacity duration-300 ${className}`}
+          draggable={false}
+          onContextMenu={(e) => e.preventDefault()}
+          onDragStart={(e) => e.preventDefault()}
+          className={`absolute inset-0 w-full h-full object-contain filter blur-md scale-105 opacity-60 transition-opacity duration-300 pointer-events-none select-none ${className}`}
+          style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
         />
       )}
 
@@ -60,11 +64,27 @@ const ProgressiveImageComponent: React.FC<ProgressiveImageProps> = ({
         loading={loading}
         decoding={decoding}
         fetchPriority={fetchpriority}
+        draggable={false}
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
-        className={`relative z-10 transition-opacity duration-300 ease-out ${
+        onContextMenu={(e) => e.preventDefault()}
+        onDragStart={(e) => e.preventDefault()}
+        className={`relative z-10 transition-opacity duration-300 ease-out pointer-events-none select-none ${
           isLoaded ? 'opacity-100' : 'opacity-0'
         } ${className}`}
+        style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+      />
+
+      {/* Transparent Protective Shield: Intercepts right-clicks, mobile hold, and inspect element */}
+      <div
+        className="photo-shield absolute inset-0 z-20 pointer-events-auto cursor-pointer"
+        style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.dispatchEvent(new CustomEvent('photo-protection-alert'));
+        }}
+        onDragStart={(e) => e.preventDefault()}
       />
 
       {/* Graceful error state */}

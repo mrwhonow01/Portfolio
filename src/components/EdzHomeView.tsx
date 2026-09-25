@@ -55,7 +55,11 @@ export const EdzHomeView: React.FC<EdzHomeViewProps> = ({ photos, className, sty
               transition={{ duration: 0.35, ease: 'easeOut' }}
               src={currentPhoto.src}
               alt={currentPhoto.title}
+              draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
+              onDragStart={(e) => e.preventDefault()}
               className="max-h-full max-w-full w-auto h-auto object-contain select-none pointer-events-none"
+              style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
             />
           </AnimatePresence>
         </div>

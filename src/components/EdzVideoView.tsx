@@ -69,7 +69,22 @@ export const EdzVideoView: React.FC<EdzVideoViewProps> = ({ videos }) => {
                       alt={video.title}
                       loading="lazy"
                       decoding="async"
-                      className="w-full h-full object-cover group-hover/thumb:scale-[1.01] transition-transform duration-500 opacity-95"
+                      draggable={false}
+                      onContextMenu={(e) => e.preventDefault()}
+                      onDragStart={(e) => e.preventDefault()}
+                      className="w-full h-full object-cover group-hover/thumb:scale-[1.01] transition-transform duration-500 opacity-95 select-none pointer-events-none"
+                      style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+                    />
+                    {/* Protective Shield Overlay */}
+                    <div
+                      className="photo-shield absolute inset-0 z-10 pointer-events-auto"
+                      style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        window.dispatchEvent(new CustomEvent('photo-protection-alert'));
+                      }}
+                      onDragStart={(e) => e.preventDefault()}
                     />
                     {/* Minimalist Play Button */}
                     <div className="absolute inset-0 bg-black/20 group-hover/thumb:bg-black/35 transition-colors flex items-center justify-center">

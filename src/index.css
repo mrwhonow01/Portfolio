@@ -125,10 +125,26 @@ button, a, .kpgriditem, figure, [role="button"] {
   will-change: transform;
 }
 
-/* Prevent accidental image drag on mobile touch devices */
-img {
-  -webkit-user-drag: none;
-  user-select: none;
+/* =========================================================================
+   Image Protection & Anti-Scraping Guards
+   ========================================================================= */
+img, canvas, video, .photo-shield, .imgframe {
+  -webkit-touch-callout: none !important; /* Disable iOS Safari long-press Save Image menu */
+  -webkit-user-select: none !important;
+  -khtml-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  user-drag: none !important;
+}
+
+/* Protective transparent shield overlay: absorbs right click & inspect */
+.photo-shield {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  pointer-events: auto;
 }
 
 /* Prevent unwanted pull-to-refresh rubber-banding during app navigation */

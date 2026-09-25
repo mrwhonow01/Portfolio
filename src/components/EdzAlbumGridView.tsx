@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { PhotoItem } from '../types';
 import { AlbumCategory, ALBUMS } from './EdzSidebar';
 import { ProgressiveImage } from './ProgressiveImage';
+import { ProtectedCanvasImage } from './ProtectedCanvasImage';
 
 export type SportsSubCategory = 'all' | 'muay-thai' | 'formula-1';
 
@@ -234,19 +235,13 @@ const EdzAlbumGridViewComponent: React.FC<EdzAlbumGridViewProps> = ({
               className="relative flex-1 w-full flex items-center justify-center min-h-0 py-2"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Pure Enlarged Photograph - Zero metadata, full visual focus */}
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={photos[enlargedIndex].id}
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                  src={photos[enlargedIndex].src}
-                  alt=""
-                  className="max-h-[82vh] max-w-[92vw] object-contain select-none shadow-xl border border-black/5"
-                />
-              </AnimatePresence>
+              {/* Pure Enlarged Photograph - Rendered via Canvas without img or src in DOM */}
+              <ProtectedCanvasImage
+                key={photos[enlargedIndex].id}
+                src={photos[enlargedIndex].src}
+                alt={photos[enlargedIndex].title || ''}
+                className="max-h-[82vh] max-w-[92vw] w-auto h-auto object-contain select-none shadow-xl border border-black/5 rounded-lg"
+              />
             </div>
 
             {/* Bottom Bar: Number of picture in the tab ONLY */}

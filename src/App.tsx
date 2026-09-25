@@ -14,6 +14,7 @@ import { ContentScroll } from './components/ContentScroll';
 import { Lightbox } from './components/Lightbox';
 import { MobileNextPageCue } from './components/MobileNextPageCue';
 import { MobilePrevPageCue } from './components/MobilePrevPageCue';
+import { PhotoProtectionNotice } from './components/PhotoProtectionNotice';
 import {
   loadPhotos,
   loadProfile,
@@ -300,6 +301,87 @@ export default function App() {
       if (timeoutId) window.clearTimeout(timeoutId);
       window.removeEventListener('resize', debouncedCheck);
       window.removeEventListener('orientationchange', checkMobile);
+    };
+  }, []);
+
+  // Image Protection & Anti-Inspect Security System
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+      if (
+        target.tagName === 'IMG' ||
+        target.tagName === 'CANVAS' ||
+        target.tagName === 'VIDEO' ||
+        target.classList.contains('photo-shield') ||
+        target.closest('.photo-shield') ||
+        target.closest('.imgframe') ||
+        target.closest('#portfolio-lightbox') ||
+        target.closest('#subalbum-enlarged-modal') ||
+        target.closest('#instagram-enlarged-modal')
+      ) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('photo-protection-alert'));
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const modifier = isMac ? e.metaKey : e.ctrlKey;
+
+      // F12 (DevTools)
+      if (e.key === 'F12') {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('photo-protection-alert'));
+        return;
+      }
+
+      // Ctrl/Cmd + Shift + I (Inspect)
+      // Ctrl/Cmd + Shift + C (Inspect Element tool)
+      // Ctrl/Cmd + Shift + J (Console)
+      if (
+        modifier &&
+        e.shiftKey &&
+        (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'c' || e.key === 'J' || e.key === 'j')
+      ) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('photo-protection-alert'));
+        return;
+      }
+
+      // Ctrl/Cmd + U (View Source)
+      if (modifier && (e.key === 'u' || e.key === 'U')) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('photo-protection-alert'));
+        return;
+      }
+
+      // Ctrl/Cmd + S (Save Page)
+      if (modifier && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('photo-protection-alert'));
+        return;
+      }
+    };
+
+    window.addEventListener('contextmenu', handleContextMenu);
+    window.addEventListener('keydown', handleKeyDown);
+
+    // DevTools Console Warning Banner
+    if (typeof console !== 'undefined') {
+      console.log(
+        '%c⚠️ RESTRICTED MEDIA',
+        'color: #e11d48; font-size: 20px; font-weight: bold; font-family: sans-serif;'
+      );
+      console.log(
+        '%cAll photographic works on this website are protected by copyright laws (© Juztin Yuen). Extracting, hotlinking, or downloading without prior written consent is strictly prohibited.',
+        'font-size: 12px; color: #777; font-family: sans-serif;'
+      );
+    }
+
+    return () => {
+      window.removeEventListener('contextmenu', handleContextMenu);
+      window.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -944,6 +1026,8 @@ export default function App() {
         onClose={() => setLightboxOpen(false)}
         onNavigate={(newIdx) => setCurrentPhotoIndex(newIdx)}
       />
+      {/* Copyright & Image Protection Alert Notice */}
+      <PhotoProtectionNotice />
     </div>
   );
 }

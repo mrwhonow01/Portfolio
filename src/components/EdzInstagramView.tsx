@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, Instagram, X, Maximize2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { ProtectedCanvasImage } from './ProtectedCanvasImage';
 
 export interface InstagramPost {
   id: string;
@@ -148,11 +149,27 @@ export const EdzInstagramView: React.FC = () => {
               alt={INSTAGRAM_POSTS[0].title}
               loading="lazy"
               decoding="async"
-              className="w-full h-auto object-contain block group-hover/card:scale-[1.005] transition-transform duration-500 select-none"
+              draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
+              onDragStart={(e) => e.preventDefault()}
+              className="w-full h-auto object-contain block group-hover/card:scale-[1.005] transition-transform duration-500 select-none pointer-events-none"
+              style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+            />
+
+            {/* Protective Shield Overlay */}
+            <div
+              className="photo-shield absolute inset-0 z-20 pointer-events-auto cursor-pointer"
+              style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent('photo-protection-alert'));
+              }}
+              onDragStart={(e) => e.preventDefault()}
             />
 
             {/* Hover Badge */}
-            <div className="absolute bottom-3 left-3 pointer-events-none z-10">
+            <div className="absolute bottom-3 left-3 pointer-events-none z-30">
               <span className="opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 bg-white/95 text-black border border-black/10 px-3 py-1.5 text-[10px] tracking-wider uppercase font-semibold shadow-sm flex items-center gap-1.5 select-none">
                 <Maximize2 className="w-3 h-3" />
                 Click to Enlarge
@@ -210,11 +227,27 @@ export const EdzInstagramView: React.FC = () => {
                   alt={post.title}
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover group-hover/card:scale-[1.02] transition-transform duration-500 select-none"
+                  draggable={false}
+                  onContextMenu={(e) => e.preventDefault()}
+                  onDragStart={(e) => e.preventDefault()}
+                  className="w-full h-full object-cover group-hover/card:scale-[1.02] transition-transform duration-500 select-none pointer-events-none"
+                  style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+                />
+
+                {/* Protective Shield Overlay */}
+                <div
+                  className="photo-shield absolute inset-0 z-20 pointer-events-auto cursor-pointer"
+                  style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent('photo-protection-alert'));
+                  }}
+                  onDragStart={(e) => e.preventDefault()}
                 />
 
                 {/* Hover Badge */}
-                <div className="absolute bottom-3 left-3 pointer-events-none z-10">
+                <div className="absolute bottom-3 left-3 pointer-events-none z-30">
                   <span className="opacity-0 group-hover/card:opacity-100 transition-opacity duration-200 bg-white/95 text-black border border-black/10 px-3 py-1.5 text-[10px] tracking-wider uppercase font-semibold shadow-sm flex items-center gap-1.5 select-none">
                     <Maximize2 className="w-3 h-3" />
                     Click to Enlarge
@@ -331,18 +364,13 @@ export const EdzInstagramView: React.FC = () => {
               className="relative flex-1 w-full flex items-center justify-center min-h-0 py-2"
               onClick={(e) => e.stopPropagation()}
             >
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={INSTAGRAM_POSTS[enlargedIndex].id}
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.2, ease: 'easeOut' }}
-                  src={INSTAGRAM_POSTS[enlargedIndex].image}
-                  alt={INSTAGRAM_POSTS[enlargedIndex].title}
-                  className="max-h-[80vh] max-w-[92vw] object-contain select-none shadow-xl border border-black/5"
-                />
-              </AnimatePresence>
+              {/* Pure Enlarged Photograph - Rendered via Canvas without img or src in DOM */}
+              <ProtectedCanvasImage
+                key={INSTAGRAM_POSTS[enlargedIndex].id}
+                src={INSTAGRAM_POSTS[enlargedIndex].image}
+                alt={INSTAGRAM_POSTS[enlargedIndex].title}
+                className="max-h-[80vh] max-w-[92vw] w-auto h-auto object-contain select-none shadow-xl border border-black/5 rounded-lg"
+              />
             </div>
 
             {/* Bottom Bar: Post Details & Counter */}
