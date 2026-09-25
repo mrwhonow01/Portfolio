@@ -355,6 +355,9 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
   };
 
   // Calendar calculations
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const year = calendarDate.getFullYear();
   const month = calendarDate.getMonth();
   const monthNames = [
@@ -367,7 +370,12 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const prevMonthDays = new Date(year, month, 0).getDate();
 
+  const isCurrentOrPastMonth =
+    year < today.getFullYear() ||
+    (year === today.getFullYear() && month <= today.getMonth());
+
   const handlePrevMonth = () => {
+    if (isCurrentOrPastMonth) return;
     setCalendarDate(new Date(year, month - 1, 1));
   };
 
@@ -377,6 +385,8 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
 
   const handleSelectDay = (day: number) => {
     const selected = new Date(year, month, day);
+    selected.setHours(0, 0, 0, 0);
+    if (selected < today) return; // Prevent selecting dates that have passed
     const formatted = selected.toLocaleDateString('en-US', {
       weekday: 'short',
       month: 'short',
@@ -773,9 +783,15 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
                     <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
                       <button
                         type="button"
+                        disabled={isCurrentOrPastMonth}
                         onClick={handlePrevMonth}
-                        className="p-1 rounded hover:bg-zinc-100 text-zinc-600 hover:text-black transition-colors cursor-pointer"
+                        className={`p-1 rounded transition-colors ${
+                          isCurrentOrPastMonth
+                            ? 'opacity-20 cursor-not-allowed text-zinc-300'
+                            : 'hover:bg-zinc-100 text-zinc-600 hover:text-black cursor-pointer'
+                        }`}
                         aria-label="Previous month"
+                        title={isCurrentOrPastMonth ? 'Cannot navigate to past months' : 'Previous month'}
                       >
                         <ChevronLeft className="w-4 h-4" />
                       </button>
@@ -811,24 +827,38 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
                         </div>
                       ))}
 
-                      {/* Current month days */}
+                      {/* Current month days - Past dates are disabled & unclickable */}
                       {Array.from({ length: daysInMonth }).map((_, i) => {
                         const dayNumber = i + 1;
-                        const isToday =
-                          new Date().getDate() === dayNumber &&
-                          new Date().getMonth() === month &&
-                          new Date().getFullYear() === year;
+                        const cellDate = new Date(year, month, dayNumber);
+                        cellDate.setHours(0, 0, 0, 0);
+
+                        const isPast = cellDate < today;
+                        const isToday = cellDate.getTime() === today.getTime();
+                        const formattedCell = cellDate.toLocaleDateString('en-US', {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        });
+                        const isSelected = formData.eventDate === formattedCell;
 
                         return (
                           <button
                             key={`day-${dayNumber}`}
                             type="button"
-                            onClick={() => handleSelectDay(dayNumber)}
-                            className={`py-1.5 rounded-sm font-mono text-[12px] transition-colors cursor-pointer ${
-                              isToday
-                                ? 'bg-black text-white font-semibold'
-                                : 'text-zinc-800 hover:bg-zinc-100 hover:text-black'
+                            disabled={isPast}
+                            onClick={() => !isPast && handleSelectDay(dayNumber)}
+                            className={`py-1.5 rounded-sm font-mono text-[12px] transition-colors ${
+                              isPast
+                                ? 'text-zinc-300 opacity-35 cursor-not-allowed line-through select-none'
+                                : isSelected
+                                ? 'bg-black text-white font-semibold cursor-pointer shadow-xs'
+                                : isToday
+                                ? 'border border-black font-semibold text-black hover:bg-zinc-100 cursor-pointer'
+                                : 'text-zinc-800 hover:bg-zinc-100 hover:text-black cursor-pointer'
                             }`}
+                            title={isPast ? 'Past date cannot be selected' : undefined}
                           >
                             {dayNumber}
                           </button>
