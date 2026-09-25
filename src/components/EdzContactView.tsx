@@ -156,6 +156,7 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedSummary, setCopiedSummary] = useState(false);
+  const [needsActivation, setNeedsActivation] = useState(false);
   const [honeypot, setHoneypot] = useState('');
 
   // Email verification state
@@ -302,6 +303,17 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
           _captcha: 'false',
         }),
       });
+
+      const data = await response.json().catch(() => ({}));
+      if (
+        data &&
+        typeof data.message === 'string' &&
+        data.message.toLowerCase().includes('activate')
+      ) {
+        setNeedsActivation(true);
+      } else {
+        setNeedsActivation(false);
+      }
     } catch (err) {
       console.warn('FormSubmit background notification:', err);
     }
@@ -495,6 +507,21 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Domain Activation Notice */}
+            {needsActivation && (
+              <div className="bg-amber-50 border border-amber-300 rounded-md p-3.5 text-amber-900 text-xs space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-[13px] text-amber-950">
+                  <span>⚡ Action Required for Portfolio Owner ({contactEmail}):</span>
+                </div>
+                <p>
+                  Because this is the first submission from this domain, FormSubmit sent a verification email to <strong>{contactEmail}</strong> titled <em>"Action Required: Activate Form"</em>.
+                </p>
+                <p className="font-semibold text-amber-950">
+                  Please open Gmail (check your Spam / Updates folder if needed) and click <strong>"Activate Form"</strong> to permanently connect this domain!
+                </p>
+              </div>
+            )}
 
             {/* Inquiry Details Overview */}
             {lastSubmittedInquiry && (
