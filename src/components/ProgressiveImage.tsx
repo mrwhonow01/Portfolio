@@ -75,11 +75,11 @@ const ProgressiveImageComponent: React.FC<ProgressiveImageProps> = ({
         style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
       />
 
-      {/* Subtle Copyright Watermark */}
-      <div className="absolute bottom-2.5 right-3 pointer-events-none z-15 select-none opacity-45 group-hover:opacity-80 transition-opacity">
-        <div className="bg-black/40 backdrop-blur-[2px] px-2 py-0.5 rounded-[3px] text-[9px] font-mono tracking-widest text-white/90 border border-white/10 uppercase drop-shadow-sm">
+      {/* Subtle Copyright Watermark: Text only, no shaded box */}
+      <div className="absolute bottom-2.5 right-3 pointer-events-none z-15 select-none opacity-50 group-hover:opacity-85 transition-opacity">
+        <span className="text-[9.5px] font-mono tracking-widest text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] uppercase">
           &copy; Juztin Yuen
-        </div>
+        </span>
       </div>
 
       {/* Transparent Protective Shield: Intercepts right-clicks, mobile hold, and inspect element */}

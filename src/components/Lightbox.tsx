@@ -239,13 +239,6 @@ export const Lightbox: React.FC<LightboxProps> = ({
                   />
                 </AnimatePresence>
 
-                {/* Subtle Copyright Watermark on the photograph */}
-                <div className="absolute bottom-3 right-4 pointer-events-none z-25 select-none opacity-65">
-                  <div className="bg-black/45 backdrop-blur-[2px] px-2.5 py-1 rounded-[3px] text-[10px] font-mono tracking-widest text-white/95 border border-white/15 drop-shadow-md uppercase">
-                    &copy; Juztin Yuen
-                  </div>
-                </div>
-
                 {/* Invisible Anti-Inspect & Anti-Save Shield: Absorbs all clicks, right-clicks, and inspects */}
                 <div
                   className="photo-shield absolute inset-0 z-30 pointer-events-auto cursor-pointer"
@@ -259,6 +252,13 @@ export const Lightbox: React.FC<LightboxProps> = ({
                   style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
                 />
               </div>
+            </div>
+
+            {/* Subtle Copyright Watermark: Stays in the exact same location in both normal and zoomed views */}
+            <div className="absolute bottom-4 right-5 sm:bottom-6 sm:right-8 pointer-events-none z-30 select-none">
+              <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-white [text-shadow:_0_1px_3px_rgba(0,0,0,0.95),_0_0_2px_rgba(0,0,0,0.85)] uppercase">
+                &copy; Juztin Yuen
+              </span>
             </div>
           </div>
         </motion.div>

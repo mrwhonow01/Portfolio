@@ -252,11 +252,11 @@ const EdzAlbumGridViewComponent: React.FC<EdzAlbumGridViewProps> = ({
                   />
                 </AnimatePresence>
 
-                {/* Subtle Copyright Watermark */}
-                <div className="absolute bottom-3 right-4 pointer-events-none z-15 select-none opacity-65">
-                  <div className="bg-black/45 backdrop-blur-[2px] px-2.5 py-1 rounded-[3px] text-[10px] font-mono tracking-widest text-white/95 border border-white/15 drop-shadow-md uppercase">
+                {/* Subtle Copyright Watermark: Text only, no shaded box */}
+                <div className="absolute bottom-3 right-4 pointer-events-none z-15 select-none opacity-70">
+                  <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-white/90 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)] uppercase">
                     &copy; Juztin Yuen
-                  </div>
+                  </span>
                 </div>
 
                 {/* Protective Shield Overlay */}
