@@ -297,6 +297,7 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
           targetDate: formData.eventDate.trim() || 'Flexible / Not specified',
           message: trimmedMessage,
           _subject: `[Portfolio Inquiry] ${formData.serviceType} - ${trimmedName}`,
+          _autoresponse: `Thank you for reaching out to Juztin Yuen!\n\nYour message regarding "${formData.serviceType}" has been received. I review all inquiries personally and will get back to you shortly.\n\nSummary of your message:\n${trimmedMessage}`,
           _template: 'table',
           _captcha: 'false',
         }),
@@ -473,12 +474,15 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
                   Thanks for reaching out! Your message has been sent.
                 </h4>
                 <p className="text-[13.5px] text-[#444444] leading-relaxed">
-                  Your inquiry has been dispatched directly to{' '}
-                  <span className="font-semibold text-black">{contactEmail}</span>. I review all incoming event and project assignments personally and will get back to you shortly at{' '}
+                  Your inquiry has been dispatched to{' '}
+                  <span className="font-semibold text-black">{contactEmail}</span> and a confirmation was sent to{' '}
                   <span className="font-semibold text-black">
                     {lastSubmittedInquiry?.email}
                   </span>.
                 </p>
+                <div className="mt-2 text-[11px] text-zinc-600 bg-zinc-100/90 p-2.5 rounded border border-zinc-200 font-mono">
+                  💡 <strong>Owner tip:</strong> Please check your <strong>Spam / Junk</strong> folder or <strong>Updates</strong> tab in Gmail for emails from FormSubmit, and click "Not Spam" or "Activate Form" so future messages go straight to Primary.
+                </div>
               </div>
             </div>
 
