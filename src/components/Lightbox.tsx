@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   X,
   Maximize2,
@@ -27,7 +27,7 @@ export const Lightbox: React.FC<LightboxProps> = ({
   const [isZoomed, setIsZoomed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string>('');
 
   const currentPhoto = photos[currentIndex];
 
@@ -87,33 +87,23 @@ export const Lightbox: React.FC<LightboxProps> = ({
     imgPrev.src = photos[prevIdx].src;
   }, [isOpen, currentIndex, photos]);
 
-  // Render photograph directly onto HTML5 Canvas
-  // (Prevents <img> tags or `src` URLs from appearing in DOM inspect element)
+  // Convert image to dynamic memory Blob URL so DevTools Inspect Element reveals NO static /photos/ file path
   useEffect(() => {
     if (!isOpen || !currentPhoto) return;
     setImageLoaded(false);
     let isMounted = true;
 
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = currentPhoto.src;
-
-    img.onload = () => {
-      if (!isMounted) return;
-      const canvas = canvasRef.current;
-      if (canvas) {
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.imageSmoothingEnabled = true;
-          ctx.imageSmoothingQuality = 'high';
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0);
+    fetch(currentPhoto.src)
+      .then((res) => res.blob())
+      .then((blob) => {
+        if (isMounted) {
+          const url = URL.createObjectURL(blob);
+          setBlobUrl(url);
         }
-      }
-      setImageLoaded(true);
-    };
+      })
+      .catch(() => {
+        if (isMounted) setBlobUrl(currentPhoto.src);
+      });
 
     return () => {
       isMounted = false;
@@ -212,7 +202,7 @@ export const Lightbox: React.FC<LightboxProps> = ({
             </div>
           </div>
 
-          {/* Main Image Stage - Rendered via Canvas with Zero <img> tag in DOM */}
+          {/* Main Image Stage - Pure Enlarged Photograph With Full Visual Focus */}
           <div className="relative flex-1 flex items-center justify-center overflow-hidden">
             <div
               className={`w-full h-full relative flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-auto ${
@@ -227,22 +217,29 @@ export const Lightbox: React.FC<LightboxProps> = ({
               )}
 
               <div className="relative inline-flex items-center justify-center">
-                {/* HTML5 Canvas: Inspect Element shows only <canvas>, no image url */}
-                <canvas
-                  ref={canvasRef}
-                  aria-label={currentPhoto.title}
-                  role="img"
-                  className={`max-h-[86vh] max-w-[94vw] w-auto h-auto object-contain rounded-xl shadow-2xl transition-all duration-300 transform-gpu border border-black/5 select-none ${
-                    imageLoaded ? 'opacity-100' : 'opacity-0'
-                  }`}
-                  style={{
-                    transform: isZoomed ? 'scale(1.5)' : 'scale(1)',
-                    WebkitTouchCallout: 'none',
-                    userSelect: 'none',
-                  }}
-                />
+                {/* High-Resolution Responsive Photograph with Perfect Proportional Sizing */}
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={currentPhoto.id}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{
+                      opacity: imageLoaded ? 1 : 0,
+                      scale: isZoomed ? 1.5 : 1,
+                    }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.25 }}
+                    src={blobUrl || currentPhoto.src}
+                    alt={currentPhoto.title}
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
+                    onDragStart={(e) => e.preventDefault()}
+                    onLoad={() => setImageLoaded(true)}
+                    className="max-h-[86vh] max-w-[94vw] object-contain rounded-xl shadow-2xl transition-transform duration-300 transform-gpu border border-black/5 select-none pointer-events-none"
+                    style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+                  />
+                </AnimatePresence>
 
-                {/* Invisible Anti-Inspect & Anti-Save Shield */}
+                {/* Invisible Anti-Inspect & Anti-Save Shield: Absorbs all clicks, right-clicks, and inspects */}
                 <div
                   className="photo-shield absolute inset-0 z-30 pointer-events-auto cursor-pointer"
                   onClick={() => setIsZoomed(!isZoomed)}

@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { PhotoItem } from '../types';
 import { AlbumCategory, ALBUMS } from './EdzSidebar';
 import { ProgressiveImage } from './ProgressiveImage';
-import { ProtectedCanvasImage } from './ProtectedCanvasImage';
 
 export type SportsSubCategory = 'all' | 'muay-thai' | 'formula-1';
 
@@ -235,13 +234,36 @@ const EdzAlbumGridViewComponent: React.FC<EdzAlbumGridViewProps> = ({
               className="relative flex-1 w-full flex items-center justify-center min-h-0 py-2"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Pure Enlarged Photograph - Rendered via Canvas without img or src in DOM */}
-              <ProtectedCanvasImage
-                key={photos[enlargedIndex].id}
-                src={photos[enlargedIndex].src}
-                alt={photos[enlargedIndex].title || ''}
-                className="max-h-[82vh] max-w-[92vw] w-auto h-auto object-contain select-none shadow-xl border border-black/5 rounded-lg"
-              />
+              <div className="relative inline-flex items-center justify-center">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={photos[enlargedIndex].id}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
+                    src={photos[enlargedIndex].src}
+                    alt=""
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
+                    onDragStart={(e) => e.preventDefault()}
+                    className="max-h-[82vh] max-w-[92vw] object-contain select-none shadow-xl border border-black/5 pointer-events-none"
+                    style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+                  />
+                </AnimatePresence>
+
+                {/* Protective Shield Overlay */}
+                <div
+                  className="photo-shield absolute inset-0 z-20 pointer-events-auto"
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.dispatchEvent(new CustomEvent('photo-protection-alert'));
+                  }}
+                  onDragStart={(e) => e.preventDefault()}
+                  style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+                />
+              </div>
             </div>
 
             {/* Bottom Bar: Number of picture in the tab ONLY */}
