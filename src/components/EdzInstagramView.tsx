@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ExternalLink, Instagram, X, Maximize2 } from 'lucide-react';
+import { ExternalLink, Instagram, X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export interface InstagramPost {
@@ -105,6 +105,18 @@ export const EdzInstagramView: React.FC = () => {
       }
     }
     setTouchStartX(null);
+  };
+
+  const handleNext = () => {
+    setEnlargedIndex((prev) =>
+      prev !== null && prev < INSTAGRAM_POSTS.length - 1 ? prev + 1 : 0
+    );
+  };
+
+  const handlePrev = () => {
+    setEnlargedIndex((prev) =>
+      prev !== null && prev > 0 ? prev - 1 : INSTAGRAM_POSTS.length - 1
+    );
   };
 
   const instagramProfileUrl = 'https://www.instagram.com/quietframes.sg/';
@@ -358,12 +370,15 @@ export const EdzInstagramView: React.FC = () => {
               </button>
             </div>
 
-            {/* Center Stage: Enlarged Image with Arrow Navigation */}
+            {/* Center Stage: Enlarged Image with Arrow Navigation - clicking outside on white sides exits view */}
             <div
-              className="relative flex-1 w-full flex items-center justify-center min-h-0 py-2"
-              onClick={(e) => e.stopPropagation()}
+              className="relative flex-1 w-full flex items-center justify-center min-h-0 py-2 cursor-pointer"
+              onClick={() => setEnlargedIndex(null)}
             >
-              <div className="relative inline-flex items-center justify-center">
+              <div
+                className="relative inline-flex items-center justify-center cursor-default"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={INSTAGRAM_POSTS[enlargedIndex].id}
@@ -400,6 +415,41 @@ export const EdzInstagramView: React.FC = () => {
                   style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
                 />
               </div>
+
+              {/* Desktop Left & Right Navigation Arrows */}
+              <motion.button
+                key="ig-desktop-prev"
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -12 }}
+                transition={{ duration: 0.18 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrev();
+                }}
+                className="hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black shadow-xl border border-black/5 backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                aria-label="Previous post"
+                title="Previous Post (Left Arrow)"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </motion.button>
+
+              <motion.button
+                key="ig-desktop-next"
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 12 }}
+                transition={{ duration: 0.18 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNext();
+                }}
+                className="hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black shadow-xl border border-black/5 backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                aria-label="Next post"
+                title="Next Post (Right Arrow)"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </motion.button>
             </div>
 
             {/* Bottom Bar: Post Details & Counter */}

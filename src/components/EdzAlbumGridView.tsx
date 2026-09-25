@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PhotoItem } from '../types';
 import { AlbumCategory, ALBUMS } from './EdzSidebar';
@@ -116,6 +116,18 @@ const EdzAlbumGridViewComponent: React.FC<EdzAlbumGridViewProps> = ({
     setTouchStartX(null);
   };
 
+  const handleNext = () => {
+    setEnlargedIndex((prev) =>
+      prev !== null && prev < photos.length - 1 ? prev + 1 : 0
+    );
+  };
+
+  const handlePrev = () => {
+    setEnlargedIndex((prev) =>
+      prev !== null && prev > 0 ? prev - 1 : photos.length - 1
+    );
+  };
+
   // Compute title based on subAlbum
   let displayTitle = albumMeta?.label || 'Album';
 
@@ -229,12 +241,15 @@ const EdzAlbumGridViewComponent: React.FC<EdzAlbumGridViewProps> = ({
               </button>
             </div>
 
-            {/* Center Stage: Enlarged Image */}
+            {/* Center Stage: Enlarged Image - clicking outside on white sides exits view */}
             <div
-              className="relative flex-1 w-full flex items-center justify-center min-h-0 py-2"
-              onClick={(e) => e.stopPropagation()}
+              className="relative flex-1 w-full flex items-center justify-center min-h-0 py-2 cursor-pointer"
+              onClick={() => setEnlargedIndex(null)}
             >
-              <div className="relative inline-flex items-center justify-center">
+              <div
+                className="relative inline-flex items-center justify-center cursor-default"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={photos[enlargedIndex].id}
@@ -271,6 +286,41 @@ const EdzAlbumGridViewComponent: React.FC<EdzAlbumGridViewProps> = ({
                   style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
                 />
               </div>
+
+              {/* Desktop Left & Right Navigation Arrows */}
+              <motion.button
+                key="album-desktop-prev"
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -12 }}
+                transition={{ duration: 0.18 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrev();
+                }}
+                className="hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black shadow-xl border border-black/5 backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                aria-label="Previous photograph"
+                title="Previous Photo (Left Arrow)"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </motion.button>
+
+              <motion.button
+                key="album-desktop-next"
+                initial={{ opacity: 0, x: 12 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 12 }}
+                transition={{ duration: 0.18 }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNext();
+                }}
+                className="hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black shadow-xl border border-black/5 backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                aria-label="Next photograph"
+                title="Next Photo (Right Arrow)"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </motion.button>
             </div>
 
             {/* Bottom Bar: Number of picture in the tab ONLY */}

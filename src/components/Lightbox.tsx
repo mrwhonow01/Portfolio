@@ -5,6 +5,8 @@ import {
   Minimize2,
   ZoomIn,
   ZoomOut,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PhotoItem } from '../types';
@@ -75,7 +77,7 @@ export const Lightbox: React.FC<LightboxProps> = ({
     };
   }, [isOpen, handleNext, handlePrev, onClose]);
 
-  // Preload adjacent images in background for instantaneous next/previous transitions
+  // Preload adjacent images in background for instantaneous transitions
   useEffect(() => {
     if (!isOpen || !photos.length) return;
     const nextIdx = (currentIndex + 1) % photos.length;
@@ -110,26 +112,40 @@ export const Lightbox: React.FC<LightboxProps> = ({
     };
   }, [isOpen, currentPhoto]);
 
+  // Touch Swipe navigation for mobile: disabled completely if zoomed in (isZoomed)
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchStartY, setTouchStartY] = useState<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (isZoomed) return;
     if (e.touches && e.touches[0]) {
       setTouchStartX(e.touches[0].clientX);
+      setTouchStartY(e.touches[0].clientY);
     }
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX === null || isZoomed) return;
+    if (isZoomed || touchStartX === null || touchStartY === null) {
+      setTouchStartX(null);
+      setTouchStartY(null);
+      return;
+    }
     const touchEndX = e.changedTouches[0]?.clientX;
-    if (touchEndX !== undefined) {
+    const touchEndY = e.changedTouches[0]?.clientY;
+    if (touchEndX !== undefined && touchEndY !== undefined) {
       const deltaX = touchEndX - touchStartX;
-      if (deltaX > 45) {
-        handlePrev();
-      } else if (deltaX < -45) {
-        handleNext();
+      const deltaY = touchEndY - touchStartY;
+      // Only switch images if the gesture is predominantly horizontal and exceeds threshold
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
+        if (deltaX > 0) {
+          handlePrev();
+        } else {
+          handleNext();
+        }
       }
     }
     setTouchStartX(null);
+    setTouchStartY(null);
   };
 
   // Reset zoom on photo change
@@ -153,7 +169,10 @@ export const Lightbox: React.FC<LightboxProps> = ({
           className="fixed inset-0 z-50 bg-white/98 backdrop-blur-2xl flex flex-col select-none text-zinc-800"
         >
           {/* Top Controls Bar */}
-          <div className="h-16 px-5 sm:px-8 flex items-center justify-between border-b border-zinc-200/80 bg-white/90 z-20">
+          <div
+            className="h-16 px-5 sm:px-8 flex items-center justify-between border-b border-zinc-200/80 bg-white/90 z-40"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Left: Index Counter & Title */}
             <div className="flex items-center gap-3">
               <span className="text-xs font-mono text-zinc-600 px-2.5 py-1 rounded-md bg-zinc-100 border border-zinc-200 select-none">
@@ -202,12 +221,21 @@ export const Lightbox: React.FC<LightboxProps> = ({
             </div>
           </div>
 
-          {/* Main Image Stage - Pure Enlarged Photograph With Full Visual Focus */}
-          <div className="relative flex-1 flex items-center justify-center overflow-hidden">
+          {/* Main Image Stage - Clicking anywhere on the white backdrop exits the view */}
+          <div
+            className="relative flex-1 flex items-center justify-center overflow-hidden cursor-pointer"
+            onClick={onClose}
+          >
+            {/* Inner Viewport Area */}
             <div
               className={`w-full h-full relative flex items-center justify-center p-3 sm:p-6 md:p-8 overflow-auto ${
-                isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'
+                isZoomed ? 'cursor-zoom-out' : 'cursor-default'
               }`}
+              onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                  onClose();
+                }
+              }}
             >
               {/* Loading Shimmer Spinner */}
               {!imageLoaded && (
@@ -216,7 +244,11 @@ export const Lightbox: React.FC<LightboxProps> = ({
                 </div>
               )}
 
-              <div className="relative inline-flex items-center justify-center">
+              {/* Photo Wrapper - stopPropagation ensures clicking the photo itself zooms, NOT exits */}
+              <div
+                className="relative inline-flex items-center justify-center cursor-default"
+                onClick={(e) => e.stopPropagation()}
+              >
                 {/* High-Resolution Responsive Photograph with Perfect Proportional Sizing */}
                 <AnimatePresence mode="wait">
                   <motion.img
@@ -239,10 +271,22 @@ export const Lightbox: React.FC<LightboxProps> = ({
                   />
                 </AnimatePresence>
 
+                {/* Subtle Copyright Watermark: Directly on the image itself, text only, no shaded box */}
+                <div className="absolute bottom-3 right-3.5 pointer-events-none z-25 select-none opacity-80">
+                  <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-white [text-shadow:_0_1px_3px_rgba(0,0,0,0.95),_0_0_2px_rgba(0,0,0,0.85)] uppercase">
+                    &copy; Juztin Yuen
+                  </span>
+                </div>
+
                 {/* Invisible Anti-Inspect & Anti-Save Shield: Absorbs all clicks, right-clicks, and inspects */}
                 <div
-                  className="photo-shield absolute inset-0 z-30 pointer-events-auto cursor-pointer"
-                  onClick={() => setIsZoomed(!isZoomed)}
+                  className={`photo-shield absolute inset-0 z-30 pointer-events-auto ${
+                    isZoomed ? 'cursor-zoom-out' : 'cursor-zoom-in'
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsZoomed(!isZoomed);
+                  }}
                   onContextMenu={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -254,12 +298,46 @@ export const Lightbox: React.FC<LightboxProps> = ({
               </div>
             </div>
 
-            {/* Subtle Copyright Watermark: Stays in the exact same location in both normal and zoomed views */}
-            <div className="absolute bottom-4 right-5 sm:bottom-6 sm:right-8 pointer-events-none z-30 select-none">
-              <span className="text-[10px] sm:text-[11px] font-mono tracking-widest text-white [text-shadow:_0_1px_3px_rgba(0,0,0,0.95),_0_0_2px_rgba(0,0,0,0.85)] uppercase">
-                &copy; Juztin Yuen
-              </span>
-            </div>
+            {/* Desktop Left & Right Navigation Arrows: Shown ONLY when unzoomed (!isZoomed) */}
+            <AnimatePresence>
+              {!isZoomed && (
+                <>
+                  <motion.button
+                    key="lightbox-desktop-prev"
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -16 }}
+                    transition={{ duration: 0.18 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrev();
+                    }}
+                    className="hidden md:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black shadow-xl border border-black/5 backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                    aria-label="Previous photograph"
+                    title="Previous Photo (Left Arrow)"
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </motion.button>
+
+                  <motion.button
+                    key="lightbox-desktop-next"
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 16 }}
+                    transition={{ duration: 0.18 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNext();
+                    }}
+                    className="hidden md:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-white/90 hover:bg-white text-zinc-700 hover:text-black shadow-xl border border-black/5 backdrop-blur-md transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                    aria-label="Next photograph"
+                    title="Next Photo (Right Arrow)"
+                  >
+                    <ChevronRight className="w-6 h-6" />
+                  </motion.button>
+                </>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       )}
