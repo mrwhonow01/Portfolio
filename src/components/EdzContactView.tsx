@@ -413,10 +413,10 @@ export const EdzContactView: React.FC<EdzContactViewProps> = ({
     <div className="w-full max-w-[850px] mx-auto text-[#666666] pt-1">
       {/* Header section */}
       <header className="mb-8">
-        <h1 className="font-schoolbell text-[32px] sm:text-[38px] md:text-[42px] text-[#1a1a1a] tracking-normal select-none mb-2">
+        <h1 className="font-schoolbell text-[32px] sm:text-[38px] md:text-[42px] text-[#1a1a1a] tracking-normal select-none mb-3.5 sm:mb-4.5 pb-1 leading-snug">
           Let's work together!
         </h1>
-        <p className="text-[14px] sm:text-[15px] text-[#555555] leading-relaxed max-w-[720px]">
+        <p className="text-[14px] sm:text-[15px] text-[#555555] leading-relaxed max-w-[720px] pt-1.5">
           Have an upcoming fight night, performance, or media assignment? Drop a message below, or reach out directly via{' '}
           <a
             href={`mailto:${contactEmail}`}

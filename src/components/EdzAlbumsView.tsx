@@ -15,10 +15,10 @@ export const EdzAlbumsView: React.FC<EdzAlbumsViewProps> = ({
   return (
     <div className="w-full max-w-[1200px] mx-auto">
       <header className="mb-8 pb-3 border-b border-gray-100">
-        <h1 className="font-schoolbell text-[30px] sm:text-[36px] md:text-[40px] text-[#1a1a1a] tracking-normal select-none -mb-1">
+        <h1 className="font-schoolbell text-[30px] sm:text-[36px] md:text-[40px] text-[#1a1a1a] tracking-normal select-none mb-3 sm:mb-4 pb-1 leading-snug">
           Photography
         </h1>
-        <p className="text-xs text-[#888888] uppercase tracking-wider mt-1">
+        <p className="text-xs text-[#888888] uppercase tracking-wider mt-1.5 sm:mt-2">
           Collections & Photo Albums
         </p>
       </header>

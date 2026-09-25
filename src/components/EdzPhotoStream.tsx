@@ -105,11 +105,11 @@ const EdzPhotoStreamComponent: React.FC<EdzPhotoStreamProps> = ({
       {/* Optional Album or Section Header */}
       {title && (
         <header className="mb-8 pb-3 border-b border-gray-100">
-          <h1 className="font-schoolbell text-[30px] sm:text-[36px] md:text-[40px] text-[#1a1a1a] tracking-normal select-none -mb-1">
+          <h1 className="font-schoolbell text-[30px] sm:text-[36px] md:text-[40px] text-[#1a1a1a] tracking-normal select-none mb-3 sm:mb-4 pb-1 leading-snug">
             {title}
           </h1>
           {subtitle && (
-            <p className="text-xs text-[#888888] uppercase tracking-wider mt-1">
+            <p className="text-xs text-[#888888] uppercase tracking-wider mt-1.5 sm:mt-2">
               {subtitle}
             </p>
           )}

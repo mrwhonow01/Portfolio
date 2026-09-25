@@ -52,7 +52,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
       {/* PHOTO HIGHLIGHT CAROUSEL */}
       <section className="w-full max-w-[960px] mt-14 sm:mt-20 md:mt-28 mb-4 sm:mb-8 md:mb-12 flex flex-col items-center relative px-2 sm:px-4">
         {/* SECTION TITLE: Handwritten in same Schoolbell font as cards */}
-        <h2 className="font-schoolbell text-[22px] sm:text-[28px] md:text-[32px] text-[#1a1a1a] tracking-normal mb-1.5 sm:mb-2 select-none text-center">
+        <h2 className="font-schoolbell text-[22px] sm:text-[28px] md:text-[32px] text-[#1a1a1a] tracking-normal mb-3.5 sm:mb-5 pb-0.5 leading-snug select-none text-center">
           My photography highlights!!!
         </h2>
 
