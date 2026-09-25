@@ -8,6 +8,7 @@ interface ProgressiveImageProps {
   containerClassName?: string;
   loading?: 'eager' | 'lazy';
   decoding?: 'async' | 'sync' | 'auto';
+  fetchpriority?: 'high' | 'low' | 'auto';
   onClick?: () => void;
 }
 
@@ -19,6 +20,7 @@ const ProgressiveImageComponent: React.FC<ProgressiveImageProps> = ({
   containerClassName = '',
   loading = 'lazy',
   decoding = 'async',
+  fetchpriority,
   onClick,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -57,6 +59,7 @@ const ProgressiveImageComponent: React.FC<ProgressiveImageProps> = ({
         alt={alt}
         loading={loading}
         decoding={decoding}
+        fetchPriority={fetchpriority}
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
         className={`relative z-10 transition-opacity duration-300 ease-out ${

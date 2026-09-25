@@ -48,7 +48,7 @@ export const EdzVideoView: React.FC<EdzVideoViewProps> = ({ videos }) => {
           const isInlinePlaying = inlinePlayingId === video.id;
 
           return (
-            <article key={video.id} className="group">
+            <article key={video.id} className="group video_article">
               {/* Video preview / inline player */}
               <div className="bg-black aspect-video relative overflow-hidden border border-gray-200">
                 {isInlinePlaying ? (
@@ -67,6 +67,8 @@ export const EdzVideoView: React.FC<EdzVideoViewProps> = ({ videos }) => {
                     <img
                       src={video.thumbnail}
                       alt={video.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover group-hover/thumb:scale-[1.01] transition-transform duration-500 opacity-95"
                     />
                     {/* Minimalist Play Button */}

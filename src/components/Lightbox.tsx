@@ -85,6 +85,18 @@ export const Lightbox: React.FC<LightboxProps> = ({
     };
   }, [isOpen, handleNext, handlePrev, onClose]);
 
+  // Preload adjacent images in background for instantaneous next/previous transitions
+  useEffect(() => {
+    if (!isOpen || !photos.length) return;
+    const nextIdx = (currentIndex + 1) % photos.length;
+    const prevIdx = (currentIndex - 1 + photos.length) % photos.length;
+
+    const imgNext = new Image();
+    imgNext.src = photos[nextIdx].src;
+    const imgPrev = new Image();
+    imgPrev.src = photos[prevIdx].src;
+  }, [isOpen, currentIndex, photos]);
+
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
   const handleTouchStart = (e: React.TouchEvent) => {

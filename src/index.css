@@ -12,6 +12,31 @@
   font-family: 'Schoolbell', cursive, sans-serif;
 }
 
+h1.font-schoolbell,
+.tab-header-title {
+  font-family: 'Schoolbell', cursive, sans-serif;
+  font-size: 32px;
+  line-height: 1.2;
+  color: #1a1a1a;
+  letter-spacing: normal;
+  user-select: none;
+  margin-bottom: -4px;
+}
+
+@media (min-width: 640px) {
+  h1.font-schoolbell,
+  .tab-header-title {
+    font-size: 38px;
+  }
+}
+
+@media (min-width: 768px) {
+  h1.font-schoolbell,
+  .tab-header-title {
+    font-size: 42px;
+  }
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -86,6 +111,11 @@ button, a, .kpgriditem, figure, [role="button"] {
 .kpgriditem {
   content-visibility: auto;
   contain-intrinsic-size: 360px;
+}
+
+.video_article {
+  content-visibility: auto;
+  contain-intrinsic-size: 460px;
 }
 
 /* Hardware GPU compositor acceleration helper */

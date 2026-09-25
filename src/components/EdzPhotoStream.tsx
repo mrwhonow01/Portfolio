@@ -1,5 +1,4 @@
-import React, { useState, useCallback } from 'react';
-import { Check } from 'lucide-react';
+import React from 'react';
 import { PhotoItem } from '../types';
 import { ProgressiveImage } from './ProgressiveImage';
 
@@ -14,16 +13,12 @@ interface PhotoStreamItemProps {
   photo: PhotoItem;
   index: number;
   onSelectPhoto: (index: number) => void;
-  copied: boolean;
-  onShare: (photo: PhotoItem, platform: 'copy' | 'twitter' | 'pinterest') => void;
 }
 
 const PhotoStreamItem = React.memo<PhotoStreamItemProps>(({
   photo,
   index,
   onSelectPhoto,
-  copied,
-  onShare,
 }) => {
   const exif = photo.cameraInfo;
   const exifParts: string[] = [];
@@ -51,6 +46,7 @@ const PhotoStreamItem = React.memo<PhotoStreamItemProps>(({
             alt={photo.title}
             thumbnailSrc={photo.thumbnailSrc}
             loading={index < 2 ? 'eager' : 'lazy'}
+            fetchpriority={index === 0 ? 'high' : 'auto'}
             className="w-full h-auto max-h-[820px] object-contain mx-auto block select-none"
           />
 
@@ -65,35 +61,15 @@ const PhotoStreamItem = React.memo<PhotoStreamItemProps>(({
 
       {/* Caption & EXIF metadata */}
       <figcaption className="cap_width mt-4 max-w-3xl">
-        <div className="flex items-baseline justify-between gap-4">
-          <h3 className="text-[16px] font-bold text-black leading-snug">
-            <button
-              type="button"
-              onClick={() => onSelectPhoto(index)}
-              className="hover:underline text-left cursor-pointer"
-            >
-              {photo.title}
-            </button>
-          </h3>
-
-          {/* Share button / controls */}
-          <div className="flex items-center gap-2 text-[11px] text-[#aaaaaa]">
-            <button
-              type="button"
-              onClick={() => onShare(photo, 'copy')}
-              className="hover:text-black transition-colors"
-              title="Copy share link"
-            >
-              {copied ? (
-                <span className="text-emerald-600 flex items-center gap-1 font-mono text-[10px]">
-                  <Check className="w-3 h-3" /> Copied
-                </span>
-              ) : (
-                <span className="text-[11px] uppercase tracking-wider">Share</span>
-              )}
-            </button>
-          </div>
-        </div>
+        <h3 className="text-[16px] font-bold text-black leading-snug">
+          <button
+            type="button"
+            onClick={() => onSelectPhoto(index)}
+            className="hover:underline text-left cursor-pointer"
+          >
+            {photo.title}
+          </button>
+        </h3>
 
         {/* EXIF list */}
         {exifParts.length > 0 && (
@@ -124,31 +100,6 @@ const EdzPhotoStreamComponent: React.FC<EdzPhotoStreamProps> = ({
   title,
   subtitle,
 }) => {
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  const handleShare = useCallback((photo: PhotoItem, platform: 'copy' | 'twitter' | 'pinterest') => {
-    const url = window.location.href;
-    const text = `${photo.title} — Photography by Juztin Yuen`;
-
-    if (platform === 'copy') {
-      navigator.clipboard.writeText(url);
-      setCopiedId(photo.id);
-      setTimeout(() => setCopiedId(null), 2000);
-    } else if (platform === 'twitter') {
-      window.open(
-        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
-        '_blank',
-        'noopener,noreferrer'
-      );
-    } else if (platform === 'pinterest') {
-      window.open(
-        `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&media=${encodeURIComponent(photo.src)}&description=${encodeURIComponent(text)}`,
-        '_blank',
-        'noopener,noreferrer'
-      );
-    }
-  }, []);
-
   return (
     <div className="w-full max-w-[1200px] mx-auto">
       {/* Optional Album or Section Header */}
@@ -173,8 +124,6 @@ const EdzPhotoStreamComponent: React.FC<EdzPhotoStreamProps> = ({
             photo={photo}
             index={index}
             onSelectPhoto={onSelectPhoto}
-            copied={copiedId === photo.id}
-            onShare={handleShare}
           />
         ))}
       </div>

@@ -159,8 +159,34 @@ function getNextMobileRoute(currentView: NavView): MobileRouteInfo | null {
   return null; // contact is the final page
 }
 
-function getPrevMobileRoute(currentView: NavView): MobileRouteInfo | null {
-  if (currentView === 'photography' || currentView === 'album') {
+function getPrevMobileRoute(
+  currentView: NavView,
+  selectedAlbum?: AlbumCategory | null,
+  selectedSubAlbum?: string | null
+): MobileRouteInfo | null {
+  // If inside a sub-album (like Muay Thai), go back to main album overview
+  if (currentView === 'album' && selectedSubAlbum) {
+    return {
+      view: 'album',
+      album: selectedAlbum || undefined,
+      title: 'Album Overview',
+      subtitle: 'Return to album overview',
+      pageNumber: 2,
+    };
+  }
+
+  // If inside an album (Sports, Stage, Events), go back to Photography
+  if (currentView === 'album') {
+    return {
+      view: 'photography',
+      title: 'Photography',
+      subtitle: 'Return to photography gallery',
+      pageNumber: 2,
+    };
+  }
+
+  // If on main Photography tab, go back to Home
+  if (currentView === 'photography') {
     return {
       view: 'home',
       title: 'Home',
@@ -168,6 +194,8 @@ function getPrevMobileRoute(currentView: NavView): MobileRouteInfo | null {
       pageNumber: 1,
     };
   }
+
+  // If on Videography, go back to Photography (never directly home)
   if (currentView === 'videography') {
     return {
       view: 'photography',
@@ -176,6 +204,8 @@ function getPrevMobileRoute(currentView: NavView): MobileRouteInfo | null {
       pageNumber: 2,
     };
   }
+
+  // If on Instagram, go back to Videography
   if (currentView === 'instagram') {
     return {
       view: 'videography',
@@ -184,6 +214,8 @@ function getPrevMobileRoute(currentView: NavView): MobileRouteInfo | null {
       pageNumber: 3,
     };
   }
+
+  // If on About, go back to Instagram
   if (currentView === 'about') {
     return {
       view: 'instagram',
@@ -192,6 +224,8 @@ function getPrevMobileRoute(currentView: NavView): MobileRouteInfo | null {
       pageNumber: 4,
     };
   }
+
+  // If on Contact, go back to About
   if (currentView === 'contact') {
     return {
       view: 'about',
@@ -200,7 +234,8 @@ function getPrevMobileRoute(currentView: NavView): MobileRouteInfo | null {
       pageNumber: 5,
     };
   }
-  return null; // home is the first page
+
+  return null; // Home is the first page
 }
 
 const pageVariants: Variants = {
@@ -358,7 +393,18 @@ export default function App() {
   };
 
   const nextMobileRoute = isMobile ? getNextMobileRoute(currentView) : null;
-  const prevMobileRoute = isMobile ? getPrevMobileRoute(currentView) : null;
+  const prevMobileRoute = isMobile ? getPrevMobileRoute(currentView, selectedAlbum, selectedSubAlbum) : null;
+
+  // Mobile pull-to-advance and pull-to-return confirmation feedback state
+  const [pullFeedback, setPullFeedback] = useState<{
+    direction: 'next' | 'prev';
+    progress: number;
+    isConfirmed: boolean;
+    targetTitle: string;
+  } | null>(null);
+
+  const pullConfirmedRef = useRef(false);
+  const activePullDirectionRef = useRef<'next' | 'prev' | null>(null);
 
   const triggerMobileAdvance = () => {
     if (isTransitioningRef.current) return;
@@ -366,8 +412,15 @@ export default function App() {
     if (!next) return;
 
     isTransitioningRef.current = true;
+    setPullFeedback(null);
+    pullConfirmedRef.current = false;
+    activePullDirectionRef.current = null;
     setTransitionDirection('next');
-    handleNavigate(next.view, next.album, next.subAlbum, true);
+    handleNavigate(next.view, next.album, next.subAlbum, false);
+
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try { navigator.vibrate(25); } catch { /* ignore */ }
+    }
 
     setTimeout(() => {
       isTransitioningRef.current = false;
@@ -377,12 +430,19 @@ export default function App() {
 
   const triggerMobileBack = () => {
     if (isTransitioningRef.current) return;
-    const prev = getPrevMobileRoute(currentView);
+    const prev = getPrevMobileRoute(currentView, selectedAlbum, selectedSubAlbum);
     if (!prev) return;
 
     isTransitioningRef.current = true;
+    setPullFeedback(null);
+    pullConfirmedRef.current = false;
+    activePullDirectionRef.current = null;
     setTransitionDirection('prev');
-    handleNavigate(prev.view, prev.album, prev.subAlbum, true);
+    handleNavigate(prev.view, prev.album, prev.subAlbum, false);
+
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      try { navigator.vibrate(25); } catch { /* ignore */ }
+    }
 
     setTimeout(() => {
       isTransitioningRef.current = false;
@@ -391,14 +451,18 @@ export default function App() {
   };
 
   // Mobile-only: Detect scrolling to the end (next page) or scrolling to top (previous page)
+  // Requires pulling further beyond edge (confirm threshold ~70px) and releasing to confirm!
   useEffect(() => {
     if (!isMobile) return;
 
     let touchStartY = 0;
+    let touchStartX = 0;
     let isAtBottom = false;
     let isAtTop = false;
     let cachedDocHeight = 0;
     let cachedWinHeight = 0;
+    let accumulatedWheelDelta = 0;
+    let wheelTimer: number | null = null;
 
     const measureDimensions = () => {
       cachedWinHeight = window.innerHeight;
@@ -410,65 +474,200 @@ export default function App() {
 
     const checkIsAtBottom = () => {
       const scrollY = window.scrollY || window.pageYOffset || 0;
-      return scrollY + cachedWinHeight >= cachedDocHeight - 35;
+      return scrollY + cachedWinHeight >= cachedDocHeight - 20;
     };
 
     const checkIsAtTop = () => {
       const scrollY = window.scrollY || window.pageYOffset || 0;
-      return scrollY <= 15;
+      return scrollY <= 10;
     };
 
     const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length !== 1) return;
+      if (e.touches.length !== 1 || isTransitioningRef.current) {
+        setPullFeedback(null);
+        activePullDirectionRef.current = null;
+        pullConfirmedRef.current = false;
+        return;
+      }
       touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
       measureDimensions();
       isAtBottom = checkIsAtBottom();
       isAtTop = checkIsAtTop();
+      pullConfirmedRef.current = false;
+      activePullDirectionRef.current = null;
     };
 
     const onTouchMove = (e: TouchEvent) => {
       if (e.touches.length !== 1 || isTransitioningRef.current) return;
       const currentY = e.touches[0].clientY;
+      const currentX = e.touches[0].clientX;
       const deltaY = touchStartY - currentY;
+      const deltaX = Math.abs(currentX - touchStartX);
 
-      // Scroll further down at the bottom -> Next page
-      if (isAtBottom && deltaY > 48) {
-        triggerMobileAdvance();
-      } else if (!isAtBottom && deltaY > 20 && checkIsAtBottom()) {
-        isAtBottom = true;
-        touchStartY = currentY;
+      // If user is predominantly swiping horizontally, cancel vertical pull intent
+      if (deltaX > Math.abs(deltaY) && Math.abs(deltaY) < 30) {
+        if (activePullDirectionRef.current) {
+          activePullDirectionRef.current = null;
+          pullConfirmedRef.current = false;
+          setPullFeedback(null);
+        }
+        return;
       }
 
-      // Scroll further up at the top -> Previous page
-      if (isAtTop && deltaY < -48) {
-        triggerMobileBack();
-      } else if (!isAtTop && deltaY < -20 && checkIsAtTop()) {
+      // Check current scroll position in case user scrolled to edge during this drag
+      if (!isAtBottom && deltaY > 0 && checkIsAtBottom()) {
+        isAtBottom = true;
+        touchStartY = currentY;
+        return;
+      }
+      if (!isAtTop && deltaY < 0 && checkIsAtTop()) {
         isAtTop = true;
         touchStartY = currentY;
+        return;
+      }
+
+      // 1. Pulling UP at the bottom (intent to advance to next tab / scroll down)
+      // Configured to be smooth, natural and easy to browse forward (threshold ~55px)
+      if (isAtBottom && deltaY > 12) {
+        const next = getNextMobileRoute(currentView);
+        if (next) {
+          activePullDirectionRef.current = 'next';
+          const pullDist = deltaY - 12;
+          const progress = Math.min(1, Math.max(0, pullDist / 55));
+          const isConfirmed = progress >= 1;
+
+          if (isConfirmed && !pullConfirmedRef.current) {
+            pullConfirmedRef.current = true;
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+              try { navigator.vibrate(15); } catch { /* ignore */ }
+            }
+          } else if (!isConfirmed) {
+            pullConfirmedRef.current = false;
+          }
+
+          setPullFeedback({
+            direction: 'next',
+            progress,
+            isConfirmed,
+            targetTitle: next.title,
+          });
+          return;
+        }
+      }
+
+      // 2. Pulling DOWN at the top (intent to return to previous tab / scroll up)
+      // Configured to be substantially harder and more weighted (deadzone 30px, threshold 120px, total ~150px)
+      // to prevent any accidental backward navigation while scrolling near the top
+      if (isAtTop && deltaY < -30) {
+        const prev = getPrevMobileRoute(currentView, selectedAlbum, selectedSubAlbum);
+        if (prev) {
+          activePullDirectionRef.current = 'prev';
+          const pullDist = -deltaY - 30;
+          const progress = Math.min(1, Math.max(0, pullDist / 120));
+          const isConfirmed = progress >= 1;
+
+          if (isConfirmed && !pullConfirmedRef.current) {
+            pullConfirmedRef.current = true;
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+              try { navigator.vibrate(15); } catch { /* ignore */ }
+            }
+          } else if (!isConfirmed) {
+            pullConfirmedRef.current = false;
+          }
+
+          setPullFeedback({
+            direction: 'prev',
+            progress,
+            isConfirmed,
+            targetTitle: prev.title,
+          });
+          return;
+        }
+      }
+
+      // If moved back inside bounds or not overscrolling
+      if (activePullDirectionRef.current === 'next' && deltaY <= 10) {
+        activePullDirectionRef.current = null;
+        pullConfirmedRef.current = false;
+        setPullFeedback(null);
+      } else if (activePullDirectionRef.current === 'prev' && deltaY >= -25) {
+        activePullDirectionRef.current = null;
+        pullConfirmedRef.current = false;
+        setPullFeedback(null);
       }
     };
 
     const onTouchEnd = (e: TouchEvent) => {
-      if (isTransitioningRef.current) return;
-      if (e.changedTouches.length === 1) {
-        const endY = e.changedTouches[0].clientY;
-        const deltaY = touchStartY - endY;
+      if (isTransitioningRef.current) {
+        setPullFeedback(null);
+        activePullDirectionRef.current = null;
+        pullConfirmedRef.current = false;
+        return;
+      }
 
-        if (isAtBottom && deltaY > 40) {
+      if (pullConfirmedRef.current) {
+        if (activePullDirectionRef.current === 'next') {
           triggerMobileAdvance();
-        } else if (isAtTop && deltaY < -40) {
+        } else if (activePullDirectionRef.current === 'prev') {
           triggerMobileBack();
         }
       }
+
+      setPullFeedback(null);
+      activePullDirectionRef.current = null;
+      pullConfirmedRef.current = false;
     };
 
     const onWheel = (e: WheelEvent) => {
       if (isTransitioningRef.current) return;
-      if (e.deltaY > 25) {
-        measureDimensions();
-        if (checkIsAtBottom()) triggerMobileAdvance();
-      } else if (e.deltaY < -25) {
-        if (checkIsAtTop()) triggerMobileBack();
+      measureDimensions();
+
+      if (e.deltaY > 0 && checkIsAtBottom()) {
+        const next = getNextMobileRoute(currentView);
+        if (!next) return;
+        accumulatedWheelDelta += e.deltaY;
+        const progress = Math.min(1, accumulatedWheelDelta / 90);
+        const isConfirmed = progress >= 1;
+        setPullFeedback({
+          direction: 'next',
+          progress,
+          isConfirmed,
+          targetTitle: next.title,
+        });
+
+        if (wheelTimer) window.clearTimeout(wheelTimer);
+        wheelTimer = window.setTimeout(() => {
+          if (accumulatedWheelDelta >= 90) {
+            triggerMobileAdvance();
+          }
+          accumulatedWheelDelta = 0;
+          setPullFeedback(null);
+        }, 220);
+      } else if (e.deltaY < 0 && checkIsAtTop()) {
+        const prev = getPrevMobileRoute(currentView, selectedAlbum, selectedSubAlbum);
+        if (!prev) return;
+        accumulatedWheelDelta += Math.abs(e.deltaY);
+        // Requires 240 wheel delta to go back (significantly more resistant)
+        const progress = Math.min(1, accumulatedWheelDelta / 240);
+        const isConfirmed = progress >= 1;
+        setPullFeedback({
+          direction: 'prev',
+          progress,
+          isConfirmed,
+          targetTitle: prev.title,
+        });
+
+        if (wheelTimer) window.clearTimeout(wheelTimer);
+        wheelTimer = window.setTimeout(() => {
+          if (accumulatedWheelDelta >= 240) {
+            triggerMobileBack();
+          }
+          accumulatedWheelDelta = 0;
+          setPullFeedback(null);
+        }, 220);
+      } else {
+        accumulatedWheelDelta = 0;
       }
     };
 
@@ -480,12 +679,13 @@ export default function App() {
     window.addEventListener('wheel', onWheel, { passive: true });
 
     return () => {
+      if (wheelTimer) window.clearTimeout(wheelTimer);
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
       window.removeEventListener('wheel', onWheel);
     };
-  }, [isMobile, currentView, selectedAlbum]);
+  }, [isMobile, currentView, selectedAlbum, selectedSubAlbum]);
 
   // Select photo to open Lightbox
   const handleSelectPhoto = (index: number) => {
@@ -595,6 +795,9 @@ export default function App() {
                 <MobilePrevPageCue
                   prevTitle={prevMobileRoute.title}
                   onBack={triggerMobileBack}
+                  isPulling={pullFeedback?.direction === 'prev'}
+                  pullProgress={pullFeedback?.direction === 'prev' ? pullFeedback.progress : 0}
+                  isConfirmed={pullFeedback?.direction === 'prev' ? pullFeedback.isConfirmed : false}
                 />
               )}
 
@@ -614,7 +817,6 @@ export default function App() {
                   photos={photos}
                   onSelectPhoto={handleSelectPhoto}
                   title="Photography"
-                  subtitle={`${photos.length} Selected Photographs · Sports, Stage & Events`}
                 />
               )}
 
@@ -724,13 +926,15 @@ export default function App() {
                 <MobileNextPageCue
                   nextTitle={nextMobileRoute.title}
                   onAdvance={triggerMobileAdvance}
+                  isPulling={pullFeedback?.direction === 'next'}
+                  pullProgress={pullFeedback?.direction === 'next' ? pullFeedback.progress : 0}
+                  isConfirmed={pullFeedback?.direction === 'next' ? pullFeedback.isConfirmed : false}
                 />
               )}
             </motion.div>
           </AnimatePresence>
         </div>
       </main>
-
 
       {/* High-Resolution Lightbox */}
       <Lightbox
