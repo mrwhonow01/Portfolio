@@ -239,6 +239,13 @@ export const Lightbox: React.FC<LightboxProps> = ({
                   />
                 </AnimatePresence>
 
+                {/* Subtle Copyright Watermark on the photograph */}
+                <div className="absolute bottom-3 right-4 pointer-events-none z-25 select-none opacity-65">
+                  <div className="bg-black/45 backdrop-blur-[2px] px-2.5 py-1 rounded-[3px] text-[10px] font-mono tracking-widest text-white/95 border border-white/15 drop-shadow-md uppercase">
+                    &copy; Juztin Yuen
+                  </div>
+                </div>
+
                 {/* Invisible Anti-Inspect & Anti-Save Shield: Absorbs all clicks, right-clicks, and inspects */}
                 <div
                   className="photo-shield absolute inset-0 z-30 pointer-events-auto cursor-pointer"

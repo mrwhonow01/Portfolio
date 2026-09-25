@@ -379,7 +379,27 @@ export default function App() {
       );
     }
 
+    // Anti-DevTools / Sources Inspector Disruption Loop
+    // When DevTools is closed, this is an imperceptible no-op.
+    // The moment someone opens DevTools or Sources tab, the browser pauses execution in debugger,
+    // freezing the Sources file tree and preventing comfortable inspection.
+    const trapInterval = setInterval(() => {
+      try {
+        const freeze = function () {
+          (function () {
+            return false;
+          }
+          ['constructor']('debugger')
+          ['call']());
+        };
+        freeze();
+      } catch {
+        // Silent catch
+      }
+    }, 450);
+
     return () => {
+      clearInterval(trapInterval);
       window.removeEventListener('contextmenu', handleContextMenu);
       window.removeEventListener('keydown', handleKeyDown);
     };

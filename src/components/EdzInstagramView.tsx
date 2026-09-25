@@ -381,6 +381,13 @@ export const EdzInstagramView: React.FC = () => {
                   />
                 </AnimatePresence>
 
+                {/* Subtle Copyright Watermark */}
+                <div className="absolute bottom-3 right-4 pointer-events-none z-15 select-none opacity-65">
+                  <div className="bg-black/45 backdrop-blur-[2px] px-2.5 py-1 rounded-[3px] text-[10px] font-mono tracking-widest text-white/95 border border-white/15 drop-shadow-md uppercase">
+                    &copy; Juztin Yuen
+                  </div>
+                </div>
+
                 {/* Protective Shield Overlay */}
                 <div
                   className="photo-shield absolute inset-0 z-20 pointer-events-auto"
