@@ -918,14 +918,20 @@ export default function App() {
                 />
               )}
 
-              {/* 2. Photography View: Full photo stream */}
-              {currentView === 'photography' && !selectedAlbum && (
-                <EdzPhotoStream
-                  photos={photos}
-                  onSelectPhoto={handleSelectPhoto}
-                  title="Photography"
-                />
-              )}
+              {/* 2. Photography View: Curated photo stream (some soccer pics, not all) */}
+              {currentView === 'photography' && !selectedAlbum && (() => {
+                const streamPhotos = photos.filter((p) => !p.subTabOnly);
+                return (
+                  <EdzPhotoStream
+                    photos={streamPhotos}
+                    onSelectPhoto={(idx) => {
+                      const globalIdx = photos.findIndex((p) => p.id === streamPhotos[idx].id);
+                      handleSelectPhoto(globalIdx !== -1 ? globalIdx : idx);
+                    }}
+                    title="Photography"
+                  />
+                );
+              })()}
 
               {/* 3a. Main Album View: Reverted back to sequential photo stream */}
               {currentView === 'album' && selectedAlbum && !selectedSubAlbum && (
