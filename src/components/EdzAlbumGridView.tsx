@@ -5,7 +5,7 @@ import { PhotoItem } from '../types';
 import { AlbumCategory, ALBUMS } from './EdzSidebar';
 import { ProgressiveImage } from './ProgressiveImage';
 
-export type SportsSubCategory = 'all' | 'muay-thai' | 'formula-1';
+export type SportsSubCategory = 'all' | 'muay-thai' | 'formula-1' | 'soccer';
 
 interface EdzAlbumGridViewProps {
   photos: PhotoItem[];
@@ -136,6 +136,8 @@ const EdzAlbumGridViewComponent: React.FC<EdzAlbumGridViewProps> = ({
       displayTitle = 'Muay Thai';
     } else if (selectedSubAlbum === 'formula-1') {
       displayTitle = 'Formula 1';
+    } else if (selectedSubAlbum === 'soccer') {
+      displayTitle = 'Soccer';
     } else {
       displayTitle = 'Sports & Action';
     }
@@ -184,6 +186,17 @@ const EdzAlbumGridViewComponent: React.FC<EdzAlbumGridViewProps> = ({
               }`}
             >
               Formula 1
+            </button>
+            <button
+              type="button"
+              onClick={() => onSelectSubAlbum && onSelectSubAlbum('soccer')}
+              className={`px-2.5 py-1 border transition-all cursor-pointer ${
+                selectedSubAlbum === 'soccer'
+                  ? 'bg-black text-white border-black font-semibold shadow-xs'
+                  : 'bg-white text-zinc-600 border-zinc-200 hover:border-black'
+              }`}
+            >
+              Soccer
             </button>
           </div>
         )}

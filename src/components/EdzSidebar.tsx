@@ -20,7 +20,7 @@ interface EdzSidebarProps {
 }
 
 export const ALBUMS: { id: AlbumCategory; label: string; countDesc: string }[] = [
-  { id: 'sports', label: 'Sports & Action', countDesc: 'Muay Thai fight nights & Formula 1 demo runs' },
+  { id: 'sports', label: 'Sports & Action', countDesc: 'Muay Thai fight nights, Formula 1 & Soccer matches' },
   { id: 'stage', label: 'Stage & Performance', countDesc: 'Wushu stage showcase & solo performance' },
   { id: 'events', label: 'Events & Publicity', countDesc: 'Temple anniversary celebration & community events' },
 ];
@@ -251,8 +251,8 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                             <ul
                               className={`mt-1 ml-2 pl-2 border-l border-gray-200 space-y-0.5 overflow-hidden transition-all duration-200 ease-out ${
                                 sportsHovered
-                                  ? 'opacity-100 max-h-28 pointer-events-auto block'
-                                  : 'opacity-0 max-h-0 pointer-events-none group-hover/sports:opacity-100 group-hover/sports:max-h-28 group-hover/sports:pointer-events-auto group-focus-within/sports:opacity-100 group-focus-within/sports:max-h-28 group-focus-within/sports:pointer-events-auto'
+                                  ? 'opacity-100 max-h-36 pointer-events-auto block'
+                                  : 'opacity-0 max-h-0 pointer-events-none group-hover/sports:opacity-100 group-hover/sports:max-h-36 group-hover/sports:pointer-events-auto group-focus-within/sports:opacity-100 group-focus-within/sports:max-h-36 group-focus-within/sports:pointer-events-auto'
                               }`}
                             >
                               <li>
@@ -285,6 +285,22 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                                   }`}
                                 >
                                   Formula 1
+                                </a>
+                              </li>
+                              <li>
+                                <a
+                                  href="#subalbum-soccer"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    handleLinkClick('album', 'sports', 'soccer');
+                                  }}
+                                  className={`block py-0.5 text-[9.5px] tracking-wider transition-colors cursor-pointer ${
+                                    isAlbumActive && selectedSubAlbum === 'soccer'
+                                      ? 'font-bold text-black'
+                                      : 'font-normal text-[#888888] hover:text-black'
+                                  }`}
+                                >
+                                  Soccer
                                 </a>
                               </li>
                             </ul>
@@ -680,6 +696,22 @@ export const EdzSidebar: React.FC<EdzSidebarProps> = ({
                                                 Formula 1
                                               </a>
                                             </li>
+                                             <li>
+                                               <a
+                                                 href="#subalbum-soccer"
+                                                 onClick={(e) => {
+                                                   e.preventDefault();
+                                                   handleLinkClick('album', 'sports', 'soccer');
+                                                 }}
+                                                 className={`block py-0.5 text-[9.5px] tracking-wider transition-colors cursor-pointer ${
+                                                   isSportsActive && selectedSubAlbum === 'soccer'
+                                                     ? 'font-bold text-black'
+                                                     : 'font-normal text-[#888888] hover:text-black'
+                                                 }`}
+                                               >
+                                                 Soccer
+                                               </a>
+                                             </li>
                                           </motion.ul>
                                         )}
                                       </AnimatePresence>

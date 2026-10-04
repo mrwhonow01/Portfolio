@@ -20,7 +20,7 @@ export interface PhotoItem {
   cameraInfo: CameraInfo;
   clientOrProject?: string;
   story?: string;
-  subCategory?: 'muay-thai' | 'formula-1' | string;
+  subCategory?: 'muay-thai' | 'formula-1' | 'soccer' | string;
   subTabOnly?: boolean;
   tags: string[];
 }

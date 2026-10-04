@@ -54,6 +54,9 @@ function parseHash(hashStr: string): { view: NavView; album: AlbumCategory | nul
   if (clean === 'subalbum-formula-1' || clean === 'formula-1') {
     return { view: 'album', album: 'sports', subAlbum: 'formula-1' };
   }
+  if (clean === 'subalbum-soccer' || clean === 'soccer') {
+    return { view: 'album', album: 'sports', subAlbum: 'soccer' };
+  }
   if (clean === 'album-stage' || clean === 'stage') {
     return { view: 'album', album: 'stage', subAlbum: null };
   }
@@ -74,6 +77,7 @@ function getHashForRoute(view: NavView, album?: AlbumCategory | null, subAlbum?:
     if (album === 'sports') {
       if (subAlbum === 'muay-thai') return '#subalbum-muay-thai';
       if (subAlbum === 'formula-1') return '#subalbum-formula-1';
+      if (subAlbum === 'soccer') return '#subalbum-soccer';
       return '#album-sports';
     }
     if (album) return `#album-${album}`;
@@ -91,6 +95,7 @@ function updateDocumentTitle(view: NavView, album?: AlbumCategory | null, subAlb
   } else if (view === 'album') {
     if (subAlbum === 'muay-thai') document.title = 'Muay Thai — Juztin Yuen';
     else if (subAlbum === 'formula-1') document.title = 'Formula 1 — Juztin Yuen';
+    else if (subAlbum === 'soccer') document.title = 'Soccer — Juztin Yuen';
     else if (album === 'sports') document.title = 'Sports & Action — Juztin Yuen';
     else if (album === 'stage') document.title = 'Stage & Performance — Juztin Yuen';
     else if (album === 'events') document.title = 'Events & Publicity — Juztin Yuen';
@@ -958,6 +963,13 @@ export default function App() {
                           className="px-2.5 py-1 text-[10px] uppercase tracking-wider bg-gray-100 hover:bg-black hover:text-white transition-all cursor-pointer"
                         >
                           Formula 1
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleNavigate('album', 'sports', 'soccer')}
+                          className="px-2.5 py-1 text-[10px] uppercase tracking-wider bg-gray-100 hover:bg-black hover:text-white transition-all cursor-pointer"
+                        >
+                          Soccer
                         </button>
                       </div>
                     )}
