@@ -192,8 +192,8 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
               className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[170px] h-[130px] col-span-2 sm:col-span-1 lg:col-span-1 transition-transform duration-200 hover:scale-105"
               title="1-SPORTS League Singapore"
             >
-              <div className="h-16 flex items-center justify-center text-black">
-                <Logo1Sport className="w-[92px] h-auto max-h-14 object-contain text-black" />
+              <div className="h-16 flex items-center justify-center">
+                <Logo1Sport className="max-h-14 max-w-[105px] object-contain" />
               </div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">
                 1-SPORTS League
