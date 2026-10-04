@@ -4,6 +4,7 @@ import { ChevronDown } from 'lucide-react';
 import { NavView, AlbumCategory } from './EdzSidebar';
 import { NametagHeroCard } from './NametagHeroCard';
 import { EdzHomeView } from './EdzHomeView';
+import { Logo1Sport } from './Logo1Sport';
 import { PhotoItem } from '../types';
 
 interface JustinLeHomeViewProps {
@@ -104,11 +105,11 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
             Organizations & Events I Have Documented:
           </p>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6 items-center justify-items-center">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 sm:gap-6 items-center justify-items-center w-full">
             {/* 1. Singapore Muay Thai Association (SMTA) */}
             <div
               onClick={() => onNavigate('album', 'sports', 'muay-thai')}
-              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[190px] h-[130px]"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[170px] h-[130px] transition-transform duration-200 hover:scale-105"
               title="Singapore Muay Thai Association (SMTA)"
             >
               <div className="h-16 flex items-center justify-center">
@@ -128,7 +129,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
             {/* 2. Mercedes-AMG PETRONAS Formula One Team */}
             <div
               onClick={() => onNavigate('album', 'sports', 'formula-1')}
-              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[190px] h-[130px]"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[170px] h-[130px] transition-transform duration-200 hover:scale-105"
               title="Mercedes-AMG PETRONAS Formula One Team"
             >
               <div className="h-16 flex items-center justify-center">
@@ -148,7 +149,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
             {/* 3. National Cadet Corps (NCC Sea) */}
             <div
               onClick={() => onNavigate('instagram')}
-              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[190px] h-[130px]"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[170px] h-[130px] transition-transform duration-200 hover:scale-105"
               title="National Cadet Corps (NCC Sea)"
             >
               <div className="h-16 flex items-center justify-center">
@@ -168,7 +169,7 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
             {/* 4. Bushido Fight Academy */}
             <div
               onClick={() => onNavigate('album', 'sports', 'muay-thai')}
-              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[190px] h-[130px]"
+              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[170px] h-[130px] transition-transform duration-200 hover:scale-105"
               title="Bushido Fight Academy Singapore"
             >
               <div className="h-16 flex items-center justify-center">
@@ -182,6 +183,20 @@ export const JustinLeHomeView: React.FC<JustinLeHomeViewProps> = ({
               </div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">
                 Bushido Fight Academy
+              </span>
+            </div>
+
+            {/* 5. 1-SPORTS League */}
+            <div
+              onClick={() => onNavigate('album', 'sports', 'soccer')}
+              className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-xl cursor-pointer w-full max-w-[170px] h-[130px] col-span-2 sm:col-span-1 lg:col-span-1 transition-transform duration-200 hover:scale-105"
+              title="1-SPORTS League Singapore"
+            >
+              <div className="h-16 flex items-center justify-center text-black">
+                <Logo1Sport className="w-[92px] h-auto max-h-14 object-contain text-black" />
+              </div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-black mt-2 text-center font-sans">
+                1-SPORTS League
               </span>
             </div>
           </div>
