@@ -22,7 +22,7 @@ interface EdzSidebarProps {
 export const ALBUMS: { id: AlbumCategory; label: string; countDesc: string }[] = [
   { id: 'sports', label: 'Sports & Action', countDesc: 'Muay Thai fight nights, Formula 1 & Soccer matches' },
   { id: 'stage', label: 'Stage & Performance', countDesc: 'Wushu stage showcase & solo performance' },
-  { id: 'events', label: 'Events & Publicity', countDesc: 'Temple anniversary celebration & community events' },
+  { id: 'events', label: 'Events & Publicity', countDesc: 'Grab vs J.P. Morgan matchday, temple celebration & community events' },
 ];
 
 export const EdzSidebar: React.FC<EdzSidebarProps> = ({
