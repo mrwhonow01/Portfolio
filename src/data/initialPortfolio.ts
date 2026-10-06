@@ -166,10 +166,10 @@ export const INITIAL_PHOTOS: PhotoItem[] = [
     cameraInfo: {
       camera: 'Sony Alpha 7 II (A7M2)',
       lens: 'Tamron 28-75mm f/2.8 Di III VXD G2',
-      aperture: 'f/4.0',
-      shutter: '1/250s',
+      aperture: 'f/2.8',
+      shutter: '1/125s',
       iso: '3200',
-      focalLength: '35mm',
+      focalLength: '36mm',
     },
     clientOrProject: 'Grab Singapore vs J.P. Morgan Corporate Match',
     tags: ['Events', 'Corporate Event', 'Soccer', 'Grab Singapore', 'J.P. Morgan', 'Matchday', 'Team Photo', 'Sony A7M2'],

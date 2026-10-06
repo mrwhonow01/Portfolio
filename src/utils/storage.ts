@@ -3,7 +3,7 @@ import { INITIAL_PHOTOS, INITIAL_PROFILE, INITIAL_TIMELINE, INITIAL_VIDEOS } fro
 import { encryptData, decryptData } from './crypto';
 
 const STORAGE_KEYS = {
-  PHOTOS: 'juztin_portfolio_photos_v18',
+  PHOTOS: 'juztin_portfolio_photos_v19',
   PROFILE: 'juztin_portfolio_profile_v8',
   TIMELINE: 'juztin_portfolio_timeline_v8',
   VIDEOS: 'juztin_portfolio_videos_v7',
